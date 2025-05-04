@@ -29,8 +29,8 @@ class EmployeeController extends Controller
                     ->where('empt.language_name', $locale);
             })
             ->leftJoin('position_assignments as posa', 'emp.id', '=', 'posa.employee_id')
-            ->leftjoin('positioin as dept', function ($join) use ($locale) {
-                $join->on('dept.department_id', '=', 'emp.department_id')
+            ->leftjoin('position_tran as post', function ($join) use ($locale) {
+                $join->on('post.position_id', '=', 'posa.position_id')
                     ->where('empt.language_name', $locale);
             })
             ->leftjoin('emails', 'emp.email_id', '=', 'emails.id')
@@ -44,6 +44,8 @@ class EmployeeController extends Controller
                 "emp.contact_id",
                 "emp.email_id",
                 "emp.department_id",
+                "post.value as position",
+
                 "dept.value as department",
                 "emails.value as email",
                 "contacts.value as contact",
@@ -58,7 +60,7 @@ class EmployeeController extends Controller
         $tr = $query->paginate($perPage, ['*'], 'page', $page);
         return response()->json(
             [
-                "users" => $tr,
+                "employees" => $tr,
             ],
             200,
             [],
@@ -75,22 +77,65 @@ class EmployeeController extends Controller
         $query = DB::table('employees as emp')
             ->leftJoin(DB::raw('(
                 SELECT
-                    hire_type_id,
-                    MAX(CASE WHEN language_name = "fa" THEN value END) as farsi,
-                    MAX(CASE WHEN language_name = "en" THEN value END) as english,
-                    MAX(CASE WHEN language_name = "ps" THEN value END) as pashto
-                FROM hire_type_trans
-                GROUP BY hire_type_id
-            ) as htt'), 'ht.id', '=', 'htt.hire_type_id')
+                    employee_id,
+                    MAX(CASE WHEN language_name = "fa" THEN first_name END) AS first_name_fa,
+                    MAX(CASE WHEN language_name = "fa" THEN last_name END) AS last_name_fa,
+                    MAX(CASE WHEN language_name = "fa" THEN father_name END) AS father_name_fa,
+        
+                    MAX(CASE WHEN language_name = "en" THEN first_name END) AS first_name_en,
+                    MAX(CASE WHEN language_name = "en" THEN last_name END) AS last_name_en,
+                    MAX(CASE WHEN language_name = "en" THEN father_name END) AS father_name_en,
+        
+                    MAX(CASE WHEN language_name = "ps" THEN first_name END) AS first_name_ps,
+                    MAX(CASE WHEN language_name = "ps" THEN last_name END) AS last_name_ps,
+                    MAX(CASE WHEN language_name = "ps" THEN father_name END) AS father_name_ps
+                FROM employee_trans
+                GROUP BY employee_id
+            ) as empt'), 'emp.id', '=', 'empt.employee_id')
+
+            ->leftJoin('department_trans as dept', function ($join) use ($locale) {
+                $join->on('dept.department_id', '=', 'emp.department_id')
+                    ->where('dept.language_name', $locale);
+            })
+            ->leftJoin('position_assignments as posa', 'emp.id', '=', 'posa.employee_id')
+            ->leftJoin('position_tran as post', function ($join) use ($locale) {
+                $join->on('post.position_id', '=', 'posa.position_id')
+                    ->where('post.language_name', $locale);
+            })
+            ->leftJoin('emails', 'emp.email_id', '=', 'emails.id')
+            ->leftJoin('contacts', 'emp.contact_id', '=', 'contacts.id')
+            ->leftJoin('addresses as perAdd', 'emp.permanent_address_id', '=', 'addresses.id')
+            ->leftJoin('addresses as tempAdd', 'emp.temporary_address_id', '=', 'addresses.id')
             ->select(
-                'ht.id',
-                'ht.created_at',
-                "ht.description",
-                'htt.farsi',
-                'htt.english',
-                'htt.pashto'
+                'emp.id',
+                'emp.hr_code',
+                'emp.contact_id',
+                'emp.email_id',
+                'emp.address_i',
+                'emp.created_at',
+                'post.id as position_id',
+                'post.value as position',
+                'dept.value as department',
+                'dept.department_id',
+                'emails.value as email',
+                'contacts.value as contact',
+
+
+
+                // Names in 3 languages
+                'empt.first_name_fa',
+                'empt.last_name_fa',
+                'empt.father_name_fa',
+
+                'empt.first_name_en',
+                'empt.last_name_en',
+                'empt.father_name_en',
+
+                'empt.first_name_ps',
+                'empt.last_name_ps',
+                'empt.father_name_ps'
             )
-            ->where('ht.id', $id);
+            ->where('emp.id', $id);
 
         $result = $query->first();
 
@@ -107,6 +152,30 @@ class EmployeeController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
+
+
+    public function store(Request $request)
+    {
+
+
+        $request->validate();
+
+        $locale = App::getLocale();
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // kdls
+    }
     protected function applyDate($query, $request)
     {
         // Apply date filtering conditionally if provided

@@ -2,12 +2,17 @@
 
 namespace Database\Seeders;
 
+use App\Models\Currency;
+use App\Models\CurrencyTran;
 use App\Models\Gender;
 use App\Models\NidType;
 use App\Models\Language;
+use App\Models\MaritalStatus;
+use App\Models\MaritalStatusTran;
 use App\Models\NidTypeTrans;
 use Illuminate\Database\Seeder;
 use Database\Seeders\CheckListSeeder;
+use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Current;
 
 /*
 1. If you add new Role steps are:
@@ -57,6 +62,8 @@ class DatabaseSeeder extends Seeder
 
         $this->statusType();
         $this->nidTypes();
+        $this->maritalStatus();
+        $this->currency();
     }
     public function nidTypes()
     {
@@ -94,6 +101,94 @@ class DatabaseSeeder extends Seeder
         ]);
     }
     public function statusType() {}
+
+    public function maritalStatus()
+    {
+
+
+
+        $statuses = [
+            'Single' => ['ps' => 'مجرد', 'fa' => 'مجرد'],
+            'Married' => ['ps' => 'واده شوی', 'fa' => 'متاهل'],
+            'Divorced' => ['ps' => 'طلاق شوی', 'fa' => 'طلاق گرفته'],
+            'Widowed' => ['ps' => 'کونډه', 'fa' => 'بیوه'],
+        ];
+
+        foreach ($statuses as $english => $translations) {
+            $marital = MaritalStatus::create(); // assuming no fields required
+
+            // English
+            MaritalStatusTran::create([
+                'marital_status_id' => $marital->id,
+                'value' => $english,
+                'language_name' => 'en',
+            ]);
+
+            // Pashto
+            MaritalStatusTran::create([
+                'marital_status_id' => $marital->id,
+                'value' => $translations['ps'],
+                'language_name' => 'ps',
+            ]);
+
+            // Farsi
+            MaritalStatusTran::create([
+                'marital_status_id' => $marital->id,
+                'value' => $translations['fa'],
+                'language_name' => 'fa',
+            ]);
+        }
+    }
+
+    public function currency()
+    {
+
+
+        $currencies = [
+            [
+                'abbr' => 'AFN',
+                'symbol' => '؋',
+                'translations' => [
+                    'en' => 'Afghani',
+                    'ps' => 'افغانی',
+                    'fa' => 'افغانی',
+                ],
+            ],
+            [
+                'abbr' => 'USD',
+                'symbol' => '$',
+                'translations' => [
+                    'en' => 'US Dollar',
+                    'ps' => 'ډالر',
+                    'fa' => 'دالر',
+                ],
+            ],
+            [
+                'abbr' => 'EUR',
+                'symbol' => '€',
+                'translations' => [
+                    'en' => 'Euro',
+                    'ps' => 'یورو',
+                    'fa' => 'یورو',
+                ],
+            ],
+        ];
+
+        foreach ($currencies as $currency) {
+            $curr = Currency::create([
+                'abbr' => $currency['abbr'],
+                'symbol' => $currency['symbol'],
+            ]);
+
+            foreach ($currency['translations'] as $lang => $value) {
+                CurrencyTran::create([
+                    'currency_id' => $curr->id,
+                    'value' => $value,
+                    'language_name' => $lang,
+                ]);
+            }
+        }
+    }
 
     protected function gender()
     {
