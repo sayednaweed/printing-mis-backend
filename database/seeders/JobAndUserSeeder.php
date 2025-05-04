@@ -6,6 +6,8 @@ use App\Enums\LanguageEnum;
 use App\Models\User;
 use App\Models\Email;
 use App\Enums\RoleEnum;
+use App\Models\Department;
+use App\Models\DepartmentTran;
 use App\Models\ModelJob;
 use App\Models\ModelJobTrans;
 use Illuminate\Database\Seeder;
@@ -18,6 +20,22 @@ class JobAndUserSeeder extends Seeder
      */
     public function run(): void
     {
+        $department = Department::factory()->create([]);
+        DepartmentTran::factory()->create([
+            "value" => "Financial",
+            "department_id" => $department->id,
+            "language_name" => LanguageEnum::default->value,
+        ]);
+        DepartmentTran::factory()->create([
+            "value" => "مالی",
+            "department_id" => $department->id,
+            "language_name" => LanguageEnum::farsi->value,
+        ]);
+        DepartmentTran::factory()->create([
+            "value" => "مالي",
+            "department_id" => $department->id,
+            "language_name" => LanguageEnum::pashto->value,
+        ]);
         $job = ModelJob::factory()->create([]);
         ModelJobTrans::factory()->create([
             "value" => "Administrator",
@@ -48,7 +66,7 @@ class JobAndUserSeeder extends Seeder
             'grant_permission' =>  true,
             'role_id' =>  RoleEnum::super,
             'job_id' =>  $job->id,
-            'destination_id' =>  1,
+            'department_id' =>  1,
         ]);
     }
 }

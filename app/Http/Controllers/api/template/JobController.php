@@ -119,7 +119,7 @@ class JobController extends Controller
         $name = $request->english;
         if ($locale == LanguageEnum::farsi->value) {
             $name = $request->farsi;
-        } else {
+        } else if ($locale == LanguageEnum::pashto->value) {
             $name = $request->pashto;
         }
 

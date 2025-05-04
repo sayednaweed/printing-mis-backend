@@ -24,15 +24,6 @@ class EmployeeController extends Controller
                 $join->on('empt.employee_id', '=', 'emp.id')
                     ->where('empt.language_name', $locale);
             })
-            ->leftjoin('department_trans as dept', function ($join) use ($locale) {
-                $join->on('dept.department_id', '=', 'emp.department_id')
-                    ->where('empt.language_name', $locale);
-            })
-            ->leftJoin('position_assignments as posa', 'emp.id', '=', 'posa.employee_id')
-            ->leftjoin('positioin as dept', function ($join) use ($locale) {
-                $join->on('dept.department_id', '=', 'emp.department_id')
-                    ->where('empt.language_name', $locale);
-            })
             ->leftjoin('emails', 'emp.email_id', '=', 'emails.id')
             ->leftjoin('contacts', 'emp.contact_id', '=', 'contacts.id')
             ->select(
@@ -43,8 +34,6 @@ class EmployeeController extends Controller
                 "emp.hr_code",
                 "emp.contact_id",
                 "emp.email_id",
-                "emp.department_id",
-                "dept.value as department",
                 "emails.value as email",
                 "contacts.value as contact",
                 "emp.created_at",
@@ -57,9 +46,7 @@ class EmployeeController extends Controller
         // Apply pagination (ensure you're paginating after sorting and filtering)
         $tr = $query->paginate($perPage, ['*'], 'page', $page);
         return response()->json(
-            [
-                "users" => $tr,
-            ],
+            $tr,
             200,
             [],
             JSON_UNESCAPED_UNICODE
@@ -68,8 +55,6 @@ class EmployeeController extends Controller
 
     public function employee($id)
     {
-
-
         $locale = App::getLocale();
 
         $query = DB::table('employees as emp')
@@ -167,4 +152,23 @@ class EmployeeController extends Controller
         }
     }
     //
+    public function employeesCount()
+    {
+        // $statistics = DB::select("
+        //     SELECT
+        //         COUNT(*) AS userCount,
+        //         (SELECT COUNT(*) FROM employees WHERE DATE(created_at) = CURDATE()) AS todayCount,
+        //         (SELECT COUNT(*) FROM employees WHERE status = 1) AS activeUserCount,
+        //         (SELECT COUNT(*) FROM employees WHERE status = 0) AS inActiveUserCount
+        //     FROM employees
+        // ");
+        return response()->json([
+            'counts' => [
+                "userCount" => 0,
+                "todayCount" => 0,
+                "activeUserCount" => 0,
+                "inActiveUserCount" =>  0
+            ],
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
 }

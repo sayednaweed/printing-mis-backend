@@ -1,20 +1,23 @@
 <?php
 
-namespace App\Http\Controllers\api\app\hr\general;
+namespace App\Http\Controllers\api\app\hr\position;
 
-use App\Models\Department;
+
+use App\Models\Position;
 use App\Enums\LanguageEnum;
+use App\Models\PositionTran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
-use App\Models\DepartmentTran;
 
-class DepartmentController extends Controller
+class PositionController extends Controller
 {
     //
 
-    public function departments(Request $request)
+
+
+    public function positions(Request $request)
     {
         $locale = App::getLocale();
         $tr = [];
@@ -23,15 +26,20 @@ class DepartmentController extends Controller
 
 
         // Start building the query
-        $query = DB::table('departments as dep')
+        $query = DB::table('positions as pos')
+            ->leftjoin('position_trans as post', function ($join) use ($locale) {
+                $join->on('pos.id', '=', 'post.position_id')
+                    ->where('post.language_name', $locale);
+            })
             ->leftjoin('department_trans as dept', function ($join) use ($locale) {
-                $join->on('dept.department_id', '=', 'dep.id')
-                    ->where('dept.language_name', $locale);
+                $join->on('pos.department_id', '=', 'dept.department_id')
+                    ->where('post.language_name', $locale);
             })
             ->select(
-                "dep.id",
-                "dept.value as name",
-                "dep.created_at",
+                "pos.id",
+                "post.value as name",
+                "dept.value as department",
+                "pos.created_at",
             );
 
         $this->applyDate($query, $request);
@@ -52,30 +60,36 @@ class DepartmentController extends Controller
 
 
 
-    public function department($id)
+    public function position($id)
     {
 
 
         $locale = App::getLocale();
 
-        $query = DB::table('departments as dep')
+        $query = DB::table('positions as pos')
+            ->leftJoin('department_trans as dept', function ($join) use ($locale) {
+                $join->on('pos.department_id', '=', 'dept.department_id')
+                    ->where('dept.language_name', '=', $locale);
+            })
             ->leftJoin(DB::raw('(
                 SELECT
-                    department_id,
+                    position_id,
                     MAX(CASE WHEN language_name = "fa" THEN value END) as farsi,
                     MAX(CASE WHEN language_name = "en" THEN value END) as english,
                     MAX(CASE WHEN language_name = "ps" THEN value END) as pashto
-                FROM department_trans
-                GROUP BY department_id
-            ) as dept'), 'dep.id', '=', 'dept.department_id')
+                FROM position_trans
+                GROUP BY position_id
+            ) as post'), 'pos.id', '=', 'post.position_id')
             ->select(
-                'dep.id',
-                'dep.created_at',
-                'dept.farsi',
-                'dept.english',
-                'dept.pashto'
+                'pos.id',
+                'pos.created_at',
+                'dept.value as department',
+                'pos.department_id',
+                'post.farsi',
+                'post.english',
+                'post.pashto'
             )
-            ->where('dept.id', $id);
+            ->where('pos.id', $id);
 
         $result = $query->first();
 
@@ -84,6 +98,7 @@ class DepartmentController extends Controller
             "english" => $result->english,
             "farsi" => $result->farsi,
             "pashto" => $result->pashto,
+            "deprtment" => ["id" => $result->deprtment_id, "name" =>  $result->deprtment],
             "created_at" => $result->created_at,
 
         ], 200, [], JSON_UNESCAPED_UNICODE);
@@ -93,17 +108,18 @@ class DepartmentController extends Controller
     {
 
         $request->validate([
+            'department_id' => 'required|integer|exists:department,id',
             'name_english' => 'required|string',
             'name_pashto' => 'required|string',
             'name_farsi' => 'required|string',
         ]);
 
-        $department = Department::create([]);
+        $position = Position::create(['department_id' => $request->department_id]);
 
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
-            DepartmentTran::create([
+            PositionTran::create([
                 "value" => $request["{$name}"],
-                "department_id" => $department->id,
+                "position_id" => $position->id,
                 "language_name" => $code,
             ]);
         }
@@ -117,10 +133,10 @@ class DepartmentController extends Controller
         }
         return response()->json([
             'message' => __('app_translation.success'),
-            'department' => [
-                "id" => $department->id,
+            'position' => [
+                "id" => $position->id,
                 "name" => $name,
-                "created_at" => $department->created_at
+                "created_at" => $position->created_at
             ]
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
@@ -147,8 +163,8 @@ class DepartmentController extends Controller
 
         if ($searchColumn && $searchValue) {
             $allowedColumns = [
-
-                'name' => 'htt.name',
+                'department' => 'dept.department',
+                'name' => 'pos.name',
 
             ];
             // Ensure that the search column is allowed
@@ -163,7 +179,8 @@ class DepartmentController extends Controller
         $sort = $request->input('filters.sort'); // Sorting column
         $order = $request->input('filters.order', 'asc'); // Sorting order (default 
         $allowedColumns = [
-            'name' => 'htt.name',
+            'department' => 'dept.department',
+            'name' => 'pos.name',
 
 
         ];
