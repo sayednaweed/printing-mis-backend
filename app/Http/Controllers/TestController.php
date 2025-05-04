@@ -1,0 +1,184 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Enums\RoleEnum;
+use Illuminate\Http\Request;
+use App\Traits\Helper\HelperTrait;
+use Illuminate\Support\Facades\DB;
+use App\Traits\Address\AddressTrait;
+use Illuminate\Support\Facades\Http;
+use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\Permission\PermissionRepositoryInterface;
+
+class TestController extends Controller
+{
+    protected $userRepository;
+    use HelperTrait;
+    protected $permissionRepository;
+
+    public function __construct(
+        UserRepositoryInterface $userRepository,
+        PermissionRepositoryInterface $permissionRepository
+    ) {
+        $this->permissionRepository = $permissionRepository;
+        $this->userRepository = $userRepository;
+    }
+
+    private function detectDevice($userAgent)
+    {
+        if (str_contains($userAgent, 'Windows')) return 'Windows PC';
+        if (str_contains($userAgent, 'Macintosh')) return 'Mac';
+        if (str_contains($userAgent, 'iPhone')) return 'iPhone';
+        if (str_contains($userAgent, 'Android')) return 'Android Device';
+        return 'Unknown Device';
+    }
+
+    private function getLocationFromIP($ip)
+    {
+
+        try {
+            $response = Http::get("http://ip-api.com/json/{$ip}");
+            return $response->json()['city'] . ', ' . $response->json()['country'];
+        } catch (\Exception $e) {
+            return 'Unknown Location';
+        }
+    }
+    use AddressTrait;
+
+    public function format($approvals)
+    {
+        return $approvals->groupBy('id')->map(function ($group) {
+            $docs = $group->filter(function ($item) {
+                return $item->approval_document_id !== null;
+            });
+
+            $approval = $group->first();
+
+            $approval->approved = (bool) $approval->approved;
+            if ($docs->isNotEmpty()) {
+                $docs->documents = $docs->map(function ($doc) {
+                    return [
+                        'id' => $doc->approval_document_id,
+                        'documentable_id' => $doc->documentable_id,
+                        'documentable_type' => $doc->documentable_type,
+                    ];
+                });
+            } else {
+                $approval->documents = [];
+            }
+            unset($approval->approval_document_id);
+
+            return $approval;
+        })->values();
+    }
+    function extractDeviceInfo($userAgent)
+    {
+        // Match OS and architecture details
+        if (preg_match('/\(([^)]+)\)/', $userAgent, $matches)) {
+            return $matches[1]; // Extract content inside parentheses
+        }
+        return "Unknown Device";
+    }
+    function extractBrowserInfo($userAgent)
+    {
+        // Match major browsers (Chrome, Firefox, Safari, Edge, Opera, etc.)
+        if (preg_match('/(Chrome|Firefox|Safari|Edge|Opera|OPR|MSIE|Trident)[\/ ]([\d.]+)/', $userAgent, $matches)) {
+            $browser = $matches[1];
+            $version = $matches[2];
+
+            // Fix for Opera (uses "OPR" in User-Agent)
+            if ($browser == 'OPR') {
+                $browser = 'Opera';
+            }
+
+            // Fix for Internet Explorer (uses "Trident" in newer versions)
+            if ($browser == 'Trident') {
+                preg_match('/rv:([\d.]+)/', $userAgent, $rvMatches);
+                $version = $rvMatches[1] ?? $version;
+                $browser = 'Internet Explorer';
+            }
+
+            return "$browser $version";
+        }
+
+        return "Unknown Browser";
+    }
+    public function index(Request $request)
+    {
+        $user_id = RoleEnum::super->value;
+
+        $permissions = DB::table('users as u')
+            ->where('u.id', $user_id)
+            ->join('user_permissions as up', 'u.id', '=', 'up.user_id')
+            ->join('permissions as p', function ($join) {
+                $join->on('up.permission', '=', 'p.name')
+                    ->where('up.view', true);
+            })
+            ->leftJoin('user_permission_subs as ups', function ($join) {
+                $join->on('up.id', '=', 'ups.user_permission_id')
+                    ->where('ups.view', true);
+            })
+            ->select(
+                'up.id as user_permission_id',
+                'p.name as permission',
+                'p.icon',
+                'p.priority',
+                'p.portal',
+                'up.view',
+                'up.edit',
+                'up.delete',
+                'up.add',
+                'up.visible',
+                DB::raw('ups.sub_permission_id as sub_permission_id'),
+                DB::raw('ups.add as sub_add'),
+                DB::raw('ups.delete as sub_delete'),
+                DB::raw('ups.edit as sub_edit'),
+                DB::raw('ups.view as sub_view')
+            )
+            ->orderBy('p.priority')  // Optional: If you want to order by priority, else remove
+            ->get();
+
+        $formattedPermissions = $permissions->groupBy('portal')->map(function ($portalGroup) {
+            return $portalGroup->groupBy('user_permission_id')->map(function ($group) {
+                $subPermissions = $group->filter(function ($item) {
+                    return $item->sub_permission_id !== null;
+                });
+
+                $permission = $group->first(); // Get the main permission data
+
+                $permission->view = (bool) $permission->view;
+                $permission->edit = (bool) $permission->edit;
+                $permission->delete = (bool) $permission->delete;
+                $permission->add = (bool) $permission->add;
+
+                if ($subPermissions->isNotEmpty()) {
+                    $permission->sub = $subPermissions->sortBy('sub_permission_id')->map(function ($sub) {
+                        return [
+                            'id' => $sub->sub_permission_id,
+                            'add' => (bool) $sub->sub_add,
+                            'delete' => (bool) $sub->sub_delete,
+                            'edit' => (bool) $sub->sub_edit,
+                            'view' => (bool) $sub->sub_view,
+                        ];
+                    })->values();
+                } else {
+                    $permission->sub = [];
+                }
+
+                // Cleanup unnecessary fields
+                unset($permission->sub_permission_id);
+                unset($permission->sub_add);
+                unset($permission->sub_delete);
+                unset($permission->sub_edit);
+
+                return $permission;
+            })->values();
+        });
+
+        return $formattedPermissions;
+
+
+        // $this->command->info('Vaccine centers imported successfully!');
+    }
+}
