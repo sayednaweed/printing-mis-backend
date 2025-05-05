@@ -15,6 +15,8 @@ class MaritalStatuController extends Controller
 
     public function maritalStatuses(Request $request)
     {
+
+
         $locale = App::getLocale();
         $tr = [];
         $perPage = $request->input('per_page', 10); // Number of records per page
@@ -24,17 +26,16 @@ class MaritalStatuController extends Controller
         // Start building the query
         $query = DB::table('marital_statuses as ms')
             ->leftjoin('marital_status_trans as mst', function ($join) use ($locale) {
-                $join->on('ms.id', '=', 'mst.matrital_status_id')
-                    ->where('sht.language_name', $locale);
+                $join->on('ms.id', '=', 'mst.marital_status_id')
+                    ->where('mst.language_name', $locale);
             })
             ->select(
                 "ms.id",
-
                 "mst.value as name",
-                "sh.created_at",
+                "ms.created_at",
             );
 
-
+        return  $query->get();
 
         // Apply pagination (ensure you're paginating after sorting and filtering)
         $tr = $query->paginate($perPage, ['*'], 'page', $page);

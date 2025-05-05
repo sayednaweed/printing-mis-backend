@@ -2,13 +2,40 @@
 
 namespace App\Http\Controllers\api\app\hr\employee;
 
+use App\Models\Email;
+use App\Models\Address;
+use App\Models\Contact;
+use App\Models\Employee;
+use App\Enums\LanguageEnum;
+use App\Models\AddressTran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
+use App\Enums\Checklist\CheckListEnum;
+use App\Enums\Checklist\CheckListTypeEnum;
+use App\Http\Requests\hr\employee\EmployeeStoreRequest;
+use App\Models\EmployeeTran;
+use App\Models\PositionAssignment;
+use App\Models\PositionAssignmentDuration;
+use App\Repositories\Storage\StorageRepositoryInterface;
+use App\Repositories\PendingTask\PendingTaskRepositoryInterface;
 
 class EmployeeController extends Controller
 {
+
+    protected $pendingTaskRepository;
+    protected $storageRepository;
+    protected $permissionRepository;
+
+    public function __construct(
+        PendingTaskRepositoryInterface $pendingTaskRepository,
+        StorageRepositoryInterface $storageRepository,
+    ) {
+        $this->pendingTaskRepository = $pendingTaskRepository;
+        $this->storageRepository = $storageRepository;
+    }
+
 
     public function employees(Request $request)
     {
@@ -154,27 +181,149 @@ class EmployeeController extends Controller
 
 
 
-    public function store(Request $request)
+    public function store(EmployeeStoreRequest $request)
     {
+        $validatedData = $request->validated();
 
 
-        $request->validate();
+        // Create email
+        $email = Email::where('value', '=', $request->email)->first();
+        if ($email) {
+            return response()->json([
+                'message' => __('app_translation.email_exist'),
+            ], 400, [], JSON_UNESCAPED_UNICODE);
+        }
+        // 2. Check contact
+        $contact = null;
+        if ($request->contact !== null && !empty($request->contact)) {
+            $contact = Contact::where('value', '=', $request->contact)->first();
+            if ($contact) {
+                return response()->json([
+                    'message' => __('app_translation.contact_exist'),
+                ], 400, [], JSON_UNESCAPED_UNICODE);
+            }
+        }
+        DB::beginTransaction();
+        // Add email and contact
+        $email = null;
+        if ($request->email) {
 
-        $locale = App::getLocale();
+            $email = Email::create([
+                "value" => $request->email
+            ]);
+        }
+        $contact = null;
+        if ($request->contact) {
+            $contact = Contact::create([
+                "value" => $request->contact
+            ]);
+        }
+
+        $permAddress = Address::create([
+            'provinces_id' => $request->permanent_province_id,
+            'district_id' => $request->permanent_district_id,
+        ]);
+        foreach (LanguageEnum::LANGUAGES as $code => $name) {
+            AddressTran::create([
+                "area" => $request->permanent_area,
+                "addresss" => $permAddress->id,
+                "language_name" => $code,
+            ]);
+        }
+
+        $temAddress = Address::create([
+            'provinces_id' => $request->temprory_province_id,
+            'district_id' => $request->temprory_district_id,
+        ]);
+        foreach (LanguageEnum::LANGUAGES as $code => $name) {
+            AddressTran::create([
+                "area" => $request->temprory_area,
+                "addresss" => $temAddress->id,
+                "language_name" => $code,
+            ]);
+        }
+
+        $user = $request->user();
 
 
 
 
+        $employee =   Employee::create([
+            'hr_code' => '',
+            'picture' => '',
+            'contact_id' => $contact->id,
+            'email_id' => $email->id,
+            'permanent_address_id' => $permAddress->id,
+            'current_address_id' => $temAddress->id,
+            'gender_id' => $request->gender_id,
+            'date_of_birth' => $request->date_of_birth,
+            'nationality_id' => $request->nationality_id,
+            'nid_document_id' => '',
+
+
+        ]);
+        $employee->hr_code = "PN-" . $employee->id;
+        $employee->save;
+
+        foreach (LanguageEnum::LANGUAGES as $code => $name) {
+            EmployeeTran::create([
+                'employee_id' => $employee->id,
+                "name" => $request->first_name,
+                "last_name" => $request->last_name,
+                "father_name" => $request->father_name,
+                "language_name" => $code,
+            ]);
+        }
+
+
+        $postAss =   PositionAssignment::create([
+            'employee_id' => $employee->id,
+            'hire_type_id' => $request->hire_type_id,
+            'salary' => $request->salary,
+            'shift_id' => $request->shift_id,
+            'position_id' => $request->position_id,
+            'position_change_type_id' => '',
+            'overtime_rate' => $request->over_time,
+            'currency_id' => $request->currency_id,
+
+
+        ]);
+
+        PositionAssignmentDuration::create([
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'position_assignment_id' => $postAss->id
+
+        ]);
 
 
 
 
+        DB::commit();
 
 
-
-
-
-        // kdls
+        return response()->json(
+            [
+                "user" => [
+                    "id" => $user->id,
+                    "registeration_number" => $user->registeration_number,
+                    "full_name" => $user->full_name,
+                    "username" => $user->username,
+                    "profile" => $user->profile,
+                    "created_at" => $user->created_at,
+                    "status" => $user->status,
+                    "email" => $request->email,
+                    "contact" => $request->contact,
+                    "zone" => $request->zone,
+                    "destination" => $request->destination,
+                    "job" => $request->job,
+                ],
+                "message" => __('app_translation.success'),
+            ],
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
     }
     protected function applyDate($query, $request)
     {
