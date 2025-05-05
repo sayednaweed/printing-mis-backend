@@ -58,6 +58,8 @@ class DatabaseSeeder extends Seeder
         $this->call(CheckListSeeder::class);
         $this->call(UserPermissionSeeder::class);
         $this->call(RolePermissionSeeder::class);
+        $this->call(HireTypeSeeder::class);
+        $this->call(EmployeeSeeder::class);
 
         $this->statusType();
         $this->nidTypes();
