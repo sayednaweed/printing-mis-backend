@@ -103,13 +103,9 @@ class DatabaseSeeder extends Seeder
 
     public function maritalStatus()
     {
-
-
-
         $statuses = [
             'Single' => ['ps' => 'مجرد', 'fa' => 'مجرد'],
             'Married' => ['ps' => 'واده شوی', 'fa' => 'متاهل'],
-            'Divorced' => ['ps' => 'طلاق شوی', 'fa' => 'طلاق گرفته'],
             'Widowed' => ['ps' => 'کونډه', 'fa' => 'بیوه'],
         ];
 

@@ -9,14 +9,8 @@ use App\Http\Controllers\Controller;
 
 class MaritalStatuController extends Controller
 {
-    //
-
-
-
     public function maritalStatuses(Request $request)
     {
-
-
         $locale = App::getLocale();
         $tr = [];
         $perPage = $request->input('per_page', 10); // Number of records per page
