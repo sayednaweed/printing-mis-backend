@@ -10,8 +10,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\api\template\LocaleMiddleware;
 use App\Http\Middleware\api\template\CheckUserAccessMiddleware;
+use App\Http\Middleware\api\template\sub\HasSubPermissionMiddleware;
 use App\Http\Middleware\api\template\main\HasMainPermissionMiddleware;
-use App\Http\Middleware\api\template\epi\sub\HasSubPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(

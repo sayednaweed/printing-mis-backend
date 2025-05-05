@@ -22,13 +22,13 @@ enum SubPermissionEnum: int
         13 => "permissions",
     ];
     case hr_configuration_job = 21;
-    case hr_configuration_destination = 22;
+    case hr_configuration_department = 22;
     case hr_configuration_leave_type = 23;
     case hr_configuration_shifts = 24;
     case hr_configuration_hire_type = 25;
     public const HR_CONFIGURATIONS = [
         21 => "job",
-        22 => "destination",
+        22 => "department",
         23 => "leave_type",
         24 => "shifts",
         25 => "hire_type",

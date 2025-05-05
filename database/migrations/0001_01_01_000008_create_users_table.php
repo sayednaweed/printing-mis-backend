@@ -36,11 +36,11 @@ return new class extends Migration
             $table->foreign('job_id')->references('id')->on('model_jobs')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('destination_id')->nullable();
-            $table->foreign('destination_id')->references('id')->on('destinations')
+            $table->unsignedBigInteger('department_id')->nullable();
+            $table->foreign('department_id')->references('id')->on('departments')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->index(["email_id", "job_id", "destination_id", "role_id"]);
+            $table->index(["email_id", "job_id", "department_id", "role_id"]);
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

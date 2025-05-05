@@ -1,23 +1,20 @@
 <?php
 
-namespace App\Http\Controllers\api\app\hr\general;
+namespace App\Http\Controllers\api\app\hr\hire;
 
-
-use App\Models\Position;
+use App\Models\HireType;
 use App\Enums\LanguageEnum;
-use App\Models\PositionTran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
+use App\Models\HireTypeTran;
 
-class PositionController extends Controller
+class HireController extends Controller
 {
     //
 
-
-
-    public function positions(Request $request)
+    public function hireTypes(Request $request)
     {
         $locale = App::getLocale();
         $tr = [];
@@ -26,20 +23,16 @@ class PositionController extends Controller
 
 
         // Start building the query
-        $query = DB::table('positions as pos')
-            ->leftjoin('position_trans as post', function ($join) use ($locale) {
-                $join->on('pos.id', '=', 'post.position_id')
-                    ->where('post.language_name', $locale);
-            })
-            ->leftjoin('department_trans as dept', function ($join) use ($locale) {
-                $join->on('pos.department_id', '=', 'dept.department_id')
-                    ->where('post.language_name', $locale);
+        $query = DB::table('hire_types as ht')
+            ->leftjoin('hire_type_trans as htt', function ($join) use ($locale) {
+                $join->on('htt.hire_type_id', '=', 'ht.id')
+                    ->where('htt.language_name', $locale);
             })
             ->select(
-                "pos.id",
-                "post.value as name",
-                "dept.value as department",
-                "pos.created_at",
+                "ht.id",
+                "ht.description",
+                "htt.value as name",
+                "ht.created_at",
             );
 
         $this->applyDate($query, $request);
@@ -60,45 +53,42 @@ class PositionController extends Controller
 
 
 
-    public function position($id)
+    public function hireType($id)
     {
 
 
         $locale = App::getLocale();
 
-        $query = DB::table('positions as pos')
-            ->leftJoin('department_trans as dept', function ($join) use ($locale) {
-                $join->on('pos.department_id', '=', 'dept.department_id')
-                    ->where('dept.language_name', '=', $locale);
-            })
+        $query = DB::table('hire_types as ht')
             ->leftJoin(DB::raw('(
                 SELECT
-                    position_id,
+                    hire_type_id,
                     MAX(CASE WHEN language_name = "fa" THEN value END) as farsi,
                     MAX(CASE WHEN language_name = "en" THEN value END) as english,
                     MAX(CASE WHEN language_name = "ps" THEN value END) as pashto
-                FROM position_trans
-                GROUP BY position_id
-            ) as post'), 'pos.id', '=', 'post.position_id')
+                FROM hire_type_trans
+                GROUP BY hire_type_id
+            ) as htt'), 'ht.id', '=', 'htt.hire_type_id')
             ->select(
-                'pos.id',
-                'pos.created_at',
-                'dept.value as department',
-                'pos.department_id',
-                'post.farsi',
-                'post.english',
-                'post.pashto'
+                'ht.id',
+                'ht.created_at',
+                "ht.description",
+                'htt.farsi',
+                'htt.english',
+                'htt.pashto'
             )
-            ->where('pos.id', $id);
+            ->where('ht.id', $id);
 
         $result = $query->first();
 
         return response()->json([
             "id" => $result->id,
+
+
+            "description" => $result->description,
             "english" => $result->english,
             "farsi" => $result->farsi,
             "pashto" => $result->pashto,
-            "deprtment" => ["id" => $result->deprtment_id, "name" =>  $result->deprtment],
             "created_at" => $result->created_at,
 
         ], 200, [], JSON_UNESCAPED_UNICODE);
@@ -108,18 +98,18 @@ class PositionController extends Controller
     {
 
         $request->validate([
-            'department_id' => 'required|integer|exists:department,id',
+            'description' => 'string',
             'name_english' => 'required|string',
             'name_pashto' => 'required|string',
             'name_farsi' => 'required|string',
         ]);
 
-        $position = Position::create(['department_id' => $request->department_id]);
+        $hiretype = HireType::create(['description' => $request->description]);
 
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
-            PositionTran::create([
+            HireTypeTran::create([
                 "value" => $request["{$name}"],
-                "position_id" => $position->id,
+                "hire_type_id" => $hiretype->id,
                 "language_name" => $code,
             ]);
         }
@@ -133,10 +123,10 @@ class PositionController extends Controller
         }
         return response()->json([
             'message' => __('app_translation.success'),
-            'position' => [
-                "id" => $position->id,
+            'hiretype' => [
+                "id" => $hiretype->id,
                 "name" => $name,
-                "created_at" => $position->created_at
+                "created_at" => $hiretype->created_at
             ]
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
@@ -163,8 +153,8 @@ class PositionController extends Controller
 
         if ($searchColumn && $searchValue) {
             $allowedColumns = [
-                'department' => 'dept.department',
-                'name' => 'pos.name',
+
+                'name' => 'dept.name',
 
             ];
             // Ensure that the search column is allowed
@@ -179,8 +169,7 @@ class PositionController extends Controller
         $sort = $request->input('filters.sort'); // Sorting column
         $order = $request->input('filters.order', 'asc'); // Sorting order (default 
         $allowedColumns = [
-            'department' => 'dept.department',
-            'name' => 'pos.name',
+            'name' => 'dept.name',
 
 
         ];

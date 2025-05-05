@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware\api\template\epi\sub;
+namespace App\Http\Middleware\api\template\sub;
 
 use Closure;
 use Illuminate\Http\Request;
