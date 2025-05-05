@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('currency_trans', function (Blueprint $table) {
+        Schema::create('marital_status_trans', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('currency_id');
-            $table->foreign('currency_id')->references('id')->on('currencies')
+            $table->string('value');
+            $table->unsignedBigInteger('marital_status_id');
+            $table->foreign('marital_status_id')->references('id')->on('marital_statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->string('language_name');
-            $table->foreign('language_name')->references('name')->on('languages')->onUpdate('cascade')
-                ->onDelete('cascade');
-            $table->string('value');
+            $table->foreign('language_name')->references('name')->on('languages')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
             $table->timestamps();
-            $table->index(["currency_id", "language_name"]);
         });
     }
 
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('currency_trans');
+        Schema::dropIfExists('marital_status_trans');
     }
 };

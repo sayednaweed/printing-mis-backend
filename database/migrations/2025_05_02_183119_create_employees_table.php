@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('hr_code');
             $table->string('date_of_birth');
-
+            $table->string('picture');
             $table->unsignedBigInteger('contact_id');
             $table->foreign('contact_id')->references('id')->on('contacts')
                 ->onUpdate('cascade')

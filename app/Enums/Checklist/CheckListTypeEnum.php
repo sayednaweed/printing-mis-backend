@@ -2,4 +2,9 @@
 
 namespace App\Enums\Checklist;
 
-enum CheckListTypeEnum: int {}
+enum CheckListTypeEnum: int
+{
+
+
+    case employee = 1;
+}

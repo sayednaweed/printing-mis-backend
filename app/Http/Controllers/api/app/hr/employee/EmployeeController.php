@@ -2,13 +2,42 @@
 
 namespace App\Http\Controllers\api\app\hr\employee;
 
+use App\Models\Email;
+use App\Models\Address;
+use App\Models\Contact;
+use App\Models\Document;
+use App\Models\Employee;
+use App\Enums\LanguageEnum;
+use App\Models\AddressTran;
+use App\Models\EmployeeTran;
 use Illuminate\Http\Request;
+use App\Models\PositionAssignment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
+use App\Enums\Checklist\CheckListEnum;
+use App\Enums\Checklist\CheckListTypeEnum;
+use App\Models\PositionAssignmentDuration;
+use App\Http\Requests\hr\employee\EmployeeStoreRequest;
+use App\Models\EmployeeDocument;
+use App\Repositories\Storage\StorageRepositoryInterface;
+use App\Repositories\PendingTask\PendingTaskRepositoryInterface;
 
 class EmployeeController extends Controller
 {
+
+    protected $pendingTaskRepository;
+    protected $storageRepository;
+    protected $permissionRepository;
+
+    public function __construct(
+        PendingTaskRepositoryInterface $pendingTaskRepository,
+        StorageRepositoryInterface $storageRepository,
+    ) {
+        $this->pendingTaskRepository = $pendingTaskRepository;
+        $this->storageRepository = $storageRepository;
+    }
+
 
     public function employees(Request $request)
     {
@@ -60,22 +89,65 @@ class EmployeeController extends Controller
         $query = DB::table('employees as emp')
             ->leftJoin(DB::raw('(
                 SELECT
-                    hire_type_id,
-                    MAX(CASE WHEN language_name = "fa" THEN value END) as farsi,
-                    MAX(CASE WHEN language_name = "en" THEN value END) as english,
-                    MAX(CASE WHEN language_name = "ps" THEN value END) as pashto
-                FROM hire_type_trans
-                GROUP BY hire_type_id
-            ) as htt'), 'ht.id', '=', 'htt.hire_type_id')
+                    employee_id,
+                    MAX(CASE WHEN language_name = "fa" THEN first_name END) AS first_name_fa,
+                    MAX(CASE WHEN language_name = "fa" THEN last_name END) AS last_name_fa,
+                    MAX(CASE WHEN language_name = "fa" THEN father_name END) AS father_name_fa,
+        
+                    MAX(CASE WHEN language_name = "en" THEN first_name END) AS first_name_en,
+                    MAX(CASE WHEN language_name = "en" THEN last_name END) AS last_name_en,
+                    MAX(CASE WHEN language_name = "en" THEN father_name END) AS father_name_en,
+        
+                    MAX(CASE WHEN language_name = "ps" THEN first_name END) AS first_name_ps,
+                    MAX(CASE WHEN language_name = "ps" THEN last_name END) AS last_name_ps,
+                    MAX(CASE WHEN language_name = "ps" THEN father_name END) AS father_name_ps
+                FROM employee_trans
+                GROUP BY employee_id
+            ) as empt'), 'emp.id', '=', 'empt.employee_id')
+
+            ->leftJoin('department_trans as dept', function ($join) use ($locale) {
+                $join->on('dept.department_id', '=', 'emp.department_id')
+                    ->where('dept.language_name', $locale);
+            })
+            ->leftJoin('position_assignments as posa', 'emp.id', '=', 'posa.employee_id')
+            ->leftJoin('position_tran as post', function ($join) use ($locale) {
+                $join->on('post.position_id', '=', 'posa.position_id')
+                    ->where('post.language_name', $locale);
+            })
+            ->leftJoin('emails', 'emp.email_id', '=', 'emails.id')
+            ->leftJoin('contacts', 'emp.contact_id', '=', 'contacts.id')
+            ->leftJoin('addresses as perAdd', 'emp.permanent_address_id', '=', 'addresses.id')
+            ->leftJoin('addresses as tempAdd', 'emp.temporary_address_id', '=', 'addresses.id')
             ->select(
-                'ht.id',
-                'ht.created_at',
-                "ht.description",
-                'htt.farsi',
-                'htt.english',
-                'htt.pashto'
+                'emp.id',
+                'emp.hr_code',
+                'emp.contact_id',
+                'emp.email_id',
+                'emp.address_i',
+                'emp.created_at',
+                'post.id as position_id',
+                'post.value as position',
+                'dept.value as department',
+                'dept.department_id',
+                'emails.value as email',
+                'contacts.value as contact',
+
+
+
+                // Names in 3 languages
+                'empt.first_name_fa',
+                'empt.last_name_fa',
+                'empt.father_name_fa',
+
+                'empt.first_name_en',
+                'empt.last_name_en',
+                'empt.father_name_en',
+
+                'empt.first_name_ps',
+                'empt.last_name_ps',
+                'empt.father_name_ps'
             )
-            ->where('ht.id', $id);
+            ->where('emp.id', $id);
 
         $result = $query->first();
 
@@ -92,6 +164,191 @@ class EmployeeController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
+
+
+    public function store(EmployeeStoreRequest $request)
+    {
+        $validatedData = $request->validated();
+
+
+        // Create email
+        $email = Email::where('value', '=', $request->email)->first();
+        if ($email) {
+            return response()->json([
+                'message' => __('app_translation.email_exist'),
+            ], 400, [], JSON_UNESCAPED_UNICODE);
+        }
+        // 2. Check contact
+        $contact = null;
+        if ($request->contact !== null && !empty($request->contact)) {
+            $contact = Contact::where('value', '=', $request->contact)->first();
+            if ($contact) {
+                return response()->json([
+                    'message' => __('app_translation.contact_exist'),
+                ], 400, [], JSON_UNESCAPED_UNICODE);
+            }
+        }
+        DB::beginTransaction();
+        // Add email and contact
+        $email = null;
+        if ($request->email) {
+
+            $email = Email::create([
+                "value" => $request->email
+            ]);
+        }
+        $contact = null;
+        if ($request->contact) {
+            $contact = Contact::create([
+                "value" => $request->contact
+            ]);
+        }
+
+        $permAddress = Address::create([
+            'provinces_id' => $request->permanent_province_id,
+            'district_id' => $request->permanent_district_id,
+        ]);
+        foreach (LanguageEnum::LANGUAGES as $code => $name) {
+            AddressTran::create([
+                "area" => $request->permanent_area,
+                "addresss" => $permAddress->id,
+                "language_name" => $code,
+            ]);
+        }
+
+        $temAddress = Address::create([
+            'provinces_id' => $request->temprory_province_id,
+            'district_id' => $request->temprory_district_id,
+        ]);
+        foreach (LanguageEnum::LANGUAGES as $code => $name) {
+            AddressTran::create([
+                "area" => $request->temprory_area,
+                "addresss" => $temAddress->id,
+                "language_name" => $code,
+            ]);
+        }
+
+
+
+
+
+
+
+
+        $employee =   Employee::create([
+            'hr_code' => '',
+            'picture' => '',
+            'contact_id' => $contact->id,
+            'email_id' => $email->id,
+            'permanent_address_id' => $permAddress->id,
+            'current_address_id' => $temAddress->id,
+            'gender_id' => $request->gender_id,
+            'date_of_birth' => $request->date_of_birth,
+            'nationality_id' => $request->nationality_id,
+            'nid_document_id' => '',
+
+
+        ]);
+        $employee->hr_code = "PN-" . $employee->id;
+        $employee->save;
+
+        foreach (LanguageEnum::LANGUAGES as $code => $name) {
+            EmployeeTran::create([
+                'employee_id' => $employee->id,
+                "name" => $request->first_name,
+                "last_name" => $request->last_name,
+                "father_name" => $request->father_name,
+                "language_name" => $code,
+            ]);
+        }
+
+
+        $postAss =   PositionAssignment::create([
+            'employee_id' => $employee->id,
+            'hire_type_id' => $request->hire_type_id,
+            'salary' => $request->salary,
+            'shift_id' => $request->shift_id,
+            'position_id' => $request->position_id,
+            'position_change_type_id' => '',
+            'overtime_rate' => $request->over_time,
+            'currency_id' => $request->currency_id,
+
+
+        ]);
+
+        PositionAssignmentDuration::create([
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'position_assignment_id' => $postAss->id
+
+        ]);
+
+
+
+        $user = $request->user();
+
+
+        $task = $this->pendingTaskRepository->pendingTaskExist(
+            $request->user(),
+            CheckListTypeEnum::employee->value,
+            CheckListEnum::employee_attachment->value,
+            null
+        );
+
+        if (!$task) {
+            return response()->json([
+                'message' => __('app_translation.task_not_found')
+            ], 404);
+        }
+        $document_id = '';
+
+        $this->storageRepository->documentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
+            $checklist_id = $documentData['check_list_id'];
+            $document = Document::create([
+                'actual_name' => $documentData['actual_name'],
+                'size' => $documentData['size'],
+                'path' => $documentData['path'],
+                'type' => $documentData['type'],
+                'check_list_id' => $checklist_id,
+            ]);
+            $document_id = $document->id;
+        });
+
+        EmployeeDocument::create([
+            'employee_id' => $employee->id,
+            'document_id' => $document_id,
+        ]);
+
+        $this->pendingTaskRepository->destroyPendingTask(
+            $request->user(),
+            CheckListTypeEnum::employee->value,
+            CheckListEnum::employee_attachment->value,
+            null
+        );
+
+
+        DB::commit();
+
+
+        return response()->json(
+            [
+                "employee" => [
+                    "id" => $employee->id,
+                    "first_name" => $request->first_name,
+                    "last_name" => $request->last_name,
+                    "father_name" => $request->father_name,
+                    "hr_code" => $employee->hr_code,
+                    "email" => $request->email,
+                    "contact" => $request->contact,
+
+                ],
+                "message" => __('app_translation.success'),
+            ],
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
+    }
     protected function applyDate($query, $request)
     {
         // Apply date filtering conditionally if provided
