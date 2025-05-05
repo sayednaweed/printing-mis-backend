@@ -19,17 +19,14 @@ return new class extends Migration
             $table->foreign('employee_id')->references('id')->on('employees')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-
             $table->unsignedBigInteger('hire_type_id');
             $table->foreign('hire_type_id')->references('id')->on('hire_types')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-
             $table->unsignedBigInteger('shift_id');
             $table->foreign('shift_id')->references('id')->on('shifts')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-
             $table->unsignedBigInteger('position_id');
             $table->foreign('position_id')->references('id')->on('positions')
                 ->onUpdate('cascade')
@@ -42,8 +39,10 @@ return new class extends Migration
             $table->foreign('currency_id')->references('id')->on('currencies')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-
-
+            $table->unsignedBigInteger('department_id');
+            $table->foreign('department_id')->references('id')->on('departments')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
             $table->timestamps();
         });
     }
