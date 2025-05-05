@@ -38,6 +38,15 @@ class ShiftController extends Controller
                 "sh.created_at",
             );
 
+        return response()->json(
+            [
+                $query->get(),
+            ],
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
+
         $this->applyDate($query, $request);
         $this->applyFilters($query, $request);
         $this->applySearch($query, $request);
