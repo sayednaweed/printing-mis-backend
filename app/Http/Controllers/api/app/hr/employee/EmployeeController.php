@@ -5,19 +5,21 @@ namespace App\Http\Controllers\api\app\hr\employee;
 use App\Models\Email;
 use App\Models\Address;
 use App\Models\Contact;
+use App\Models\Document;
 use App\Models\Employee;
 use App\Enums\LanguageEnum;
 use App\Models\AddressTran;
+use App\Models\EmployeeTran;
 use Illuminate\Http\Request;
+use App\Models\PositionAssignment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Enums\Checklist\CheckListEnum;
 use App\Enums\Checklist\CheckListTypeEnum;
-use App\Http\Requests\hr\employee\EmployeeStoreRequest;
-use App\Models\EmployeeTran;
-use App\Models\PositionAssignment;
 use App\Models\PositionAssignmentDuration;
+use App\Http\Requests\hr\employee\EmployeeStoreRequest;
+use App\Models\EmployeeDocument;
 use App\Repositories\Storage\StorageRepositoryInterface;
 use App\Repositories\PendingTask\PendingTaskRepositoryInterface;
 
@@ -243,7 +245,9 @@ class EmployeeController extends Controller
             ]);
         }
 
-        $user = $request->user();
+
+
+
 
 
 
@@ -298,25 +302,62 @@ class EmployeeController extends Controller
 
 
 
+        $user = $request->user();
+
+
+        $task = $this->pendingTaskRepository->pendingTaskExist(
+            $request->user(),
+            CheckListTypeEnum::employee->value,
+            CheckListEnum::employee_attachment->value,
+            null
+        );
+
+        if (!$task) {
+            return response()->json([
+                'message' => __('app_translation.task_not_found')
+            ], 404);
+        }
+        $document_id = '';
+
+        $this->storageRepository->documentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
+            $checklist_id = $documentData['check_list_id'];
+            $document = Document::create([
+                'actual_name' => $documentData['actual_name'],
+                'size' => $documentData['size'],
+                'path' => $documentData['path'],
+                'type' => $documentData['type'],
+                'check_list_id' => $checklist_id,
+            ]);
+            $document_id = $document->id;
+        });
+
+        EmployeeDocument::create([
+            'employee_id' => $employee->id,
+            'document_id' => $document_id,
+        ]);
+
+        $this->pendingTaskRepository->destroyPendingTask(
+            $request->user(),
+            CheckListTypeEnum::employee->value,
+            CheckListEnum::employee_attachment->value,
+            null
+        );
+
 
         DB::commit();
 
 
         return response()->json(
             [
-                "user" => [
-                    "id" => $user->id,
-                    "registeration_number" => $user->registeration_number,
-                    "full_name" => $user->full_name,
-                    "username" => $user->username,
-                    "profile" => $user->profile,
-                    "created_at" => $user->created_at,
-                    "status" => $user->status,
+                "employee" => [
+                    "id" => $employee->id,
+                    "first_name" => $request->first_name,
+                    "last_name" => $request->last_name,
+                    "father_name" => $request->father_name,
+                    "hr_code" => $employee->hr_code,
                     "email" => $request->email,
                     "contact" => $request->contact,
-                    "zone" => $request->zone,
-                    "destination" => $request->destination,
-                    "job" => $request->job,
+
                 ],
                 "message" => __('app_translation.success'),
             ],

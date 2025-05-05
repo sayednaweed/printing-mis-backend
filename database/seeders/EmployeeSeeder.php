@@ -48,7 +48,7 @@ class EmployeeSeeder extends Seeder
 
 
         $checklist = CheckList::create([
-            'id' => CheckListEnum::employee_photo->value,
+            'id' => CheckListEnum::employee_attachment->value,
             'check_list_type_id' => CheckListTypeEnum::employee->value,
             'acceptable_extensions' => "pdf,jpeg,png,jpg",
             'acceptable_mimes' => "application/pdf,image/jpeg,image/png,image/jpg",
@@ -59,43 +59,17 @@ class EmployeeSeeder extends Seeder
         ]);
         CheckListTrans::create([
             'check_list_id' => $checklist->id,
-            'value' => "Photo",
+            'value' => "Employee Attachment",
             'language_name' => LanguageEnum::default,
         ]);
         CheckListTrans::create([
             'check_list_id' => $checklist->id,
-            'value' => "عکس",
+            'value' => "کارکوونکی ضمیمه",
             'language_name' => LanguageEnum::farsi,
         ]);
         CheckListTrans::create([
             'check_list_id' => $checklist->id,
-            'value' => "تصویر",
-            'language_name' => LanguageEnum::pashto,
-        ]);
-
-        $checklist = CheckList::create([
-            'id' => CheckListEnum::employee_nid->value,
-            'check_list_type_id' => CheckListTypeEnum::employee->value,
-            'acceptable_extensions' => "pdf,jpeg,png,jpg",
-            'acceptable_mimes' => "application/pdf,image/jpeg,image/png,image/jpg",
-            'accept' => ".pdf,.jpeg,.png,.jpg",
-            'description' => "",
-            'file_size' => 3048,
-            'user_id' => RoleEnum::super,
-        ]);
-        CheckListTrans::create([
-            'check_list_id' => $checklist->id,
-            'value' => "Nid",
-            'language_name' => LanguageEnum::default,
-        ]);
-        CheckListTrans::create([
-            'check_list_id' => $checklist->id,
-            'value' => "تذکره",
-            'language_name' => LanguageEnum::farsi,
-        ]);
-        CheckListTrans::create([
-            'check_list_id' => $checklist->id,
-            'value' => "تذکره",
+            'value' => "کارمند ضمیمه",
             'language_name' => LanguageEnum::pashto,
         ]);
     }
