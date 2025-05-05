@@ -14,35 +14,42 @@ class HireTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        $this->hireType();
     }
-
 
     protected function hireType()
     {
         $hireTypes = [
             [
-                'description' => 'Full Time',
+                'description' => '',
                 'translations' => [
-                    'en' => 'Full Time',
-                    'ps' => 'د بشپړ وخت',
-                    'fa' => 'تمام وقت',
-                ]
-            ],
-            [
-                'description' => 'Part Time',
-                'translations' => [
-                    'en' => 'Part Time',
-                    'ps' => 'د نیمه وخت',
-                    'fa' => 'نیمه وقت',
-                ]
-            ],
-            [
-                'description' => 'Contract',
-                'translations' => [
-                    'en' => 'Contract',
+                    'en' => 'Contractual',
                     'ps' => 'قراردادي',
                     'fa' => 'قراردادی',
+                ]
+            ],
+            [
+                'description' => '',
+                'translations' => [
+                    'en' => 'Permanent',
+                    'ps' => 'دائمی',
+                    'fa' => 'دایمي',
+                ]
+            ],
+            [
+                'description' => '',
+                'translations' => [
+                    'en' => 'Temporary',
+                    'ps' => 'موقتی',
+                    'fa' => 'لنډمهاله',
+                ]
+            ],
+            [
+                'description' => '',
+                'translations' => [
+                    'en' => 'Internship',
+                    'ps' => 'موقتی',
+                    'fa' => 'کارآموزی',
                 ]
             ]
         ];
