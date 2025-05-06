@@ -34,8 +34,5 @@ return [
         "name_pashto" => "نام پشتو",
         "name_farsi" => "نام فارسی",
         "contact" => "شماره تلفن",
-        "role_id" => "نقش",
-        "zone_id" => "زون",
-        "job_id" => "وظیفه",
     ],
 ];

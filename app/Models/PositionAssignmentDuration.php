@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class PositionAssignmentDuration extends Model
 {
-    //
+    protected $guarded = [];
 }

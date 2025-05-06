@@ -10,6 +10,8 @@ use App\Models\Department;
 use App\Models\DepartmentTran;
 use App\Models\ModelJob;
 use App\Models\ModelJobTrans;
+use App\Models\Position;
+use App\Models\PositionTran;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -36,6 +38,25 @@ class JobAndUserSeeder extends Seeder
             "department_id" => $department->id,
             "language_name" => LanguageEnum::pashto->value,
         ]);
+        $position = Position::factory()->create([
+            'department_id' => $department->id
+        ]);
+        PositionTran::factory()->create([
+            "value" => "Manager",
+            "position_id" => $position->id,
+            "language_name" => LanguageEnum::default->value,
+        ]);
+        PositionTran::factory()->create([
+            "value" => "مدیر",
+            "position_id" => $position->id,
+            "language_name" => LanguageEnum::farsi->value,
+        ]);
+        PositionTran::factory()->create([
+            "value" => "مدیر",
+            "position_id" => $position->id,
+            "language_name" => LanguageEnum::pashto->value,
+        ]);
+        // //
         $job = ModelJob::factory()->create([]);
         ModelJobTrans::factory()->create([
             "value" => "Administrator",

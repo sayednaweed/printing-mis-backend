@@ -34,9 +34,5 @@ return [
         "name_pashto" => "Name Pashto",
         "name_farsi" => "Name Farsi",
         "contact" => "Contact",
-        "role_id" => "Role",
-        "zone_id" => "Zone",
-        "job_id" => "Job",
-        'passport_number' => 'passport_number'
     ],
 ];

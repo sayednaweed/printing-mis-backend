@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('hr_code');
             $table->string('date_of_birth');
-            $table->string('picture');
+            $table->boolean('is_current_employee')->default(true);
+            $table->string('picture')->nullable();
             $table->unsignedBigInteger('contact_id');
             $table->foreign('contact_id')->references('id')->on('contacts')
                 ->onUpdate('cascade')
@@ -32,12 +33,16 @@ return new class extends Migration
             $table->foreign('current_address_id')->references('id')->on('addresses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('country_id');
-            $table->foreign('country_id')->references('id')->on('countries')
+            $table->unsignedBigInteger('nationality_id');
+            $table->foreign('nationality_id')->references('id')->on('nationalities')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('gender_id');
             $table->foreign('gender_id')->references('id')->on('genders')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
+            $table->unsignedBigInteger('marital_status_id');
+            $table->foreign('marital_status_id')->references('id')->on('marital_statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->timestamps();

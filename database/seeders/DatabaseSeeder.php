@@ -2,15 +2,18 @@
 
 namespace Database\Seeders;
 
-use App\Models\Currency;
-use App\Models\CurrencyTran;
+use Carbon\Carbon;
+use App\Models\Shift;
 use App\Models\Gender;
 use App\Models\NidType;
+use App\Models\Currency;
 use App\Models\Language;
-use App\Models\MaritalStatus;
-use App\Models\MaritalStatusTran;
+use App\Models\ShiftTran;
+use App\Models\CurrencyTran;
 use App\Models\NidTypeTrans;
+use App\Models\MaritalStatus;
 use Illuminate\Database\Seeder;
+use App\Models\MaritalStatusTran;
 use Database\Seeders\CheckListSeeder;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Current;
 
@@ -61,11 +64,12 @@ class DatabaseSeeder extends Seeder
         $this->call(HireTypeSeeder::class);
         $this->call(EmployeeSeeder::class);
 
-        $this->statusType();
+        $this->shifts();
         $this->nidTypes();
         $this->maritalStatus();
         $this->currency();
     }
+
     public function nidTypes()
     {
         $nid = NidType::create([]);
@@ -101,7 +105,29 @@ class DatabaseSeeder extends Seeder
             "nid_type_id" => $nid->id
         ]);
     }
-    public function statusType() {}
+    public function shifts()
+    {
+        $shift = Shift::factory()->create([
+            'start_time' => Carbon::today()->setTime(8, 0)->toTimeString(),  // 8:00 AM
+            'end_time' => Carbon::today()->setTime(4, 0)->toTimeString(),    // 9:00 AM
+            "description" => "",
+        ]);
+        ShiftTran::factory()->create([
+            "value" => "8 to 4 Shift",
+            "shift_id" => $shift->id,
+            "language_name" => "en",
+        ]);
+        ShiftTran::factory()->create([
+            "value" => "شیفت ۸ تا ۴",
+            "shift_id" => $shift->id,
+            "language_name" => "fa",
+        ]);
+        ShiftTran::factory()->create([
+            "value" => "له ۸ څخه تر ۴ پورې شفټ",
+            "shift_id" => $shift->id,
+            "language_name" => "ps",
+        ]);
+    }
 
     public function maritalStatus()
     {

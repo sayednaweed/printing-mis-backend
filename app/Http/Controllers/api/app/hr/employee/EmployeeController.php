@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Enums\Checklist\CheckListEnum;
 use App\Enums\Checklist\CheckListTypeEnum;
+use App\Enums\Types\HireTypeEnum;
 use App\Models\PositionAssignmentDuration;
 use App\Http\Requests\hr\employee\EmployeeStoreRequest;
 use App\Models\EmployeeDocument;
@@ -38,14 +39,12 @@ class EmployeeController extends Controller
         $this->storageRepository = $storageRepository;
     }
 
-
     public function employees(Request $request)
     {
         $locale = App::getLocale();
         $tr = [];
         $perPage = $request->input('per_page', 10); // Number of records per page
         $page = $request->input('page', 1); // Current page
-
 
         // Start building the query
         $query = DB::table('employees as emp')
@@ -164,183 +163,163 @@ class EmployeeController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-
-
     public function store(EmployeeStoreRequest $request)
     {
-        $validatedData = $request->validated();
-
-
+        $request->validated();
         // Create email
-        $email = Email::where('value', '=', $request->email)->first();
-        if ($email) {
-            return response()->json([
-                'message' => __('app_translation.email_exist'),
-            ], 400, [], JSON_UNESCAPED_UNICODE);
-        }
-        // 2. Check contact
-        $contact = null;
-        if ($request->contact !== null && !empty($request->contact)) {
-            $contact = Contact::where('value', '=', $request->contact)->first();
-            if ($contact) {
+        $email = null;
+        DB::beginTransaction();
+        if ($request->email != null && !empty($request->email)) {
+            $email = Email::where('value', '=', $request->email)->first();
+            if ($email) {
                 return response()->json([
-                    'message' => __('app_translation.contact_exist'),
+                    'message' => __('app_translation.email_exist'),
                 ], 400, [], JSON_UNESCAPED_UNICODE);
+            } else {
+                $email = Email::create([
+                    "value" => $request->email
+                ]);
             }
         }
-        DB::beginTransaction();
-        // Add email and contact
-        $email = null;
-        if ($request->email) {
+        // 2. Check contact
+        $contact = Contact::where('value', '=', $request->contact)->first();
+        if ($contact) {
+            return response()->json([
+                'message' => __('app_translation.contact_exist'),
+            ], 400, [], JSON_UNESCAPED_UNICODE);
+        }
 
-            $email = Email::create([
-                "value" => $request->email
-            ]);
-        }
-        $contact = null;
-        if ($request->contact) {
-            $contact = Contact::create([
-                "value" => $request->contact
-            ]);
-        }
+        $contact = Contact::create([
+            "value" => $request->contact
+        ]);
 
         $permAddress = Address::create([
-            'provinces_id' => $request->permanent_province_id,
+            'province_id' => $request->permanent_province_id,
             'district_id' => $request->permanent_district_id,
         ]);
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
             AddressTran::create([
                 "area" => $request->permanent_area,
-                "addresss" => $permAddress->id,
+                "address_id" => $permAddress->id,
                 "language_name" => $code,
             ]);
         }
 
-        $temAddress = Address::create([
-            'provinces_id' => $request->temprory_province_id,
-            'district_id' => $request->temprory_district_id,
+        $currentAddress = Address::create([
+            'province_id' => $request->current_province_id,
+            'district_id' => $request->current_district_id,
         ]);
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
             AddressTran::create([
-                "area" => $request->temprory_area,
-                "addresss" => $temAddress->id,
+                "area" => $request->current_area,
+                "address_id" => $currentAddress->id,
                 "language_name" => $code,
             ]);
         }
 
-
-
-
-
-
-
-
-        $employee =   Employee::create([
+        $employee = Employee::create([
             'hr_code' => '',
-            'picture' => '',
             'contact_id' => $contact->id,
-            'email_id' => $email->id,
-            'permanent_address_id' => $permAddress->id,
-            'current_address_id' => $temAddress->id,
-            'gender_id' => $request->gender_id,
+            'email_id' => $email ? $email->id : null,
+            'parmanent_address_id' => $permAddress->id,
+            'current_address_id' => $currentAddress->id,
             'date_of_birth' => $request->date_of_birth,
             'nationality_id' => $request->nationality_id,
-            'nid_document_id' => '',
-
-
+            'gender_id' => $request->gender_id,
+            'marital_status_id' => $request->marital_status_id,
         ]);
-        $employee->hr_code = "PN-" . $employee->id;
-        $employee->save;
+        $employee->hr_code = "HR-" . $employee->id;
+        $employee->save();
 
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
             EmployeeTran::create([
                 'employee_id' => $employee->id,
-                "name" => $request->first_name,
+                "first_name" => $request->first_name,
                 "last_name" => $request->last_name,
                 "father_name" => $request->father_name,
                 "language_name" => $code,
             ]);
         }
 
-
-        $postAss =   PositionAssignment::create([
+        $postAss = PositionAssignment::create([
             'employee_id' => $employee->id,
             'hire_type_id' => $request->hire_type_id,
             'salary' => $request->salary,
             'shift_id' => $request->shift_id,
             'position_id' => $request->position_id,
-            'position_change_type_id' => '',
-            'overtime_rate' => $request->over_time,
+            'overtime_rate' => $request->overtime_rate,
             'currency_id' => $request->currency_id,
-
-
+            'department_id' => $request->department_id,
+            'hire_date' => $request->hire_date,
         ]);
 
-        PositionAssignmentDuration::create([
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'position_assignment_id' => $postAss->id
-
-        ]);
-
-
-
-        $user = $request->user();
-
-
-        $task = $this->pendingTaskRepository->pendingTaskExist(
-            $request->user(),
-            CheckListTypeEnum::employee->value,
-            CheckListEnum::employee_attachment->value,
-            null
-        );
-
-        if (!$task) {
-            return response()->json([
-                'message' => __('app_translation.task_not_found')
-            ], 404);
-        }
-        $document_id = '';
-
-        $this->storageRepository->documentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
-            $checklist_id = $documentData['check_list_id'];
-            $document = Document::create([
-                'actual_name' => $documentData['actual_name'],
-                'size' => $documentData['size'],
-                'path' => $documentData['path'],
-                'type' => $documentData['type'],
-                'check_list_id' => $checklist_id,
+        // Insert PositionAssignmentDuration in case it is not permanent
+        if (HireTypeEnum::permanent->value != $request->hire_type_id) {
+            $request->validate([
+                'start_date' => 'required',
+                'end_date' => 'required',
             ]);
-            $document_id = $document->id;
-        });
+            PositionAssignmentDuration::create([
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'position_assignment_id' => $postAss->id
+            ]);
+        }
 
-        EmployeeDocument::create([
-            'employee_id' => $employee->id,
-            'document_id' => $document_id,
-        ]);
+        if ($request->has_attachment == true) {
+            $user = $request->user();
+            $task = $this->pendingTaskRepository->pendingTaskExist(
+                $request->user(),
+                CheckListTypeEnum::employee->value,
+                CheckListEnum::employee_attachment->value,
+                null
+            );
 
-        $this->pendingTaskRepository->destroyPendingTask(
-            $request->user(),
-            CheckListTypeEnum::employee->value,
-            CheckListEnum::employee_attachment->value,
-            null
-        );
+            if (!$task) {
+                return response()->json([
+                    'message' => __('app_translation.task_not_found')
+                ], 404);
+            }
+            $document_id = '';
+
+            $this->storageRepository->documentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
+                $checklist_id = $documentData['check_list_id'];
+                $document = Document::create([
+                    'actual_name' => $documentData['actual_name'],
+                    'size' => $documentData['size'],
+                    'path' => $documentData['path'],
+                    'type' => $documentData['type'],
+                    'check_list_id' => $checklist_id,
+                ]);
+                $document_id = $document->id;
+            });
+
+            EmployeeDocument::create([
+                'employee_id' => $employee->id,
+                'document_id' => $document_id,
+            ]);
+            $this->pendingTaskRepository->destroyPendingTask(
+                $request->user(),
+                CheckListTypeEnum::employee->value,
+                CheckListEnum::employee_attachment->value,
+                null
+            );
+        }
 
 
         DB::commit();
-
-
         return response()->json(
             [
                 "employee" => [
+                    'profile' => null,
                     "id" => $employee->id,
                     "first_name" => $request->first_name,
                     "last_name" => $request->last_name,
                     "father_name" => $request->father_name,
                     "hr_code" => $employee->hr_code,
                     "email" => $request->email,
+                    "hire_date" => $request->hire_date,
                     "contact" => $request->contact,
-
                 ],
                 "message" => __('app_translation.success'),
             ],
