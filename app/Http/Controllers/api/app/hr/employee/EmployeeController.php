@@ -363,10 +363,12 @@ class EmployeeController extends Controller
             'emp.id',
             'emp.hr_code',
             'empt.name',
+            'emp.picture',
             'empt.last_name',
             'empt.father_name',
             'emp.date_of_birth',
             'emp.contact_id',
+            'emp.is_current_employee',
             'contacts.value as contact',
             'emp.email_id',
             'emails.value as email',
@@ -375,10 +377,14 @@ class EmployeeController extends Controller
             'emp.nationality_id',
             'nit.value as nationality',
             'emp.parmanent_address_id',
+            'p_add.province_id as parmanent_province_id',
+            'p_add.district_id as parmanent_district_id',
             'p_addt.area as parmanent_area',
             'p_pvt.value as parmanent_province',
             'p_dst.value as parmanent_district',
             'emp.current_address_id',
+            't_add.province_id as temprory_province_id',
+            't_add.district_id as temprory_district_id',
             't_addt.area as temprory_area',
             't_pvt.value as temprory_province',
             't_dst.value as temprory_district',
@@ -389,6 +395,12 @@ class EmployeeController extends Controller
 
         // return $query->toSql();
         $result = $query->first();
+        $document =    Document::join('employee_documents as emp_doc', 'emp_doc.document_id', '=', 'documents.id')
+            ->where('emp_doc.employee_id', $id)
+            ->select('actual_name,type,path')->where('documents.check_list_id', CheckListEnum::employee_attachment->value)
+            ->first();
+
+
         if (!$result) {
             return response()->json([
                 'message' => __('app_translation.employee_not_found'),
@@ -400,17 +412,25 @@ class EmployeeController extends Controller
             'first_name' => $result->name,
             'last_name' => $result->last_name,
             'father_name' => $result->father_name,
+            'picture' => $result->picture,
             'date_of_birth' => $result->date_of_birth,
-            'contact' => ['id' => $result->contact_id, 'value' => $result->contact],
-            'email' => ['id' => $result->email_id, 'value' => $result->email],
-            'gender' => ['id' => $result->gender_id, 'value' => $result->gender],
-            'nationality' => ['id' => $result->nationality_id, 'value' => $result->nationality],
+            'contact' =>  $result->contact,
+            'email' => $result->email,
+            'gender' => ['id' => $result->gender_id, 'name' => $result->gender],
+            'nationality' => ['id' => $result->nationality_id, 'name' => $result->nationality],
+            'is_current_employee' => $result->is_current_employee,
             'permanent_area' => $result->parmanent_area,
-            'permanent_province' => $result->parmanent_province,
-            'permanent_district' => $result->parmanent_district,
+            'permanent_province' => ['id' => $result->parmanent_province_id, 'name' => $result->parmanent_province],
+            'permanent_district' => ['id' => $result->parmanent_district_id, 'name' => $result->parmanent_district],
             'current_area' => $result->temprory_area,
-            'current_province' => $result->temprory_province,
-            'current_district' => $result->temprory_district,
+            'current_province' => ['id' => $result->temprory_province_id, 'name' => $result->temprory_province],
+            'current_district' => ['id' => $result->temprory_district_id, 'name' => $result->temprory_district],
+            'attachment' => $document ? [
+                'actual_name' => $document->actual_name,
+                'type' => $document->type,
+                'path' => $document->path,
+            ] : null,
+            'created_at' => $result->created_at,
         ];
         return response()->json([
             'employee' => $result,
@@ -467,20 +487,21 @@ class EmployeeController extends Controller
     //
     public function employeesCount()
     {
-        // $statistics = DB::select("
-        //     SELECT
-        //         COUNT(*) AS userCount,
-        //         (SELECT COUNT(*) FROM employees WHERE DATE(created_at) = CURDATE()) AS todayCount,
-        //         (SELECT COUNT(*) FROM employees WHERE status = 1) AS activeUserCount,
-        //         (SELECT COUNT(*) FROM employees WHERE status = 0) AS inActiveUserCount
-        //     FROM employees
-        // ");
+        $statistics = DB::select("
+            SELECT
+                COUNT(*) AS employeeCount,
+                (SELECT COUNT(*) FROM employees WHERE DATE(created_at) = CURDATE()) AS todayCount,
+                (SELECT COUNT(*) FROM employees WHERE is_current_employee = 1) AS activeUserCount,
+                (SELECT COUNT(*) FROM employees WHERE is_current_employee = 0) AS inActiveUserCount
+            FROM employees
+        ");
         return response()->json([
             'counts' => [
-                "userCount" => 0,
-                "todayCount" => 0,
-                "activeUserCount" => 0,
-                "inActiveUserCount" =>  0
+                "userCount" => $statistics[0]->employeeCount,
+                "todayCount" => $statistics[0]->todayCount,
+                "activeUserCount" => $statistics[0]->activeUserCount,
+                "inActiveUserCount" => $statistics[0]->inActiveUserCount
+
             ],
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
