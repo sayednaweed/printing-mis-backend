@@ -61,71 +61,60 @@ class AttendanceController extends Controller
         );
     }
 
+
+
     public function employeeList()
     {
         $locale = App::getLocale();
+        $currentDate = Carbon::now()->toDateString(); // Already formatted
 
-        // Fetch the employees and join with the employee_trans and leaves tables
-        $query = DB::table('employees as emp')
+        // Fetch employees with translations and leave info
+        $employees = DB::table('employees as emp')
             ->join('employee_trans as empt', function ($join) use ($locale) {
                 $join->on('emp.id', '=', 'empt.employee_id')
                     ->where('empt.language_name', $locale);
             })
-            ->leftJoin('leaves as lv', 'emp.id', '=', 'lv.employee_id') // Left join leaves table to check if employee has leave
+            ->leftJoin('leaves as lv', function ($join) use ($currentDate) {
+                $join->on('emp.id', '=', 'lv.employee_id')
+                    ->whereDate('lv.start_date', '<=', $currentDate)
+                    ->whereDate('lv.end_date', '>=', $currentDate);
+            })
             ->select(
-                "emp.id",
-                "empt.first_name",
-                "empt.last_name",
-                "lv.start_date as leave_start_date",
-                "lv.end_date as leave_end_date"
+                'emp.id',
+                'emp.picture',
+                'emp.hr_code',
+                'empt.first_name',
+                'empt.last_name',
+                DB::raw('IF(lv.id IS NOT NULL, 1, 0) as is_on_leave')
             )
-            ->get(); // Execute the query
+            ->get();
 
+        // Fetch attendance statuses, separating "Leave" status
 
-        // Fetch all the statuses from the attendance_status_tran table
-        $status = AttendanceStatusTran::where('language_name', $locale)
+        $leaveStatusValue = AttendanceStatusEnum::leave->value;
+
+        $statusWithoutLeave = AttendanceStatusTran::where('language_name', $locale)
+            ->whereNotIn('attendance_status_id', [$leaveStatusValue]) // Exclude "Leave"
             ->select('value as status', 'attendance_status_id as status_id')
             ->get();
 
-        // Define the current date to check for leave
-        $currentDate = now()->format('Y-m-d'); // You can replace this with any specific date
 
-        // Filter out the "Leave" status from the status array
-        $statusWithoutLeave = $status->filter(function ($statusItem) {
-            return $statusItem->status !== AttendanceStatusEnum::leave->value;
+        // Build employee response list
+        $data = $employees->map(function ($emp) {
+            return [
+                'id' => $emp->id,
+                'hr_code' => $emp->hr_code,
+                'picture' => $emp->picture,
+                'first_name' => $emp->first_name,
+                'last_name' => $emp->last_name,
+                'status' => $emp->is_on_leave ? 1 : 0
+            ];
         });
 
-        // Create an array to hold the result
-        $arr = [];
-
-        foreach ($query as $item) {
-            // Check if the employee has leave and if the current date falls within the leave period
-            if ($item->leave_start_date && $item->leave_end_date) {
-                // Check if the current date falls within the leave period
-                if ($currentDate >= $item->leave_start_date && $currentDate <= $item->leave_end_date) {
-                    // Employee is on leave for the current date
-                    $leaveStatus = $status->firstWhere('status', AttendanceStatusEnum::leave->value); // Fetch the "Leave" status
-                    $arr[] = [
-                        'id' => $item->id,
-                        'first_name' => $item->first_name,
-                        'last_name' => $item->last_name,
-                        'status' => $leaveStatus ? $leaveStatus->status : 'Leave' // Default to "Leave" if status is not found
-                    ];
-                    continue; // Skip the attendance status check since the employee is on leave
-                }
-            }
-
-            // Add employee data with attendance status (if they are not on leave)
-            $arr[] = [
-                'id' => $item->id,
-                'first_name' => $item->first_name,
-                'last_name' => $item->last_name,
-                'status' => $statusWithoutLeave // Add all the attendance statuses that are not "Leave"
-            ];
-        }
-
-        // Return or process the array
-        return $arr;
+        return response()->json([
+            'statuses' => $statusWithoutLeave->values(),
+            'data' => $data,
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
 
