@@ -77,25 +77,15 @@ class HireTypeSeeder extends Seeder
         // First, create an array of position change types and their corresponding translations
         $positionChangeTypes = [
             'promotion' => [
-                'en' => 'promotion',
-                'fa' => 'ترفیع', // Promotion in Farsi
-                'ps' => 'ترفیع'  // Promotion in Pashto
+                'en' => 'Promotion',
+                'fa' => 'ارتقا', // Promotion in Farsi
+                'ps' => 'ارتقا'  // Promotion in Pashto
             ],
             'demotion' => [
-                'en' => 'demotion',
-                'fa' => 'تنزل رتبه', // Demotion in Farsi
-                'ps' => 'کموالی'  // Demotion in Pashto
+                'en' => 'Demotion',
+                'fa' => 'تنزل', // Demotion in Farsi
+                'ps' => 'تنزل'  // Demotion in Pashto
             ],
-            'change of grade' => [
-                'en' => 'change of grade',
-                'fa' => 'تغییر درجه', // Change of Grade in Farsi
-                'ps' => 'د درجه بدلون' // Change of Grade in Pashto
-            ],
-            'change of position' => [
-                'en' => 'change of position',
-                'fa' => 'تغییر پست', // Change of Position in Farsi
-                'ps' => 'د پوست بدلون' // Change of Position in Pashto
-            ]
         ];
 
         // Loop through the array to create PositionChangeTypes and their translations

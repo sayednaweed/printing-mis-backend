@@ -13,9 +13,6 @@ use App\Models\AttendanceStatusTran;
 
 class AttendaceController extends Controller
 {
-    //
-
-
     public function employeeList()
     {
         $locale = App::getLocale();
