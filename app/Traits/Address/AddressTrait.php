@@ -25,18 +25,16 @@ trait AddressTrait
     private function address($query, $as = '', $joinTable)
     {
         $locale = App()->getLocale();
-
-
-        $query->leftJoin("addresses as {$as}add", $joinTable, '=', "{$as}add.id")
-            ->leftJoin("address_trans as {$as}addt", function ($join) use ($locale, $as) {
+        $query->join("addresses as {$as}add", $joinTable, '=', "{$as}add.id")
+            ->join("address_trans as {$as}addt", function ($join) use ($locale, $as) {
                 $join->on("{$as}addt.address_id", '=', "{$as}add.id")
                     ->where("{$as}addt.language_name", $locale);
             })
-            ->leftJoin("province_trans as {$as}pvt", function ($join) use ($locale, $as) {
+            ->join("province_trans as {$as}pvt", function ($join) use ($locale, $as) {
                 $join->on("{$as}pvt.id", '=', "{$as}add.province_id")
                     ->where("{$as}pvt.language_name", $locale);
             })
-            ->leftJoin("district_trans as {$as}dst", function ($join) use ($locale, $as) {
+            ->join("district_trans as {$as}dst", function ($join) use ($locale, $as) {
                 $join->on("{$as}dst.id", '=', "{$as}add.district_id")
                     ->where("{$as}dst.language_name", $locale);
             });

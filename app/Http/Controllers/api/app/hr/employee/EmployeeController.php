@@ -328,103 +328,102 @@ class EmployeeController extends Controller
         );
     }
 
-    public function personalDetial(Request $request, $id)
+    public function personalDetial($id)
     {
         $locale = App::getLocale();
         $query = DB::table('employees as emp')
-            ->leftJoin('employee_trans as empt', function ($join) use ($locale) {
+            ->where('emp.id', $id)
+            ->join('employee_trans as empt', function ($join) use ($locale) {
                 $join->on('empt.employee_id', '=', 'emp.id')
                     ->where('empt.language_name', $locale);
             })
-            ->leftJoin('contacts', 'emp.contact_id', '=', 'contacts.id')
+            ->join('contacts', 'emp.contact_id', '=', 'contacts.id')
             ->leftJoin('emails', 'emp.email_id', '=', 'emails.id')
-            ->leftJoin('genders as gent', function ($join) use ($locale) {
+            ->join('genders as gent', function ($join) {
                 $join->on('gent.id', '=', 'emp.gender_id');
             })
-            ->leftJoin('marital_status_trans as mrt', function ($join) use ($locale) {
+            ->join('marital_status_trans as mrt', function ($join) use ($locale) {
                 $join->on('mrt.marital_status_id', '=', 'emp.marital_status_id')
                     ->where('mrt.language_name', $locale);
             })
-            ->leftJoin('nationality_trans as nit', function ($join) use ($locale) {
+            ->join('nationality_trans as nit', function ($join) use ($locale) {
                 $join->on('nit.nationality_id', '=', 'emp.nationality_id')
                     ->where('nit.language_name', $locale);
             });
 
         $query = $this->address($query, 'p_', 'emp.parmanent_address_id');
         $query = $this->address($query, 't_', 'emp.current_address_id');
-
-        $query->select(
+        $employee = $query->select(
             'emp.id',
             'emp.hr_code',
-            'empt.name',
+            'empt.first_name',
             'emp.picture',
             'empt.last_name',
             'empt.father_name',
             'emp.date_of_birth',
-            'emp.contact_id',
             'emp.is_current_employee',
             'contacts.value as contact',
-            'emp.email_id',
             'emails.value as email',
             'emp.gender_id',
             "gent.name_{$locale} as gender",
             'emp.nationality_id',
             'nit.value as nationality',
-            'emp.parmanent_address_id',
-            'p_add.province_id as parmanent_province_id',
-            'p_add.district_id as parmanent_district_id',
-            'p_addt.area as parmanent_area',
-            'p_pvt.value as parmanent_province',
-            'p_dst.value as parmanent_district',
-            'emp.current_address_id',
+            // 'p_add.province_id as parmanent_province_id',
+            // 'p_add.district_id as parmanent_district_id',
+            // 'p_addt.area as parmanent_area',
+            // 'p_pvt.value as parmanent_province',
+            // 'p_dst.value as parmanent_district',
             't_add.province_id as temprory_province_id',
             't_add.district_id as temprory_district_id',
             't_addt.area as temprory_area',
             't_pvt.value as temprory_province',
-            't_dst.value as temprory_district',
-            'emp.created_at'
-
-        )
-            ->where('emp.id', $id);
-
-        // return $query->toSql();
-        $result = $query->first();
-        $document =    Document::join('employee_documents as emp_doc', 'emp_doc.document_id', '=', 'documents.id')
-            ->where('emp_doc.employee_id', $id)
-            ->select('actual_name,type,path')->where('documents.check_list_id', CheckListEnum::employee_attachment->value)
+            't_dst.value as temprory_district'
+        )->first();
+        return response()->json([
+            'message' => __('app_translation.employee_not_found'),
+            'dd' => $employee,
+        ], 404, [], JSON_UNESCAPED_UNICODE);
+        if (!$employee) {
+            return response()->json([
+                'message' => __('app_translation.employee_not_found'),
+                'dd' => $employee,
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+        $document = DB::table('employee_documents as ed')
+            ->where('ed.employee_id', $employee->id)
+            ->join('documents as d', 'd.id', '=', 'ed.document_id')
+            ->select(
+                'd.actual_name',
+                'd.path',
+                'd.type',
+            )
             ->first();
 
 
-        if (!$result) {
-            return response()->json([
-                'message' => __('app_translation.employee_not_found'),
-            ], 404, [], JSON_UNESCAPED_UNICODE);
-        }
         $result = [
-            'id' => $result->id,
-            'hrcode' => $result->hr_code,
-            'first_name' => $result->name,
-            'last_name' => $result->last_name,
-            'father_name' => $result->father_name,
-            'picture' => $result->picture,
-            'date_of_birth' => $result->date_of_birth,
-            'contact' =>  $result->contact,
-            'email' => $result->email,
-            'gender' => ['id' => $result->gender_id, 'name' => $result->gender],
-            'nationality' => ['id' => $result->nationality_id, 'name' => $result->nationality],
-            'is_current_employee' => $result->is_current_employee,
-            'permanent_area' => $result->parmanent_area,
-            'permanent_province' => ['id' => $result->parmanent_province_id, 'name' => $result->parmanent_province],
-            'permanent_district' => ['id' => $result->parmanent_district_id, 'name' => $result->parmanent_district],
-            'current_area' => $result->temprory_area,
-            'current_province' => ['id' => $result->temprory_province_id, 'name' => $result->temprory_province],
-            'current_district' => ['id' => $result->temprory_district_id, 'name' => $result->temprory_district],
+            'id' => $employee->id,
+            'hrcode' => $employee->hr_code,
+            'first_name' => $employee->first_name,
+            'last_name' => $employee->last_name,
+            'father_name' => $employee->father_name,
+            'picture' => $employee->picture,
+            'date_of_birth' => $employee->date_of_birth,
+            'contact' =>  $employee->contact,
+            'email' => $employee->email,
+            'gender' => ['id' => $employee->gender_id, 'name' => $employee->gender],
+            'nationality' => ['id' => $employee->nationality_id, 'name' => $employee->nationality],
+            'is_current_employee' => $employee->is_current_employee,
+            'permanent_area' => $employee->parmanent_area,
+            'permanent_province' => ['id' => $employee->parmanent_province_id, 'name' => $employee->parmanent_province],
+            'permanent_district' => ['id' => $employee->parmanent_district_id, 'name' => $employee->parmanent_district],
+            'current_area' => $employee->temprory_area,
+            'current_province' => ['id' => $employee->temprory_province_id, 'name' => $employee->temprory_province],
+            'current_district' => ['id' => $employee->temprory_district_id, 'name' => $employee->temprory_district],
             'attachment' => $document ? [
                 'actual_name' => $document->actual_name,
                 'type' => $document->type,
                 'path' => $document->path,
             ] : null,
-            'created_at' => $result->created_at,
         ];
         return response()->json([
             'employee' => $result,
