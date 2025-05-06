@@ -3,30 +3,19 @@
 namespace App\Http\Controllers\api\app\hr\assignment;
 
 use Illuminate\Http\Request;
+use App\Enums\Types\HireTypeEnum;
 use App\Models\PositionAssignment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
+use App\Models\PositionAssignmentDuration;
 
 class EmployeeAssignment extends Controller
 {
     public function employeeAssignments($id)
     {
-
         $locale = App::getLocale();
         $tr = [];
-
-        //         id: string;
-        //   hire_type: string;
-        //   salary: string;
-        //   shift: string;
-        //   position: string;
-        //   position_change_type: string;
-        //   overtime_rate: string;
-        //   currency: string;
-        //   department: string;
-        //   hire_date: string;
-
         $tr = DB::table('position_assignments as poas')
             ->join('position_trans as pos', function ($join) use ($locale) {
                 $join->on('pos.position_id', '=', 'poas.position_id')
@@ -86,8 +75,7 @@ class EmployeeAssignment extends Controller
             'position_change_type_id' => 'required|integer',
         ]);
 
-
-        PositionAssignment::create([
+        $postAss = PositionAssignment::create([
             'employee_id' => $request->employee_id,
             'position_id' => $request->position_id,
             'department_id' => $request->department_id,
@@ -99,6 +87,17 @@ class EmployeeAssignment extends Controller
             'position_change_type_id' => $request->position_change_type_id,
         ]);
 
+        if (HireTypeEnum::permanent->value != $request->hire_type_id) {
+            $request->validate([
+                'start_date' => 'required',
+                'end_date' => 'required',
+            ]);
+            PositionAssignmentDuration::create([
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'position_assignment_id' => $postAss->id
+            ]);
+        }
         return response()->json(
             [
 

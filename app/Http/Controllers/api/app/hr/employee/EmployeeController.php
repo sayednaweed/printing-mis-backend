@@ -84,85 +84,6 @@ class EmployeeController extends Controller
         );
     }
 
-    public function employee($id)
-    {
-        $locale = App::getLocale();
-
-        $query = DB::table('employees as emp')
-            ->leftJoin(DB::raw('(
-                SELECT
-                    employee_id,
-                    MAX(CASE WHEN language_name = "fa" THEN first_name END) AS first_name_fa,
-                    MAX(CASE WHEN language_name = "fa" THEN last_name END) AS last_name_fa,
-                    MAX(CASE WHEN language_name = "fa" THEN father_name END) AS father_name_fa,
-        
-                    MAX(CASE WHEN language_name = "en" THEN first_name END) AS first_name_en,
-                    MAX(CASE WHEN language_name = "en" THEN last_name END) AS last_name_en,
-                    MAX(CASE WHEN language_name = "en" THEN father_name END) AS father_name_en,
-        
-                    MAX(CASE WHEN language_name = "ps" THEN first_name END) AS first_name_ps,
-                    MAX(CASE WHEN language_name = "ps" THEN last_name END) AS last_name_ps,
-                    MAX(CASE WHEN language_name = "ps" THEN father_name END) AS father_name_ps
-                FROM employee_trans
-                GROUP BY employee_id
-            ) as empt'), 'emp.id', '=', 'empt.employee_id')
-
-            ->leftJoin('department_trans as dept', function ($join) use ($locale) {
-                $join->on('dept.department_id', '=', 'emp.department_id')
-                    ->where('dept.language_name', $locale);
-            })
-            ->leftJoin('position_assignments as posa', 'emp.id', '=', 'posa.employee_id')
-            ->leftJoin('position_tran as post', function ($join) use ($locale) {
-                $join->on('post.position_id', '=', 'posa.position_id')
-                    ->where('post.language_name', $locale);
-            })
-            ->leftJoin('emails', 'emp.email_id', '=', 'emails.id')
-            ->leftJoin('contacts', 'emp.contact_id', '=', 'contacts.id')
-            ->leftJoin('addresses as perAdd', 'emp.permanent_address_id', '=', 'addresses.id')
-            ->leftJoin('addresses as tempAdd', 'emp.current_address_id', '=', 'addresses.id')
-            ->select(
-                'emp.id',
-                'emp.hr_code',
-                'emp.contact_id',
-                'emp.email_id',
-                'emp.address_i',
-                'emp.created_at',
-                'post.id as position_id',
-                'post.value as position',
-                'dept.value as department',
-                'dept.department_id',
-                'emails.value as email',
-                'contacts.value as contact',
-                // Names in 3 languages
-                'empt.first_name_fa',
-                'empt.last_name_fa',
-                'empt.father_name_fa',
-
-                'empt.first_name_en',
-                'empt.last_name_en',
-                'empt.father_name_en',
-
-                'empt.first_name_ps',
-                'empt.last_name_ps',
-                'empt.father_name_ps'
-            )
-            ->where('emp.id', $id);
-
-        $result = $query->first();
-
-        return response()->json([
-            "id" => $result->id,
-
-
-            "description" => $result->description,
-            "english" => $result->english,
-            "farsi" => $result->farsi,
-            "pashto" => $result->pashto,
-            "created_at" => $result->created_at,
-
-        ], 200, [], JSON_UNESCAPED_UNICODE);
-    }
-
     public function store(EmployeeStoreRequest $request)
     {
         $request->validated();
@@ -360,6 +281,8 @@ class EmployeeController extends Controller
             'emp.hr_code',
             'empt.first_name',
             'emp.picture',
+            'mrt.marital_status_id',
+            'mrt.value as marital_status',
             'empt.last_name',
             'empt.father_name',
             'emp.date_of_birth',
@@ -404,6 +327,7 @@ class EmployeeController extends Controller
             'id' => $employee->id,
             'hrcode' => $employee->hr_code,
             'first_name' => $employee->first_name,
+            'marital_status' => ['id' => $employee->marital_status_id, 'name' => $employee->marital_status],
             'last_name' => $employee->last_name,
             'father_name' => $employee->father_name,
             'picture' => $employee->picture,
@@ -553,12 +477,10 @@ class EmployeeController extends Controller
         }
 
 
-
-
         DB::commit();
 
         return response()->json([
-            'message' => __('app_translation.employee_updated_successfully'),
+            'message' => __('app_translation.profile_changed'),
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 

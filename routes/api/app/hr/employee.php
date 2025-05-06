@@ -12,7 +12,7 @@ Route::prefix('v1')->middleware(["authorized:" . 'user:api'])->group(function ()
     Route::get('/employee/{id}', [EmployeeController::class, "personalDetial"])->middleware(["HasSubPermission:" . HrPermissionEnum::employees->value . "," . SubPermissionEnum::hr_employees_information->value . ',' . 'view']);
     Route::delete('/epi/user/delete/profile-picture/{id}', [EmployeeController::class, 'deleteProfilePicture'])->middleware(["HasSubPermission:" . HrPermissionEnum::employees->value . ',' . 'delete']);
     Route::post('/epi/user/update/profile-picture', [EmployeeController::class, 'updateProfilePicture'])->middleware(["HasMainPermission:" . HrPermissionEnum::employees->value . ',' . 'edit']);
-    Route::post('/employee/update/information', [EmployeeController::class, 'updateInformation'])->middleware(["HasSubPermission:" . HrPermissionEnum::employees->value . "," . SubPermissionEnum::hr_user_information->value . ',' . 'edit']);
+    Route::post('/employee/update/information', [EmployeeController::class, 'updatePersonalDetail'])->middleware(["HasSubPermission:" . HrPermissionEnum::employees->value . "," . SubPermissionEnum::hr_employees_information->value . ',' . 'edit']);
     Route::post('/employee/store', [EmployeeController::class, 'store'])->middleware(["HasMainPermission:" . HrPermissionEnum::employees->value . ',' . 'add']);
     Route::post('/epi/user/change/account/password', [EmployeeController::class, 'changePassword'])->middleware(["HasSubPermission:" . HrPermissionEnum::employees->value . "," . SubPermissionEnum::hr_user_password->value . ',' . 'edit']);
 });

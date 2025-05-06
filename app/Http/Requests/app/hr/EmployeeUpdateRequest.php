@@ -29,7 +29,6 @@ class EmployeeUpdateRequest extends FormRequest
             'date_of_birth' => 'required',
             'gender_id' => 'required',
             'contact' => 'required',
-            'email' => 'required',
             'marital_status_id' => 'required',
             'nationality_id' => 'required',
             'permanent_province_id' => 'required',
@@ -38,8 +37,6 @@ class EmployeeUpdateRequest extends FormRequest
             'current_district_id' => 'required',
             'permanent_area' => 'required',
             'current_area' => 'required',
-            'hire_type_id' => 'required',
-            'department_id' => 'required',
         ];
     }
 }

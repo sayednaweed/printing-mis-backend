@@ -8,6 +8,8 @@ use App\Traits\Helper\HelperTrait;
 use Illuminate\Support\Facades\DB;
 use App\Traits\Address\AddressTrait;
 use Illuminate\Support\Facades\Http;
+use App\Enums\Permission\HrPermissionEnum;
+use App\Enums\Permission\SubPermissionEnum;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Permission\PermissionRepositoryInterface;
 
@@ -106,6 +108,19 @@ class TestController extends Controller
     }
     public function index(Request $request)
     {
+        $column = 'edit';
+        $perm = HrPermissionEnum::employees->value;
+        $permSub = SubPermissionEnum::hr_employees_information->value;
+        $permission = DB::table("user_permissions as up")
+            ->where("user_id", "=", 1)
+            ->where("permission", $perm)
+            ->join("user_permission_subs as ups", function ($join) use ($permSub, &$column) {
+                return $join->on('ups.user_permission_id', '=', 'up.id')
+                    ->where('ups.sub_permission_id', $permSub)
+                    ->where("ups." . $column, true);
+            })->select("ups.id")->first();
+
+        return $permission;
         $user_id = RoleEnum::super->value;
 
         $permissions = DB::table('users as u')
