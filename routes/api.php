@@ -28,6 +28,7 @@ require __DIR__ . '/api/app/hr/hireType.php';
 require __DIR__ . '/api/app/hr/department.php';
 require __DIR__ . '/api/app/hr/positions.php';
 require __DIR__ . '/api/app/hr/attendance.php';
+require __DIR__ . '/api/app/hr/leave.php';
 
 
 

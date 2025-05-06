@@ -21,7 +21,7 @@ return new class extends Migration
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('attendance_status_id');
-            $table->foreign('attendance_status_id')->references('id')->on('attendances')
+            $table->foreign('attendance_status_id')->references('id')->on('attendance_statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
 
