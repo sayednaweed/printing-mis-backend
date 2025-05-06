@@ -11,23 +11,25 @@ use App\Enums\LanguageEnum;
 use App\Models\AddressTran;
 use App\Models\EmployeeTran;
 use Illuminate\Http\Request;
+use App\Models\EmployeeDocument;
+use App\Enums\Types\HireTypeEnum;
 use App\Models\PositionAssignment;
+use App\Traits\Helper\HelperTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
+use App\Traits\Address\AddressTrait;
 use App\Enums\Checklist\CheckListEnum;
 use App\Enums\Checklist\CheckListTypeEnum;
-use App\Enums\Types\HireTypeEnum;
 use App\Models\PositionAssignmentDuration;
-use App\Http\Requests\hr\employee\EmployeeStoreRequest;
-use App\Models\EmployeeDocument;
+use App\Http\Requests\app\hr\EmployeeStoreRequest;
+use App\Http\Requests\app\hr\EmployeeUpdateRequest;
 use App\Repositories\Storage\StorageRepositoryInterface;
 use App\Repositories\PendingTask\PendingTaskRepositoryInterface;
-use App\Traits\Address\AddressTrait;
 
 class EmployeeController extends Controller
 {
-    use AddressTrait;
+    use AddressTrait, HelperTrait;
     protected $pendingTaskRepository;
     protected $storageRepository;
     protected $permissionRepository;
@@ -365,24 +367,22 @@ class EmployeeController extends Controller
             'contacts.value as contact',
             'emails.value as email',
             'emp.gender_id',
+            'emp.is_current_employee',
             "gent.name_{$locale} as gender",
             'emp.nationality_id',
             'nit.value as nationality',
-            // 'p_add.province_id as parmanent_province_id',
-            // 'p_add.district_id as parmanent_district_id',
-            // 'p_addt.area as parmanent_area',
-            // 'p_pvt.value as parmanent_province',
-            // 'p_dst.value as parmanent_district',
+            'p_add.province_id as parmanent_province_id',
+            'p_add.district_id as parmanent_district_id',
+            'p_addt.area as parmanent_area',
+            'p_pvt.value as parmanent_province',
+            'p_dst.value as parmanent_district',
             't_add.province_id as temprory_province_id',
             't_add.district_id as temprory_district_id',
             't_addt.area as temprory_area',
             't_pvt.value as temprory_province',
             't_dst.value as temprory_district'
         )->first();
-        return response()->json([
-            'message' => __('app_translation.employee_not_found'),
-            'dd' => $employee,
-        ], 404, [], JSON_UNESCAPED_UNICODE);
+
         if (!$employee) {
             return response()->json([
                 'message' => __('app_translation.employee_not_found'),
@@ -412,7 +412,7 @@ class EmployeeController extends Controller
             'email' => $employee->email,
             'gender' => ['id' => $employee->gender_id, 'name' => $employee->gender],
             'nationality' => ['id' => $employee->nationality_id, 'name' => $employee->nationality],
-            'is_current_employee' => $employee->is_current_employee,
+            'is_current_employee' => (bool) $employee->is_current_employee,
             'permanent_area' => $employee->parmanent_area,
             'permanent_province' => ['id' => $employee->parmanent_province_id, 'name' => $employee->parmanent_province],
             'permanent_district' => ['id' => $employee->parmanent_district_id, 'name' => $employee->parmanent_district],
@@ -431,14 +431,13 @@ class EmployeeController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-
-
-
     // personal detail update
-    public function updatePersonalDetail(Request $request, $id)
+    public function updatePersonalDetail(EmployeeUpdateRequest $request)
     {
-        $employee = DB::table('employees')->where('id', $id)->first();
+        $request->validated();
+        $id = $request->id;
 
+        $employee = Employee::where('id', $id)->first();
         if (!$employee) {
             return response()->json([
                 'message' => __('app_translation.employee_not_found'),
@@ -446,14 +445,11 @@ class EmployeeController extends Controller
         }
 
         DB::beginTransaction();
-
-        // Update employee
-
         $employee->date_of_birth = $request->date_of_birth;
         $employee->gender_id = $request->gender_id;
-        $nationality_id = $request->nationality_id;
+        $employee->nationality_id = $request->nationality_id;
         $employee->is_current_employee = $request->is_current_employee;
-        $employee->save();
+        $employee->marital_status_id = $request->marital_status_id;
 
         $employeeTran  = EmployeeTran::where('employee_id', $id)->first();
         // Update employee_trans (localized data)
@@ -464,35 +460,65 @@ class EmployeeController extends Controller
         ]);
         $employeeTran->save();
 
-        $contact = Contact::where('id', $employee->contact_id)->first();
-        // Update contact
-        $contact->value = $request->contact;
-        $contact->save();
+        $contact = Contact::where('value', $request->contact)
+            ->select('id')->first();
+        if ($contact) {
+            if ($contact->id == $employee->contact_id) {
+                $contact->value = $request->contact;
+                $contact->save();
+            } else {
+                return response()->json([
+                    'message' => __('app_translation.contact_exist'),
+                ], 409, [], JSON_UNESCAPED_UNICODE);
+            }
+        } else {
+            $contact = Contact::where('id', $employee->contact_id)->first();
+            $contact->value = $request->contact;
+            $contact->save();
+        }
+        if ($request->email !== null && !empty($request->email)) {
+            $email = Email::where('value', $request->email)
+                ->select('id')->first();
+            if ($email) {
+                if ($email->id == $employee->email_id) {
+                    $email->value = $request->email_id;
+                    $email->save();
+                } else {
+                    return response()->json([
+                        'message' => __('app_translation.email_exist'),
+                    ], 409, [], JSON_UNESCAPED_UNICODE);
+                }
+            } else {
+                if (isset($employee->email_id)) {
+                    $email = Email::where('id', $employee->email_id)->first();
+                    $email->value = $request->email;
+                    $email->save();
+                } else {
+                    $email = Email::create(['value' => $request->email]);
+                    $employee->email_id = $email->id;
+                }
+            }
+        }
 
-        $email = Email::where('id', $employee->email_id)->first();
-        $email->value = $request->email;
-        $email->save();
-
-
-
+        $employee->save();
         if ($request->has_attachment == true) {
             $user = $request->user();
-
-            $exists = EmployeeDocument::join('documents', 'documents.id', '=', 'employee_documents.document_id')
+            $document = EmployeeDocument::join('documents', 'documents.id', '=', 'employee_documents.document_id')
                 ->join('check_lists', 'check_lists.id', '=', 'documents.check_list_id')
                 ->where('employee_id', $id)
                 ->where('documents.check_list_id', CheckListEnum::employee_attachment->value)
                 ->where('check_list_id', CheckListEnum::employee_attachment->value)
+                ->select('documents.path')
                 ->first();
-            if ($exists) {
-                $exists->delete();
+            if ($document) {
+                $this->deleteDocument(storage_path() . "/app/private/" . $document->path);
+                $document->delete();
             }
-
             $task = $this->pendingTaskRepository->pendingTaskExist(
                 $request->user(),
                 CheckListTypeEnum::employee->value,
                 CheckListEnum::employee_attachment->value,
-                null
+                $employee->id
             );
 
             if (!$task) {
@@ -522,7 +548,7 @@ class EmployeeController extends Controller
                 $request->user(),
                 CheckListTypeEnum::employee->value,
                 CheckListEnum::employee_attachment->value,
-                null
+                $employee->id
             );
         }
 
@@ -536,18 +562,6 @@ class EmployeeController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-    // 
     protected function applyDate($query, $request)
     {
         // Apply date filtering conditionally if provided

@@ -209,26 +209,26 @@ class UserController extends Controller
     //         ]);
     //     }
 
-    //     // Create email
-    //     $email = Email::where('value', '=', $request->email)->first();
-    //     if ($email) {
+    // // Create email
+    // $email = Email::where('value', '=', $request->email)->first();
+    // if ($email) {
+    //     return response()->json([
+    //         'message' => __('app_translation.email_exist'),
+    //     ], 400, [], JSON_UNESCAPED_UNICODE);
+    // }
+    // // 2. Check contact
+    // $contact = null;
+    // if ($request->contact !== null && !empty($request->contact)) {
+    //     $contact = Contact::where('value', '=', $request->contact)->first();
+    //     if ($contact) {
     //         return response()->json([
-    //             'message' => __('app_translation.email_exist'),
+    //             'message' => __('app_translation.contact_exist'),
     //         ], 400, [], JSON_UNESCAPED_UNICODE);
     //     }
-    //     // 2. Check contact
-    //     $contact = null;
-    //     if ($request->contact !== null && !empty($request->contact)) {
-    //         $contact = Contact::where('value', '=', $request->contact)->first();
-    //         if ($contact) {
-    //             return response()->json([
-    //                 'message' => __('app_translation.contact_exist'),
-    //             ], 400, [], JSON_UNESCAPED_UNICODE);
-    //         }
-    //         $contact = Contact::create([
-    //             "value" => $request->contact
-    //         ]);
-    //     }
+    //     $contact = Contact::create([
+    //         "value" => $request->contact
+    //     ]);
+    // }
     //     DB::beginTransaction();
     //     // Add email and contact
     //     $email = Email::create([
@@ -335,46 +335,46 @@ class UserController extends Controller
     //     // 1. User is passed from middleware
     //     DB::beginTransaction();
     //     if ($user) {
-    //         $email = Email::where('value', $request->email)
-    //             ->select('id')->first();
-    //         // Email Is taken by someone
-    //         if ($email) {
-    //             if ($email->id == $user->email_id) {
-    //                 $email->value = $request->email;
-    //                 $email->save();
-    //             } else {
-    //                 return response()->json([
-    //                     'message' => __('app_translation.email_exist'),
-    //                 ], 409, [], JSON_UNESCAPED_UNICODE);
-    //             }
+    // $email = Email::where('value', $request->email)
+    //     ->select('id')->first();
+    // // Email Is taken by someone
+    // if ($email) {
+    //     if ($email->id == $user->email_id) {
+    //         $email->value = $request->email;
+    //         $email->save();
+    //     } else {
+    //         return response()->json([
+    //             'message' => __('app_translation.email_exist'),
+    //         ], 409, [], JSON_UNESCAPED_UNICODE);
+    //     }
+    // } else {
+    //     $email = Email::where('id', $user->email_id)->first();
+    //     $email->value = $request->email;
+    //     $email->save();
+    // }
+    // if ($request->contact !== null && !empty($request->contact)) {
+    //     $contact = Contact::where('value', $request->contact)
+    //         ->select('id')->first();
+    //     if ($contact) {
+    //         if ($contact->id == $user->contact_id) {
+    //             $contact->value = $request->contact;
+    //             $contact->save();
     //         } else {
-    //             $email = Email::where('id', $user->email_id)->first();
-    //             $email->value = $request->email;
-    //             $email->save();
+    //             return response()->json([
+    //                 'message' => __('app_translation.contact_exist'),
+    //             ], 409, [], JSON_UNESCAPED_UNICODE);
     //         }
-    //         if ($request->contact !== null && !empty($request->contact)) {
-    //             $contact = Contact::where('value', $request->contact)
-    //                 ->select('id')->first();
-    //             if ($contact) {
-    //                 if ($contact->id == $user->contact_id) {
-    //                     $contact->value = $request->contact;
-    //                     $contact->save();
-    //                 } else {
-    //                     return response()->json([
-    //                         'message' => __('app_translation.contact_exist'),
-    //                     ], 409, [], JSON_UNESCAPED_UNICODE);
-    //                 }
-    //             } else {
-    //                 if (isset($user->contact_id)) {
-    //                     $contact = Contact::where('id', $user->contact_id)->first();
-    //                     $contact->value = $request->contact;
-    //                     $contact->save();
-    //                 } else {
-    //                     $contact = Contact::create(['value' => $request->contact]);
-    //                     $user->contact_id = $contact->id;
-    //                 }
-    //             }
+    //     } else {
+    //         if (isset($user->contact_id)) {
+    //             $contact = Contact::where('id', $user->contact_id)->first();
+    //             $contact->value = $request->contact;
+    //             $contact->save();
+    //         } else {
+    //             $contact = Contact::create(['value' => $request->contact]);
+    //             $user->contact_id = $contact->id;
     //         }
+    //     }
+    // }
 
     //         // 4. Update User other attributes
     //         $user->full_name = $request->full_name;
