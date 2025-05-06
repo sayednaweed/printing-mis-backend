@@ -64,7 +64,6 @@ class EmployeeController extends Controller
                 "emp.email_id",
                 "emails.value as email",
                 "contacts.value as contact",
-                "emp.created_at",
             );
 
         $this->applyDate($query, $request);
