@@ -37,6 +37,7 @@ return new class extends Migration
             $table->foreign('nationality_id')->references('id')->on('nationalities')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+
             $table->unsignedBigInteger('gender_id');
             $table->foreign('gender_id')->references('id')->on('genders')
                 ->onUpdate('cascade')

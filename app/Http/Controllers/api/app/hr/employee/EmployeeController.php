@@ -23,10 +23,11 @@ use App\Http\Requests\hr\employee\EmployeeStoreRequest;
 use App\Models\EmployeeDocument;
 use App\Repositories\Storage\StorageRepositoryInterface;
 use App\Repositories\PendingTask\PendingTaskRepositoryInterface;
+use App\Traits\Address\AddressTrait;
 
 class EmployeeController extends Controller
 {
-
+    use AddressTrait;
     protected $pendingTaskRepository;
     protected $storageRepository;
     protected $permissionRepository;
@@ -116,7 +117,7 @@ class EmployeeController extends Controller
             ->leftJoin('emails', 'emp.email_id', '=', 'emails.id')
             ->leftJoin('contacts', 'emp.contact_id', '=', 'contacts.id')
             ->leftJoin('addresses as perAdd', 'emp.permanent_address_id', '=', 'addresses.id')
-            ->leftJoin('addresses as tempAdd', 'emp.temporary_address_id', '=', 'addresses.id')
+            ->leftJoin('addresses as tempAdd', 'emp.current_address_id', '=', 'addresses.id')
             ->select(
                 'emp.id',
                 'emp.hr_code',
@@ -328,6 +329,93 @@ class EmployeeController extends Controller
             [],
             JSON_UNESCAPED_UNICODE
         );
+    }
+
+    public function personalDetial(Request $request, $id)
+    {
+        $locale = App::getLocale();
+
+
+
+        $query = DB::table('employees as emp')
+            ->leftJoin('employee_trans as empt', function ($join) use ($locale) {
+                $join->on('empt.employee_id', '=', 'emp.id')
+                    ->where('empt.language_name', $locale);
+            })
+            ->leftJoin('contacts', 'emp.contact_id', '=', 'contacts.id')
+            ->leftJoin('emails', 'emp.email_id', '=', 'emails.id')
+            ->leftJoin('genders as gent', function ($join) use ($locale) {
+                $join->on('gent.id', '=', 'emp.gender_id');
+            })
+            ->leftJoin('marital_status_trans as mrt', function ($join) use ($locale) {
+                $join->on('mrt.marital_status_id', '=', 'emp.marital_status_id')
+                    ->where('mrt.language_name', $locale);
+            })
+            ->leftJoin('nationality_trans as nit', function ($join) use ($locale) {
+                $join->on('nit.nationality_id', '=', 'emp.nationality_id')
+                    ->where('nit.language_name', $locale);
+            });
+
+        $query = $this->address($query, 'p_', 'emp.parmanent_address_id');
+        $query = $this->address($query, 't_', 'emp.current_address_id');
+
+        $query->select(
+            'emp.id',
+            'emp.hr_code',
+            'empt.name',
+            'empt.last_name',
+            'empt.father_name',
+            'emp.date_of_birth',
+            'emp.contact_id',
+            'contacts.value as contact',
+            'emp.email_id',
+            'emails.value as email',
+            'emp.gender_id',
+            "gent.name_{$locale} as gender",
+            'emp.nationality_id',
+            'nit.value as nationality',
+            'emp.parmanent_address_id',
+            'p_addt.area as parmanent_area',
+            'p_pvt.value as parmanent_province',
+            'p_dst.value as parmanent_district',
+            'emp.current_address_id',
+            't_addt.area as temprory_area',
+            't_pvt.value as temprory_province',
+            't_dst.value as temprory_district',
+            'emp.created_at'
+
+        )
+            ->where('emp.id', $id);
+
+        // return $query->toSql();
+        $result = $query->first();
+        if (!$result) {
+            return response()->json([
+                'message' => __('app_translation.employee_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+        $result = [
+            'id' => $result->id,
+            'hrcode' => $result->hr_code,
+            'first_name' => $result->name,
+            'last_name' => $result->last_name,
+            'father_name' => $result->father_name,
+            'date_of_birth' => $result->date_of_birth,
+            'contact' => ['id' => $result->contact_id, 'value' => $result->contact],
+            'email' => ['id' => $result->email_id, 'value' => $result->email],
+            'gender' => ['id' => $result->gender_id, 'value' => $result->gender],
+            'nationality' => ['id' => $result->nationality_id, 'value' => $result->nationality],
+            'permanent_area' => $result->parmanent_area,
+            'permanent_province' => $result->parmanent_province,
+            'permanent_district' => $result->parmanent_district,
+            'current_area' => $result->temprory_area,
+            'current_province' => $result->temprory_province,
+            'current_district' => $result->temprory_district,
+        ];
+        return response()->json([
+            'employee' => $result,
+
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
     protected function applyDate($query, $request)
     {
