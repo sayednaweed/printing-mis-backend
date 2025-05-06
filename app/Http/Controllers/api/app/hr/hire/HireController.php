@@ -17,11 +17,6 @@ class HireController extends Controller
     public function hireTypes(Request $request)
     {
         $locale = App::getLocale();
-        $tr = [];
-        $perPage = $request->input('per_page', 10); // Number of records per page
-        $page = $request->input('page', 1); // Current page
-
-
         // Start building the query
         $query = DB::table('hire_types as ht')
             ->leftjoin('hire_type_trans as htt', function ($join) use ($locale) {
@@ -33,18 +28,10 @@ class HireController extends Controller
                 "ht.description",
                 "htt.value as name",
                 "ht.created_at",
-            );
+            )->get();
 
-        $this->applyDate($query, $request);
-        $this->applyFilters($query, $request);
-        $this->applySearch($query, $request);
-
-        // Apply pagination (ensure you're paginating after sorting and filtering)
-        $tr = $query->paginate($perPage, ['*'], 'page', $page);
         return response()->json(
-            [
-                "users" => $tr,
-            ],
+            $query,
             200,
             [],
             JSON_UNESCAPED_UNICODE

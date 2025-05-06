@@ -13,45 +13,21 @@ use App\Http\Controllers\Controller;
 
 class PositionController extends Controller
 {
-    //
-
-
-
-    public function positions(Request $request)
+    public function positions()
     {
         $locale = App::getLocale();
-        $tr = [];
-        $perPage = $request->input('per_page', 10); // Number of records per page
-        $page = $request->input('page', 1); // Current page
-
-
-        // Start building the query
         $query = DB::table('positions as pos')
-            ->leftjoin('position_trans as post', function ($join) use ($locale) {
+            ->join('position_trans as post', function ($join) use ($locale) {
                 $join->on('pos.id', '=', 'post.position_id')
-                    ->where('post.language_name', $locale);
-            })
-            ->leftjoin('department_trans as dept', function ($join) use ($locale) {
-                $join->on('pos.department_id', '=', 'dept.department_id')
                     ->where('post.language_name', $locale);
             })
             ->select(
                 "pos.id",
                 "post.value as name",
-                "dept.value as department",
-                "pos.created_at",
-            );
+            )->get();
 
-        $this->applyDate($query, $request);
-        $this->applyFilters($query, $request);
-        $this->applySearch($query, $request);
-
-        // Apply pagination (ensure you're paginating after sorting and filtering)
-        $tr = $query->paginate($perPage, ['*'], 'page', $page);
         return response()->json(
-            [
-                "users" => $tr,
-            ],
+            $query,
             200,
             [],
             JSON_UNESCAPED_UNICODE

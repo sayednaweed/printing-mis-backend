@@ -12,18 +12,9 @@ use App\Http\Controllers\Controller;
 
 class ShiftController extends Controller
 {
-    //
-
-
-
-    public function shifts(Request $request)
+    public function shifts()
     {
         $locale = App::getLocale();
-        $tr = [];
-        $perPage = $request->input('per_page', 10); // Number of records per page
-        $page = $request->input('page', 1); // Current page
-
-
         // Start building the query
         $query = DB::table('shifts as sh')
             ->leftjoin('shift_trans as sht', function ($join) use ($locale) {
@@ -36,34 +27,16 @@ class ShiftController extends Controller
                 "sh.end_time",
                 "sht.value as name",
                 "sh.created_at",
-            );
+            )->get();
 
         return response()->json(
-            [
-                $query->get(),
-            ],
-            200,
-            [],
-            JSON_UNESCAPED_UNICODE
-        );
+            $query,
 
-        $this->applyDate($query, $request);
-        $this->applyFilters($query, $request);
-        $this->applySearch($query, $request);
-
-        // Apply pagination (ensure you're paginating after sorting and filtering)
-        $tr = $query->paginate($perPage, ['*'], 'page', $page);
-        return response()->json(
-            [
-                "shifts" => $tr,
-            ],
             200,
             [],
             JSON_UNESCAPED_UNICODE
         );
     }
-
-
 
     public function shift($id)
     {
