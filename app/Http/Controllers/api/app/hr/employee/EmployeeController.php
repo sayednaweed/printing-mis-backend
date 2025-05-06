@@ -131,9 +131,6 @@ class EmployeeController extends Controller
                 'dept.department_id',
                 'emails.value as email',
                 'contacts.value as contact',
-
-
-
                 // Names in 3 languages
                 'empt.first_name_fa',
                 'empt.last_name_fa',
@@ -334,9 +331,6 @@ class EmployeeController extends Controller
     public function personalDetial(Request $request, $id)
     {
         $locale = App::getLocale();
-
-
-
         $query = DB::table('employees as emp')
             ->leftJoin('employee_trans as empt', function ($join) use ($locale) {
                 $join->on('empt.employee_id', '=', 'emp.id')
