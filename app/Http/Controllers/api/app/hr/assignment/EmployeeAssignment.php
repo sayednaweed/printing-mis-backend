@@ -27,9 +27,6 @@ class EmployeeAssignment extends Controller
         //   department: string;
         //   hire_date: string;
 
-
-        $locale = App::getLocale();
-
         $tr = DB::table('position_assignments as poas')
             ->join('position_trans as pos', function ($join) use ($locale) {
                 $join->on('pos.position_id', '=', 'poas.position_id')
@@ -74,6 +71,63 @@ class EmployeeAssignment extends Controller
         // return $tr->toSql();
         return response()->json($tr, 200, [], JSON_UNESCAPED_UNICODE);
     }
+
+    public function changePosition(Request $request)
+    {
+        $request->validate([
+            'employee_id' => 'required|integer',
+            'position_id' => 'required|integer',
+            'department_id' => 'required|integer',
+            'hire_type_id' => 'required|integer',
+            'shift_id' => 'required|integer',
+            'salary' => 'required|string',
+            'overtime_rate' => 'required|string',
+            'currency_id' => 'required|integer',
+            'position_change_type_id' => 'required|integer',
+        ]);
+
+
+        PositionAssignment::create([
+            'employee_id' => $request->employee_id,
+            'position_id' => $request->position_id,
+            'department_id' => $request->department_id,
+            'hire_type_id' => $request->hire_type_id,
+            'shift_id' => $request->shift_id,
+            'salary' => $request->salary,
+            'overtime_rate' => $request->overtime_rate,
+            'currency_id' => $request->currency_id,
+            'position_change_type_id' => $request->position_change_type_id,
+        ]);
+
+        return response()->json(
+            [
+
+                'message' => __('app_translation.success'),
+                'data' => [
+                    'employee_id' => $request->employee_id,
+                    'position_id' => $request->position_id,
+                    'department_id' => $request->department_id,
+                    'hire_type_id' => $request->hire_type_id,
+                    'shift_id' => $request->shift_id,
+                    'salary' => $request->salary,
+                    'overtime_rate' => $request->overtime_rate,
+                    'currency_id' => $request->currency_id,
+                    'position_change_type_id' => $request->position_change_type_id,
+                ]
+
+            ],
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
+    }
+
+
+
+
+
+
+    // 
     public function store(Request $request)
     {
         $locale = App::getLocale();
