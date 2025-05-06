@@ -336,10 +336,10 @@ class EmployeeController extends Controller
         $endDate = $request->input('filters.date.endDate');
 
         if ($startDate) {
-            $query->where('eu.created_at', '>=', $startDate);
+            $query->where('emp.created_at', '>=', $startDate);
         }
         if ($endDate) {
-            $query->where('eu.created_at', '<=', $endDate);
+            $query->where('emp.created_at', '<=', $endDate);
         }
     }
     // search function 
@@ -355,12 +355,6 @@ class EmployeeController extends Controller
                 'last_name' => 'empt.last_name',
                 'father_name' => 'empt.father_name',
                 'hr_code' => 'emp.hr_code',
-                'contact_id' => 'emp.contact_id',
-                'email_id' => 'emp.email_id',
-                'department_id' => 'emp.department_id',
-
-
-
             ];
             // Ensure that the search column is allowed
             if (in_array($searchColumn, array_keys($allowedColumns))) {
@@ -374,15 +368,9 @@ class EmployeeController extends Controller
         $sort = $request->input('filters.sort'); // Sorting column
         $order = $request->input('filters.order', 'asc'); // Sorting order (default 
         $allowedColumns = [
-            'first_name' => 'empt.first_name',
-            'last_name' => 'empt.last_name',
-            'father_name' => 'empt.father_name',
-            'hr_code' => 'emp.hr_code',
-            'contact_id' => 'emp.contact_id',
-            'email_id' => 'emp.email_id',
-            'department_id' => 'emp.department_id',
-
-
+            'status' => 'emp.is_current_employee',
+            'created_at' => 'emp.created_at',
+            'contact' => 'emp.contact_id',
         ];
         if (in_array($sort, array_keys($allowedColumns))) {
             $query->orderBy($allowedColumns[$sort], $order);
