@@ -430,6 +430,124 @@ class EmployeeController extends Controller
 
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
+
+
+
+
+    // personal detail update
+    public function updatePersonalDetail(Request $request, $id)
+    {
+        $employee = DB::table('employees')->where('id', $id)->first();
+
+        if (!$employee) {
+            return response()->json([
+                'message' => __('app_translation.employee_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        DB::beginTransaction();
+
+        // Update employee
+
+        $employee->date_of_birth = $request->date_of_birth;
+        $employee->gender_id = $request->gender_id;
+        $nationality_id = $request->nationality_id;
+        $employee->is_current_employee = $request->is_current_employee;
+        $employee->save();
+
+        $employeeTran  = EmployeeTran::where('employee_id', $id)->first();
+        // Update employee_trans (localized data)
+        $employeeTran->update([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'father_name' => $request->father_name,
+        ]);
+        $employeeTran->save();
+
+        $contact = Contact::where('id', $employee->contact_id)->first();
+        // Update contact
+        $contact->value = $request->contact;
+        $contact->save();
+
+        $email = Email::where('id', $employee->email_id)->first();
+        $email->value = $request->email;
+        $email->save();
+
+
+
+        if ($request->has_attachment == true) {
+            $user = $request->user();
+
+            $exists = EmployeeDocument::join('documents', 'documents.id', '=', 'employee_documents.document_id')
+                ->join('check_lists', 'check_lists.id', '=', 'documents.check_list_id')
+                ->where('employee_id', $id)
+                ->where('documents.check_list_id', CheckListEnum::employee_attachment->value)
+                ->where('check_list_id', CheckListEnum::employee_attachment->value)
+                ->first();
+            if ($exists) {
+                $exists->delete();
+            }
+
+            $task = $this->pendingTaskRepository->pendingTaskExist(
+                $request->user(),
+                CheckListTypeEnum::employee->value,
+                CheckListEnum::employee_attachment->value,
+                null
+            );
+
+            if (!$task) {
+                return response()->json([
+                    'message' => __('app_translation.task_not_found')
+                ], 404);
+            }
+            $document_id = '';
+
+            $this->storageRepository->documentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
+                $checklist_id = $documentData['check_list_id'];
+                $document = Document::create([
+                    'actual_name' => $documentData['actual_name'],
+                    'size' => $documentData['size'],
+                    'path' => $documentData['path'],
+                    'type' => $documentData['type'],
+                    'check_list_id' => $checklist_id,
+                ]);
+                $document_id = $document->id;
+            });
+
+            EmployeeDocument::create([
+                'employee_id' => $employee->id,
+                'document_id' => $document_id,
+            ]);
+            $this->pendingTaskRepository->destroyPendingTask(
+                $request->user(),
+                CheckListTypeEnum::employee->value,
+                CheckListEnum::employee_attachment->value,
+                null
+            );
+        }
+
+
+
+
+        DB::commit();
+
+        return response()->json([
+            'message' => __('app_translation.employee_updated_successfully'),
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    // 
     protected function applyDate($query, $request)
     {
         // Apply date filtering conditionally if provided
