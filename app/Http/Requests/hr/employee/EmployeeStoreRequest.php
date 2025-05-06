@@ -23,6 +23,15 @@ class EmployeeStoreRequest extends FormRequest
     {
         return [
             //
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'father_name' => 'required|string|max:255',
+            'date_of_birth' => 'required|date',
+            'position_id' => 'required|exists:positions,id',
+            'department_id' => 'required|exists:departments,id',
+
+
+
         ];
     }
 }

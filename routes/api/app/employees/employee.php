@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Enums\Permission\SubPermissionEnum;
 use App\Http\Controllers\api\app\hr\employee\EmployeeController;
 
-
+Route::get('/employee/{id}', [EmployeeController::class, "personalDetial"]);
 Route::prefix('v1')->middleware(["authorized:" . 'user:api'])->group(function () {
     Route::get('/employees/record/count', [EmployeeController::class, "employeesCount"])->middleware(["HasMainPermission:" . HrPermissionEnum::users->value . ',' . 'view']);
     Route::get('/employees', [EmployeeController::class, "employees"])->middleware(["HasMainPermission:" . HrPermissionEnum::users->value . ',' . 'view']);

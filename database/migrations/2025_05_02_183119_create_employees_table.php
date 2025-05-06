@@ -32,12 +32,17 @@ return new class extends Migration
             $table->foreign('current_address_id')->references('id')->on('addresses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('country_id');
-            $table->foreign('country_id')->references('id')->on('countries')
+            $table->unsignedBigInteger('nationality_id');
+            $table->foreign('nationality_id')->references('id')->on('nationalities')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+
             $table->unsignedBigInteger('gender_id');
             $table->foreign('gender_id')->references('id')->on('genders')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
+            $table->unsignedBigInteger('marital_status_id');
+            $table->foreign('marital_status_id')->references('id')->on('marital_statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->timestamps();

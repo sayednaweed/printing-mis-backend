@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('hire_type_trans', function (Blueprint $table) {
             $table->id();
             $table->string('value');
-
             $table->unsignedBigInteger('hire_type_id');
             $table->foreign('hire_type_id')->references('id')->on('hire_types')
                 ->onUpdate('cascade')
