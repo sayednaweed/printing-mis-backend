@@ -2,12 +2,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\api\app\hr\attendance\AttendaceController;
+use App\Http\Controllers\api\app\hr\attendance\AttendanceController;
 
 
 
-Route::get('/attendace/employees', [AttendaceController::class, 'employeeList']);
+Route::get('/attendance/employee', [AttendanceController::class, 'employeeList']);
+Route::get('/attendances', [AttendanceController::class, 'attendaceList']);
 
 Route::prefix('v1')->middleware(["authorized:" . 'user:api'])->group(function () {
-    Route::get('/attendace/employees', [AttendaceController::class, 'employeeList']);
+    Route::get('/attendance/employees', [AttendanceController::class, 'employeeList']);
+    Route::post('/attendace/store', [AttendanceController::class, 'store']);
+    Route::get('/attendances', [AttendanceController::class, 'attendaceList']);
 });

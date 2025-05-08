@@ -21,6 +21,10 @@ return new class extends Migration
             $table->foreign('contact_id')->references('id')->on('contacts')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+            $table->unsignedBigInteger('contact_id');
+            $table->foreign('contact_id')->references('id')->on('contacts')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
             $table->unsignedBigInteger('email_Id')->nullable();
             $table->foreign('email_Id')->references('id')->on('emails')
                 ->onUpdate('cascade')
@@ -37,7 +41,6 @@ return new class extends Migration
             $table->foreign('nationality_id')->references('id')->on('nationalities')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-
             $table->unsignedBigInteger('gender_id');
             $table->foreign('gender_id')->references('id')->on('genders')
                 ->onUpdate('cascade')

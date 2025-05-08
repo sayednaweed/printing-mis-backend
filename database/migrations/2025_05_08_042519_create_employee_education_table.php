@@ -11,24 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attendances', function (Blueprint $table) {
+        Schema::create('employee_education', function (Blueprint $table) {
             $table->id();
-            $table->string('check_in_time');
-            $table->string('check_out_time');
-            $table->string('description');
-            $table->unsignedBigInteger('taken_by_id');
-            $table->foreign('taken_by_id')->references('id')->on('users')
+            $table->unsignedBigInteger('education_id');
+            $table->foreign('education_id')->references('id')->on('educations')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('attendance_status_id');
-            $table->foreign('attendance_status_id')->references('id')->on('attendance_statuses')
-                ->onUpdate('cascade')
-                ->onDelete('no action');
-
             $table->unsignedBigInteger('employee_id');
             $table->foreign('employee_id')->references('id')->on('employees')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }
@@ -38,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attendances');
+        Schema::dropIfExists('employee_education');
     }
 };

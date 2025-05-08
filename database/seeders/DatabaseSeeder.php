@@ -63,6 +63,8 @@ class DatabaseSeeder extends Seeder
         $this->call(RolePermissionSeeder::class);
         $this->call(HireTypeSeeder::class);
         $this->call(EmployeeSeeder::class);
+        $this->call(AttendanceStatusSeeder::class);
+
 
         $this->shifts();
         $this->nidTypes();

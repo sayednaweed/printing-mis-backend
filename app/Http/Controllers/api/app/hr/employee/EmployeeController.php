@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\api\app\hr\employee;
 
+use App\Models\Nid;
 use App\Models\Email;
 use App\Models\Address;
 use App\Models\Contact;
@@ -24,6 +25,7 @@ use App\Enums\Checklist\CheckListTypeEnum;
 use App\Models\PositionAssignmentDuration;
 use App\Http\Requests\app\hr\EmployeeStoreRequest;
 use App\Http\Requests\app\hr\EmployeeUpdateRequest;
+use App\Models\EmployeeEducation;
 use App\Repositories\Storage\StorageRepositoryInterface;
 use App\Repositories\PendingTask\PendingTaskRepositoryInterface;
 
@@ -115,6 +117,19 @@ class EmployeeController extends Controller
             "value" => $request->contact
         ]);
 
+        // 2. Check family contact
+
+        $family_contact = Contact::where('value', '=', $request->family_contact)->first();
+        if ($family_contact) {
+            return response()->json([
+                'message' => __('app_translation.contact_exist'),
+            ], 400, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        $family_contact = Contact::create([
+            "value" => $request->family_contact
+        ]);
+
         $permAddress = Address::create([
             'province_id' => $request->permanent_province_id,
             'district_id' => $request->permanent_district_id,
@@ -142,6 +157,7 @@ class EmployeeController extends Controller
         $employee = Employee::create([
             'hr_code' => '',
             'contact_id' => $contact->id,
+            'family_contact_id' => $family_contact->id,
             'email_id' => $email ? $email->id : null,
             'parmanent_address_id' => $permAddress->id,
             'current_address_id' => $currentAddress->id,
@@ -153,6 +169,7 @@ class EmployeeController extends Controller
         $employee->hr_code = "HR-" . $employee->id;
         $employee->save();
 
+
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
             EmployeeTran::create([
                 'employee_id' => $employee->id,
@@ -162,6 +179,24 @@ class EmployeeController extends Controller
                 "language_name" => $code,
             ]);
         }
+        // Create NID
+        Nid::create([
+            'employee_id' => $employee->id,
+            'nid_type' => $request->nid_type_id,
+            'province_id' => $request->nid_province_id,
+            'number' => $request->nid_number,
+            'volume' => $request->nid_volume ?? '',
+            'page' => $request->nid_page ?? '',
+        ]);
+
+        // create education
+        EmployeeEducation::create([
+            'employee_id' => $employee->id,
+            'education_id' => $request->education_id,
+            'description' => $request->description ?? '',
+        ]);
+
+
 
         $postAss = PositionAssignment::create([
             'employee_id' => $employee->id,
