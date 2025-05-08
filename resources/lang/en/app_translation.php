@@ -50,5 +50,5 @@ return [
     "file_not_found_reupload" => "File not found or has been currepted upload file again.",
     "payment_number_not_found" => "The payment number is incorrect, it was not issued by the system.",
     "vaccine_card_already_exist" => "Vaccine card already exist.",
-
+    "employee_not_found" => "Employee not found.",
 ];

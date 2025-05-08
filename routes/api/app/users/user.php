@@ -7,13 +7,15 @@ use App\Enums\Permission\SubPermissionEnum;
 use App\Http\Controllers\api\app\hr\users\UserController;
 
 
-Route::prefix('v1')->middleware(["authorized:" . 'epi:api'])->group(function () {
-    Route::get('/epi/record/count', [UserController::class, "userCount"])->middleware(["epiHasMainPermission:" . HrPermissionEnum::users->value . ',' . 'view']);
-    Route::get('/epi/users', [UserController::class, "users"])->middleware(["epiHasMainPermission:" . HrPermissionEnum::users->value . ',' . 'view']);
-    Route::get('/epi/user/{id}', [UserController::class, "user"])->middleware(['checkEpiAccess', "epiHasSubPermission:" . HrPermissionEnum::users->value . "," . SubPermissionEnum::hr_user_information->value . ',' . 'view']);
-    Route::delete('/epi/user/delete/profile-picture/{id}', [UserController::class, 'deleteProfilePicture'])->middleware(['checkEpiAccess', "epiHasMainPermission:" . HrPermissionEnum::users->value . ',' . 'delete']);
-    Route::post('/epi/user/update/profile-picture', [UserController::class, 'updateProfilePicture'])->middleware(['checkEpiAccess', "epiHasMainPermission:" . HrPermissionEnum::users->value . ',' . 'edit']);
-    Route::post('/epi/user/update/information', [UserController::class, 'updateInformation'])->middleware(['checkEpiAccess', "epiHasSubPermission:" . HrPermissionEnum::users->value . "," . SubPermissionEnum::hr_user_information->value . ',' . 'edit']);
-    Route::post('/epi/user/store', [UserController::class, 'store'])->middleware(["epiHasMainPermission:" . HrPermissionEnum::users->value . ',' . 'add']);
-    Route::post('/epi/user/change/account/password', [UserController::class, 'changePassword'])->middleware(['checkEpiAccess', "epiHasSubPermission:" . HrPermissionEnum::users->value . "," . SubPermissionEnum::hr_user_password->value . ',' . 'edit']);
+Route::prefix('v1')->middleware(["authorized:" . 'user:api'])->group(function () {
+    Route::get('/users/record/count', [UserController::class, "userCount"])->middleware(["HasMainPermission:" . HrPermissionEnum::users->value . ',' . 'view']);
+    Route::get('/users', [UserController::class, "users"])->middleware(["HasMainPermission:" . HrPermissionEnum::users->value . ',' . 'view']);
+    Route::get('/user/{id}', [UserController::class, "user"])->middleware(["HasMainPermission:" . HrPermissionEnum::users->value . ',' . 'view']);
+    Route::delete('/user/delete/profile-picture/{id}', [UserController::class, 'deleteProfilePicture'])->middleware(['checkUserAccess', "HasMainPermission:" . HrPermissionEnum::users->value . ',' . 'delete']);
+    Route::post('/user/update/profile-picture', [UserController::class, 'updateProfilePicture'])->middleware(['checkUserAccess', "HasMainPermission:" . HrPermissionEnum::users->value . ',' . 'edit']);
+    Route::post('/user/update/information', [UserController::class, 'updateInformation'])->middleware(["HasSubPermission:" . HrPermissionEnum::users->value . "," . SubPermissionEnum::hr_user_information->value . ',' . 'edit']);
+    Route::post('/user/store', [UserController::class, 'store'])->middleware(["HasMainPermission:" . HrPermissionEnum::users->value . ',' . 'add']);
+    Route::delete('/user/{id}', [UserController::class, 'destroy'])->middleware(["HasMainPermission:" . HrPermissionEnum::users->value . ',' . 'delete']);
+    Route::post('/user/validate/email/contact', [UserController::class, "validateEmailContact"]);
+    Route::post('/user/account/change-password', [UserController::class, 'changePassword'])->middleware(["HasSubPermission:" . HrPermissionEnum::users->value . "," . SubPermissionEnum::hr_user_password->value . ',' . 'edit']);
 });

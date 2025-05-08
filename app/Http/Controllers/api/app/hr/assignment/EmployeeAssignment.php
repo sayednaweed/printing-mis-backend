@@ -80,6 +80,7 @@ class EmployeeAssignment extends Controller
             'position_id' => $request->position_id,
             'department_id' => $request->department_id,
             'hire_type_id' => $request->hire_type_id,
+            'hire_date' => $request->hire_date,
             'shift_id' => $request->shift_id,
             'salary' => $request->salary,
             'overtime_rate' => $request->overtime_rate,
@@ -100,7 +101,6 @@ class EmployeeAssignment extends Controller
         }
         return response()->json(
             [
-
                 'message' => __('app_translation.success'),
                 'data' => [
                     'employee_id' => $request->employee_id,
@@ -113,7 +113,6 @@ class EmployeeAssignment extends Controller
                     'currency_id' => $request->currency_id,
                     'position_change_type_id' => $request->position_change_type_id,
                 ]
-
             ],
             200,
             [],
@@ -121,12 +120,6 @@ class EmployeeAssignment extends Controller
         );
     }
 
-
-
-
-
-
-    // 
     public function store(Request $request)
     {
         $locale = App::getLocale();

@@ -59,6 +59,7 @@ class EmployeeController extends Controller
             ->leftjoin('contacts', 'emp.contact_id', '=', 'contacts.id')
             ->select(
                 "emp.id",
+                "emp.picture",
                 "empt.first_name",
                 "empt.last_name",
                 "empt.father_name",
@@ -240,6 +241,7 @@ class EmployeeController extends Controller
                     "hr_code" => $employee->hr_code,
                     "email" => $request->email,
                     "hire_date" => $request->hire_date,
+                    "is_current_employee" => true,
                     "contact" => $request->contact,
                     "is_current_employee" => $employee->is_current_employee,
                 ],
@@ -481,6 +483,50 @@ class EmployeeController extends Controller
 
         return response()->json([
             'message' => __('app_translation.profile_changed'),
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+
+    public function updateProfilePicture(Request $request)
+    {
+        $request->validate([
+            'profile' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'id' => 'required',
+        ]);
+        $employee = Employee::find($request->id);
+        if (!$employee) {
+            return response()->json([
+                'message' => __('app_translation.user_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+        $path = $this->storeProfile($request);
+        if ($path != null) {
+            // 1. delete old profile
+            $this->deleteDocument($this->getEmployeeProfilePath($employee->profile));
+            // 2. Update the profile
+            $employee->picture = $path;
+        }
+        $employee->save();
+        return response()->json([
+            'message' => __('app_translation.profile_changed'),
+            "profile" => $employee->picture
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+
+    public function deleteProfilePicture($id)
+    {
+        $employee = Employee::find($id);
+        if (!$employee) {
+            return response()->json([
+                'message' => __('app_translation.employee_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+        // 1. delete old profile
+        $this->deleteDocument($this->getEmployeeProfilePath($employee->picture));
+        // 2. Update the profile
+        $employee->picture = null;
+        $employee->save();
+        return response()->json([
+            'message' => __('app_translation.success')
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 

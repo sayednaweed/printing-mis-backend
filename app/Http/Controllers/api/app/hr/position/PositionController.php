@@ -35,13 +35,9 @@ class PositionController extends Controller
     }
 
 
-
     public function position($id)
     {
-
-
         $locale = App::getLocale();
-
         $query = DB::table('positions as pos')
             ->leftJoin('department_trans as dept', function ($join) use ($locale) {
                 $join->on('pos.department_id', '=', 'dept.department_id')

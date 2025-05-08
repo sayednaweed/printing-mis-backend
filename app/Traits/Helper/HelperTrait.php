@@ -58,7 +58,11 @@ trait HelperTrait
     }
     public function getProfilePath($filePath)
     {
-        return storage_path() . "/app/private/profile/{$filePath}";
+        return storage_path() . "/app/private/profile/employee/{$filePath}";
+    }
+    public function getEmployeeProfilePath($filePath)
+    {
+        return storage_path() . "/app/private/profile/employee/{$filePath}";
     }
     public function deleteTempFile($filePath)
     {

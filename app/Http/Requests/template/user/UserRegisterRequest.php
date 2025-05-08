@@ -29,8 +29,8 @@ class UserRegisterRequest extends FormRequest
             "role" => ["required"],
             "job" => ["required"],
             "job_id" => ["required"],
-            "destination" => ["required"],
-            "destination_id" => ["required"]
+            "department" => ["required"],
+            "department_id" => ["required"]
         ];
     }
 }
