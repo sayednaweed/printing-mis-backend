@@ -11,23 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('nids', function (Blueprint $table) {
+        Schema::create('employee_education', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('nid_type_id');
-            $table->foreign('nid_type_id')->references('id')->on('nid_types')
+            $table->unsignedBigInteger('education_level_id');
+            $table->foreign('education_level_id')->references('id')->on('education_levels')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('employee_id');
             $table->foreign('employee_id')->references('id')->on('employees')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('province_id')->nullable();
-            $table->foreign('province_id')->references('id')->on('provinces')
-                ->onUpdate('cascade')
-                ->onDelete('no action');
-            $table->string('number');
-            $table->string('volume')->nullable();
-            $table->string('page')->nullable();
             $table->timestamps();
         });
     }
@@ -37,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('nids');
+        Schema::dropIfExists('employee_education');
     }
 };

@@ -5,8 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class EmployeeEducation extends Model
+class EmployeeStatus extends Model
 {
-    /** @use HasFactory<\Database\Factories\EmployeeEducationFactory> */
+    /** @use HasFactory<\Database\Factories\EmployeeStatusFactory> */
     use HasFactory;
+    protected $guarded = [];
 }

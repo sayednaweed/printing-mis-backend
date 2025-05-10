@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('education_trans', function (Blueprint $table) {
+        Schema::create('employee_status_trans', function (Blueprint $table) {
             $table->id();
             $table->string('value');
-            $table->unsignedBigInteger('education_id');
-            $table->foreign('education_id')->references('id')->on('educations')
+            $table->unsignedBigInteger('employee_statuse_id');
+            $table->foreign('employee_statuse_id')->references('id')->on('employee_statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->string('language_name');
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('education_trans');
+        Schema::dropIfExists('employee_status_trans');
     }
 };

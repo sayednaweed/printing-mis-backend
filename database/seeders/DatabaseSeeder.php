@@ -12,9 +12,15 @@ use App\Models\ShiftTran;
 use App\Models\CurrencyTran;
 use App\Models\NidTypeTrans;
 use App\Models\MaritalStatus;
+use App\Models\EducationLevel;
+use App\Models\EmployeeStatus;
 use Illuminate\Database\Seeder;
 use App\Models\MaritalStatusTran;
+use App\Models\EducationLevelTran;
+use App\Models\EmployeeStatusTran;
 use Database\Seeders\CheckListSeeder;
+use App\Enums\Types\EducationLevelEnum;
+use App\Enums\Types\EmployeeStatusEnum;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Current;
 
 /*
@@ -70,6 +76,123 @@ class DatabaseSeeder extends Seeder
         $this->nidTypes();
         $this->maritalStatus();
         $this->currency();
+        $this->employeeStatus();
+        $this->educationLevel();
+    }
+
+    public function educationLevel()
+    {
+        $level = EducationLevel::factory()->create([
+            'id' => EducationLevelEnum::high_school->value
+        ]);
+        EducationLevelTran::factory()->create([
+            "value" => "High School",
+            "education_level_id" => $level->id,
+            "language_name" => "en",
+        ]);
+        EducationLevelTran::factory()->create([
+            "value" => "لیسه",
+            "education_level_id" => $level->id,
+            "language_name" => "fa",
+        ]);
+        EducationLevelTran::factory()->create([
+            "value" => "لیسه",
+            "education_level_id" => $level->id,
+            "language_name" => "ps",
+        ]);
+        $level = EducationLevel::factory()->create([
+            'id' => EducationLevelEnum::bachelor->value
+        ]);
+        EducationLevelTran::factory()->create([
+            "value" => "Bachelor's",
+            "education_level_id" => $level->id,
+            "language_name" => "en",
+        ]);
+        EducationLevelTran::factory()->create([
+            "value" => "لیسانس",
+            "education_level_id" => $level->id,
+            "language_name" => "fa",
+        ]);
+        EducationLevelTran::factory()->create([
+            "value" => "لیسانس",
+            "education_level_id" => $level->id,
+            "language_name" => "ps",
+        ]);
+        $level = EducationLevel::factory()->create([
+            'id' => EducationLevelEnum::master->value
+        ]);
+        EducationLevelTran::factory()->create([
+            "value" => "Master's",
+            "education_level_id" => $level->id,
+            "language_name" => "en",
+        ]);
+        EducationLevelTran::factory()->create([
+            "value" => "ماستری",
+            "education_level_id" => $level->id,
+            "language_name" => "fa",
+        ]);
+        EducationLevelTran::factory()->create([
+            "value" => "ماسټر",
+            "education_level_id" => $level->id,
+            "language_name" => "ps",
+        ]);
+        $level = EducationLevel::factory()->create([
+            'id' => EducationLevelEnum::doctorate->value
+        ]);
+        EducationLevelTran::factory()->create([
+            "value" => "Doctorate",
+            "education_level_id" => $level->id,
+            "language_name" => "en",
+        ]);
+        EducationLevelTran::factory()->create([
+            "value" => "دکتورا",
+            "education_level_id" => $level->id,
+            "language_name" => "fa",
+        ]);
+        EducationLevelTran::factory()->create([
+            "value" => "دکتورا",
+            "education_level_id" => $level->id,
+            "language_name" => "ps",
+        ]);
+    }
+    public function employeeStatus()
+    {
+        $status = EmployeeStatus::factory()->create([
+            'id' => EmployeeStatusEnum::active->value
+        ]);
+        EmployeeStatusTran::factory()->create([
+            "value" => "Active",
+            "employee_statuse_id" => $status->id,
+            "language_name" => "en",
+        ]);
+        EmployeeStatusTran::factory()->create([
+            "value" => "فعال",
+            "employee_statuse_id" => $status->id,
+            "language_name" => "fa",
+        ]);
+        EmployeeStatusTran::factory()->create([
+            "value" => "فعال",
+            "employee_statuse_id" => $status->id,
+            "language_name" => "ps",
+        ]);
+        $status = EmployeeStatus::factory()->create([
+            'id' => EmployeeStatusEnum::former->value
+        ]);
+        EmployeeStatusTran::factory()->create([
+            "value" => "Former",
+            "employee_statuse_id" => $status->id,
+            "language_name" => "en",
+        ]);
+        EmployeeStatusTran::factory()->create([
+            "value" => "سابق",
+            "employee_statuse_id" => $status->id,
+            "language_name" => "fa",
+        ]);
+        EmployeeStatusTran::factory()->create([
+            "value" => "پخوانی",
+            "employee_statuse_id" => $status->id,
+            "language_name" => "ps",
+        ]);
     }
 
     public function nidTypes()
@@ -92,17 +215,33 @@ class DatabaseSeeder extends Seeder
         ]);
         $nid = NidType::create([]);
         NidTypeTrans::create([
-            "value" => "تذکره",
+            "value" => "تذکره الکترونیکی",
             "language_name" => "fa",
             "nid_type_id" => $nid->id
         ]);
         NidTypeTrans::create([
-            "value" => "تذکره",
+            "value" => "برېښنايي پېژندپاڼه",
             "language_name" => "ps",
             "nid_type_id" => $nid->id
         ]);
         NidTypeTrans::create([
-            "value" => "ID card",
+            "value" => "Electronic ID card",
+            "language_name" => "en",
+            "nid_type_id" => $nid->id
+        ]);
+        $nid = NidType::create([]);
+        NidTypeTrans::create([
+            "value" => "تذکره کاغذی",
+            "language_name" => "fa",
+            "nid_type_id" => $nid->id
+        ]);
+        NidTypeTrans::create([
+            "value" => "د کاغذ پېژندپاڼه",
+            "language_name" => "ps",
+            "nid_type_id" => $nid->id
+        ]);
+        NidTypeTrans::create([
+            "value" => "Paper ID card",
             "language_name" => "en",
             "nid_type_id" => $nid->id
         ]);

@@ -15,18 +15,21 @@ return new class extends Migration
             $table->id();
             $table->string('hr_code');
             $table->string('date_of_birth');
-            $table->boolean('is_current_employee')->default(true);
             $table->string('picture')->nullable();
             $table->unsignedBigInteger('contact_id');
             $table->foreign('contact_id')->references('id')->on('contacts')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('contact_id');
-            $table->foreign('contact_id')->references('id')->on('contacts')
+            $table->unsignedBigInteger('family_mem_contact');
+            $table->foreign('family_mem_contact')->references('id')->on('contacts')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('email_Id')->nullable();
             $table->foreign('email_Id')->references('id')->on('emails')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
+            $table->unsignedBigInteger('employee_statuse_id');
+            $table->foreign('employee_statuse_id')->references('id')->on('employee_statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('parmanent_address_id');

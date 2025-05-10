@@ -15,9 +15,6 @@ class AttendanceStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        //
-
-
         $this->attendanceStatus();
     }
 
