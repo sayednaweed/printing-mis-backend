@@ -5,22 +5,28 @@ namespace Database\Seeders;
 use Carbon\Carbon;
 use App\Models\Shift;
 use App\Models\Gender;
+use App\Models\Status;
 use App\Models\NidType;
 use App\Models\Currency;
 use App\Models\Language;
 use App\Models\ShiftTran;
+use App\Models\StatusTran;
 use App\Models\CurrencyTran;
 use App\Models\NidTypeTrans;
 use App\Models\MaritalStatus;
 use App\Models\EducationLevel;
 use App\Models\EmployeeStatus;
+use App\Models\ReportSelection;
 use Illuminate\Database\Seeder;
+use App\Enums\Status\StatusEnum;
 use App\Models\MaritalStatusTran;
 use App\Models\EducationLevelTran;
 use App\Models\EmployeeStatusTran;
 use Database\Seeders\CheckListSeeder;
 use App\Enums\Types\EducationLevelEnum;
 use App\Enums\Types\EmployeeStatusEnum;
+use App\Enums\Types\ReportSelectionEnum;
+use App\Models\ReportSelectionTrans;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Current;
 
 /*
@@ -76,10 +82,50 @@ class DatabaseSeeder extends Seeder
         $this->nidTypes();
         $this->maritalStatus();
         $this->currency();
-        $this->employeeStatus();
+        $this->status();
         $this->educationLevel();
+        $this->reportSelection();
     }
 
+    public function reportSelection()
+    {
+        $level = ReportSelection::factory()->create([
+            'id' => ReportSelectionEnum::individual->value
+        ]);
+        ReportSelectionTrans::factory()->create([
+            "value" => "Individual",
+            "report_selection_id" => $level->id,
+            "language_name" => "en",
+        ]);
+        ReportSelectionTrans::factory()->create([
+            "value" => "فردی",
+            "report_selection_id" => $level->id,
+            "language_name" => "fa",
+        ]);
+        ReportSelectionTrans::factory()->create([
+            "value" => "انفرادي",
+            "report_selection_id" => $level->id,
+            "language_name" => "ps",
+        ]);
+        $level = ReportSelection::factory()->create([
+            'id' => ReportSelectionEnum::all->value
+        ]);
+        ReportSelectionTrans::factory()->create([
+            "value" => "All",
+            "report_selection_id" => $level->id,
+            "language_name" => "en",
+        ]);
+        ReportSelectionTrans::factory()->create([
+            "value" => "همه",
+            "report_selection_id" => $level->id,
+            "language_name" => "fa",
+        ]);
+        ReportSelectionTrans::factory()->create([
+            "value" => "ټول",
+            "report_selection_id" => $level->id,
+            "language_name" => "ps",
+        ]);
+    }
     public function educationLevel()
     {
         $level = EducationLevel::factory()->create([
@@ -155,42 +201,114 @@ class DatabaseSeeder extends Seeder
             "language_name" => "ps",
         ]);
     }
-    public function employeeStatus()
+    public function status()
     {
-        $status = EmployeeStatus::factory()->create([
-            'id' => EmployeeStatusEnum::active->value
+        $status = Status::factory()->create([
+            'id' => StatusEnum::active->value
         ]);
-        EmployeeStatusTran::factory()->create([
+        StatusTran::factory()->create([
             "value" => "Active",
-            "employee_statuse_id" => $status->id,
+            "status_id" => $status->id,
             "language_name" => "en",
         ]);
-        EmployeeStatusTran::factory()->create([
+        StatusTran::factory()->create([
             "value" => "فعال",
-            "employee_statuse_id" => $status->id,
+            "status_id" => $status->id,
             "language_name" => "fa",
         ]);
-        EmployeeStatusTran::factory()->create([
+        StatusTran::factory()->create([
             "value" => "فعال",
-            "employee_statuse_id" => $status->id,
+            "status_id" => $status->id,
             "language_name" => "ps",
         ]);
-        $status = EmployeeStatus::factory()->create([
-            'id' => EmployeeStatusEnum::former->value
+        $status = Status::factory()->create([
+            'id' => StatusEnum::on_leave->value
         ]);
-        EmployeeStatusTran::factory()->create([
-            "value" => "Former",
-            "employee_statuse_id" => $status->id,
+        StatusTran::factory()->create([
+            "value" => "On leave",
+            "status_id" => $status->id,
             "language_name" => "en",
         ]);
-        EmployeeStatusTran::factory()->create([
-            "value" => "سابق",
-            "employee_statuse_id" => $status->id,
+        StatusTran::factory()->create([
+            "value" => "در رخصتی",
+            "status_id" => $status->id,
             "language_name" => "fa",
         ]);
-        EmployeeStatusTran::factory()->create([
-            "value" => "پخوانی",
-            "employee_statuse_id" => $status->id,
+        StatusTran::factory()->create([
+            "value" => "په رخصتۍ",
+            "status_id" => $status->id,
+            "language_name" => "ps",
+        ]);
+        $status = Status::factory()->create([
+            'id' => StatusEnum::resigned->value
+        ]);
+        StatusTran::factory()->create([
+            "value" => "Resigned",
+            "status_id" => $status->id,
+            "language_name" => "en",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "استعفا داد",
+            "status_id" => $status->id,
+            "language_name" => "fa",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "استعفا ورکړه",
+            "status_id" => $status->id,
+            "language_name" => "ps",
+        ]);
+        $status = Status::factory()->create([
+            'id' => StatusEnum::terminated->value
+        ]);
+        StatusTran::factory()->create([
+            "value" => "Terminated",
+            "status_id" => $status->id,
+            "language_name" => "en",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "اخراج شد",
+            "status_id" => $status->id,
+            "language_name" => "fa",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "اخراج شو",
+            "status_id" => $status->id,
+            "language_name" => "ps",
+        ]);
+        $status = Status::factory()->create([
+            'id' => StatusEnum::absconded->value
+        ]);
+        StatusTran::factory()->create([
+            "value" => "Absconded",
+            "status_id" => $status->id,
+            "language_name" => "en",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "غایب شد",
+            "status_id" => $status->id,
+            "language_name" => "fa",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "غایب شوی دی",
+            "status_id" => $status->id,
+            "language_name" => "ps",
+        ]);
+        $status = Status::factory()->create([
+            'id' => StatusEnum::deceased->value
+        ]);
+        StatusTran::factory()->create([
+            "value" => "Deceased",
+            "status_id" => $status->id,
+            "language_name" => "en",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "وفات کرده",
+            "status_id" => $status->id,
+            "language_name" => "fa",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "وفات شوی دی",
+            "status_id" => $status->id,
             "language_name" => "ps",
         ]);
     }

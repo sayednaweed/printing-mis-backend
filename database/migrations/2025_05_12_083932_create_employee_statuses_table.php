@@ -11,20 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employee_nids', function (Blueprint $table) {
+        Schema::create('employee_statuses', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('nid_type_id');
-            $table->foreign('nid_type_id')->references('id')->on('nid_types')
+            $table->unsignedBigInteger('status_id');
+            $table->foreign('status_id')->references('id')->on('statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('employee_id');
             $table->foreign('employee_id')->references('id')->on('employees')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->string('register_number');
-            $table->string('register')->nullable();
-            $table->string('volume')->nullable();
-            $table->string('page')->nullable();
+            $table->text('description');
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }
@@ -34,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employee_nids');
+        Schema::dropIfExists('employee_statuses');
     }
 };

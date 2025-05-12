@@ -13,4 +13,5 @@ Route::prefix('v1')->middleware(["authorized:" . 'user:api'])->group(function ()
     Route::get('/attendance/employees', [AttendanceController::class, 'employeeList']);
     Route::post('/attendace/store', [AttendanceController::class, 'store']);
     Route::get('/attendances', [AttendanceController::class, 'attendaceList']);
+    Route::get('/attendance/statuses', [AttendanceController::class, 'statuses']);
 });

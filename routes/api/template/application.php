@@ -1,8 +1,9 @@
 
 <?php
 
-use App\Http\Controllers\api\template\ApplicationController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\api\template\ApplicationController;
+use App\Http\Controllers\api\template\ReportTemplateController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/lang/{locale}', [ApplicationController::class, 'changeLocale']);
@@ -12,5 +13,5 @@ Route::prefix('v1')->group(function () {
     Route::post('/user/validate/email/contact', [ApplicationController::class, "validateEmailContact"]);
     Route::get('/nationalities', [ApplicationController::class, "nationalities"]);
     Route::get('/currencies', [ApplicationController::class, "currencies"]);
-    Route::get('/payment/statuses', [ApplicationController::class, "paymentStatuses"]);
+    Route::get('/report/selections', [ReportTemplateController::class, 'selections']);
 });

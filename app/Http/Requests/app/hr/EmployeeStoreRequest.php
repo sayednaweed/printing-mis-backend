@@ -47,12 +47,11 @@ class EmployeeStoreRequest extends FormRequest
             'shift_id' => 'required',
             'has_attachment' => 'required',
             'nid_type_id' => 'required',
-            'nid_province_id' => 'integer',
-            'nid_number' => 'required',
-            'nid_volume' => 'string',
-            'nid_page' => 'string',
-            'education_id' => 'required',
-            'description' => 'string',
+            'register_no' => 'required',
+            'register' => 'required',
+            'volume' => 'string',
+            'page' => 'string',
+            'education_level_id' => 'required',
         ];
     }
 }

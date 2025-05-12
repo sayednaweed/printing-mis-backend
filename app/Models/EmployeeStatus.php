@@ -9,5 +9,4 @@ class EmployeeStatus extends Model
 {
     /** @use HasFactory<\Database\Factories\EmployeeStatusFactory> */
     use HasFactory;
-    protected $guarded = [];
 }

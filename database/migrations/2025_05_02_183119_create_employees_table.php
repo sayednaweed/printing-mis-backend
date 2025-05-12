@@ -28,10 +28,6 @@ return new class extends Migration
             $table->foreign('email_Id')->references('id')->on('emails')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('employee_statuse_id');
-            $table->foreign('employee_statuse_id')->references('id')->on('employee_statuses')
-                ->onUpdate('cascade')
-                ->onDelete('no action');
             $table->unsignedBigInteger('parmanent_address_id');
             $table->foreign('parmanent_address_id')->references('id')->on('addresses')
                 ->onUpdate('cascade')

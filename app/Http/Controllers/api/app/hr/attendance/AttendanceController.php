@@ -158,7 +158,17 @@ class AttendanceController extends Controller
             'message' => __('app_translation.success'),
         ]);
     }
-
+    public function statuses()
+    {
+        $locale = App::getLocale();
+        $tr = DB::table('attendance_statuses as as')
+            ->join('attendance_status_trans as ast', function ($join) use ($locale) {
+                $join->on('ast.attendance_status_id', '=', 'as.id')
+                    ->where('ast.language_name', $locale);
+            })
+            ->select('as.id', "ast.value as name", 'as.created_at')->get();
+        return response()->json($tr, 200, [], JSON_UNESCAPED_UNICODE);
+    }
 
     protected function applyDate($query, $request)
     {

@@ -64,9 +64,9 @@ class DepartmentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name_english' => 'required|string',
-            'name_pashto' => 'required|string',
-            'name_farsi' => 'required|string',
+            'english' => 'required|string',
+            'pashto' => 'required|string',
+            'farsi' => 'required|string',
         ]);
 
         $department = Department::create([]);
@@ -80,11 +80,11 @@ class DepartmentController extends Controller
         }
 
         $locale = App::getLocale();
-        $name = $request->name_english;
+        $name = $request->english;
         if ($locale == LanguageEnum::farsi->value) {
-            $name = $request->name_farsi;
+            $name = $request->farsi;
         } else if ($locale == LanguageEnum::pashto->value) {
-            $name = $request->name_pashto;
+            $name = $request->pashto;
         }
         return response()->json([
             'message' => __('app_translation.success'),
@@ -93,6 +93,49 @@ class DepartmentController extends Controller
                 "name" => $name,
                 "created_at" => $department->created_at
             ]
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+    public function update(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+            'english' => 'required|string',
+            'pashto' => 'required|string',
+            'farsi' => 'required|string',
+        ]);
+        // 1. Find
+        $department = Department::find($request->id);
+        if (!$department) {
+            return response()->json([
+                'message' => __('app_translation.department_not_found')
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        $trans = DepartmentTran::where('department_id', $request->id)
+            ->select('id', 'language_name', 'value')
+            ->get();
+        // Update
+        foreach (LanguageEnum::LANGUAGES as $code => $name) {
+            $tran =  $trans->where('language_name', $code)->first();
+            $tran->value = $request["{$name}"];
+            $tran->save();
+        }
+
+        $locale = App::getLocale();
+        $name = $request->english;
+        if ($locale == LanguageEnum::farsi->value) {
+            $name = $request->farsi;
+        } else if ($locale == LanguageEnum::pashto->value) {
+            $name = $request->pashto;
+        }
+
+        return response()->json([
+            'message' => __('app_translation.success'),
+            'department' => [
+                "id" => $department->id,
+                "name" => $name,
+                "created_at" => $department->created_at
+            ],
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 }

@@ -22,10 +22,13 @@ use App\Http\Controllers\Controller;
 use App\Traits\Address\AddressTrait;
 use App\Enums\Checklist\CheckListEnum;
 use App\Enums\Checklist\CheckListTypeEnum;
+use App\Enums\Status\StatusEnum;
 use App\Models\PositionAssignmentDuration;
 use App\Http\Requests\app\hr\EmployeeStoreRequest;
 use App\Http\Requests\app\hr\EmployeeUpdateRequest;
 use App\Models\EmployeeEducation;
+use App\Models\EmployeeNid;
+use App\Models\EmployeeStatus;
 use App\Repositories\Storage\StorageRepositoryInterface;
 use App\Repositories\PendingTask\PendingTaskRepositoryInterface;
 
@@ -53,20 +56,25 @@ class EmployeeController extends Controller
 
         // Start building the query
         $query = DB::table('employees as emp')
-            ->leftjoin('employee_trans as empt', function ($join) use ($locale) {
+            ->join('employee_trans as empt', function ($join) use ($locale) {
                 $join->on('empt.employee_id', '=', 'emp.id')
                     ->where('empt.language_name', $locale);
             })
             ->leftjoin('emails', 'emp.email_id', '=', 'emails.id')
-            ->leftjoin('contacts', 'emp.contact_id', '=', 'contacts.id')
+            ->join('contacts', 'emp.contact_id', '=', 'contacts.id')
+            ->join('employee_statuses as es', 'es.employee_id', '=', 'emp.id')
+            ->join('status_trans as st', function ($join) use ($locale) {
+                $join->on('st.status_id', '=', 'es.status_id')
+                    ->where('st.language_name', $locale);
+            })
             ->select(
                 "emp.id",
                 "emp.picture",
                 "empt.first_name",
+                "st.value as status",
                 "empt.last_name",
                 "empt.father_name",
                 "emp.hr_code",
-                "emp.is_current_employee",
                 "emp.contact_id",
                 "emp.email_id",
                 "emails.value as email",
@@ -169,6 +177,11 @@ class EmployeeController extends Controller
         $employee->hr_code = "HR-" . $employee->id;
         $employee->save();
 
+        EmployeeStatus::create([
+            'status_id' => StatusEnum::active->value,
+            'employee_id' => $employee->id,
+            'description' => '',
+        ]);
 
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
             EmployeeTran::create([
@@ -180,23 +193,20 @@ class EmployeeController extends Controller
             ]);
         }
         // Create NID
-        Nid::create([
+        EmployeeNid::create([
             'employee_id' => $employee->id,
-            'nid_type' => $request->nid_type_id,
+            'nid_type_id' => $request->nid_type_id,
             'province_id' => $request->nid_province_id,
-            'number' => $request->nid_number,
-            'volume' => $request->nid_volume ?? '',
-            'page' => $request->nid_page ?? '',
+            'register_number' => $request->register_no,
+            'register' => $request->register,
+            'volume' => $request->volume,
+            'page' => $request->page,
         ]);
-
         // create education
         EmployeeEducation::create([
             'employee_id' => $employee->id,
-            'education_id' => $request->education_id,
-            'description' => $request->description ?? '',
+            'education_level_id' => $request->education_level_id,
         ]);
-
-
 
         $postAss = PositionAssignment::create([
             'employee_id' => $employee->id,
@@ -276,9 +286,7 @@ class EmployeeController extends Controller
                     "hr_code" => $employee->hr_code,
                     "email" => $request->email,
                     "hire_date" => $request->hire_date,
-                    "is_current_employee" => true,
                     "contact" => $request->contact,
-                    "is_current_employee" => $employee->is_current_employee,
                 ],
                 "message" => __('app_translation.success'),
             ],
@@ -323,11 +331,9 @@ class EmployeeController extends Controller
             'empt.last_name',
             'empt.father_name',
             'emp.date_of_birth',
-            'emp.is_current_employee',
             'contacts.value as contact',
             'emails.value as email',
             'emp.gender_id',
-            'emp.is_current_employee',
             "gent.name_{$locale} as gender",
             'emp.nationality_id',
             'nit.value as nationality',
@@ -373,7 +379,6 @@ class EmployeeController extends Controller
             'email' => $employee->email,
             'gender' => ['id' => $employee->gender_id, 'name' => $employee->gender],
             'nationality' => ['id' => $employee->nationality_id, 'name' => $employee->nationality],
-            'is_current_employee' => (bool) $employee->is_current_employee,
             'permanent_area' => $employee->parmanent_area,
             'permanent_province' => ['id' => $employee->parmanent_province_id, 'name' => $employee->parmanent_province],
             'permanent_district' => ['id' => $employee->parmanent_district_id, 'name' => $employee->parmanent_district],
@@ -409,7 +414,6 @@ class EmployeeController extends Controller
         $employee->date_of_birth = $request->date_of_birth;
         $employee->gender_id = $request->gender_id;
         $employee->nationality_id = $request->nationality_id;
-        $employee->is_current_employee = $request->is_current_employee;
         $employee->marital_status_id = $request->marital_status_id;
 
         $employeeTran  = EmployeeTran::where('employee_id', $id)->first();
@@ -604,7 +608,6 @@ class EmployeeController extends Controller
         $sort = $request->input('filters.sort'); // Sorting column
         $order = $request->input('filters.order', 'asc'); // Sorting order (default 
         $allowedColumns = [
-            'status' => 'emp.is_current_employee',
             'created_at' => 'emp.created_at',
             'contact' => 'emp.contact_id',
         ];
@@ -618,10 +621,9 @@ class EmployeeController extends Controller
         $statistics = DB::select("
             SELECT
                 COUNT(*) AS employeeCount,
-                (SELECT COUNT(*) FROM employees WHERE DATE(created_at) = CURDATE()) AS todayCount,
-                (SELECT COUNT(*) FROM employees WHERE is_current_employee = 1) AS activeUserCount,
-                (SELECT COUNT(*) FROM employees WHERE is_current_employee = 0) AS inActiveUserCount
-            FROM employees
+                (SELECT COUNT(*) FROM employees WHERE DATE(created_at) = CURDATE()) AS todayCount, (SELECT COUNT(*) FROM employees AS e JOIN employee_statuses AS es ON e.id = es.employee_id WHERE es.status_id = 1 AND es.active = 1) AS activeUserCount,
+                (SELECT COUNT(*) FROM employees AS e JOIN employee_statuses AS es ON e.id = es.employee_id WHERE es.status_id > 2 AND es.active = 1) AS inActiveUserCount
+            FROM employees;
         ");
         return response()->json([
             'counts' => [
@@ -629,7 +631,6 @@ class EmployeeController extends Controller
                 "todayCount" => $statistics[0]->todayCount,
                 "activeUserCount" => $statistics[0]->activeUserCount,
                 "inActiveUserCount" => $statistics[0]->inActiveUserCount
-
             ],
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
