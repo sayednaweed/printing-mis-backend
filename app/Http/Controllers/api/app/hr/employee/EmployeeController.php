@@ -23,6 +23,7 @@ use App\Traits\Address\AddressTrait;
 use App\Enums\Checklist\CheckListEnum;
 use App\Enums\Checklist\CheckListTypeEnum;
 use App\Enums\Status\StatusEnum;
+use App\Enums\Types\NidTypeEnum;
 use App\Models\PositionAssignmentDuration;
 use App\Http\Requests\app\hr\EmployeeStoreRequest;
 use App\Http\Requests\app\hr\EmployeeUpdateRequest;
@@ -71,7 +72,8 @@ class EmployeeController extends Controller
                 "emp.id",
                 "emp.picture",
                 "empt.first_name",
-                "st.value as status",
+                "es.status_id as status",
+                "st.value as status_name",
                 "empt.last_name",
                 "empt.father_name",
                 "emp.hr_code",
@@ -98,7 +100,13 @@ class EmployeeController extends Controller
     public function store(EmployeeStoreRequest $request)
     {
         $request->validated();
-        // Create email
+        if ($request->nid_type_id == NidTypeEnum::paper_id_card->value) {
+            $request->validate([
+                'register' => 'required',
+                'volume' => 'required',
+                'page' => 'required',
+            ]);
+        }
         $email = null;
         DB::beginTransaction();
         if ($request->email != null && !empty($request->email)) {
@@ -127,7 +135,7 @@ class EmployeeController extends Controller
 
         // 2. Check family contact
 
-        $family_contact = Contact::where('value', '=', $request->family_contact)->first();
+        $family_contact = Contact::where('value', '=', $request->family_mem_contact)->first();
         if ($family_contact) {
             return response()->json([
                 'message' => __('app_translation.contact_exist'),
@@ -135,7 +143,7 @@ class EmployeeController extends Controller
         }
 
         $family_contact = Contact::create([
-            "value" => $request->family_contact
+            "value" => $request->family_mem_contact
         ]);
 
         $permAddress = Address::create([
@@ -196,7 +204,6 @@ class EmployeeController extends Controller
         EmployeeNid::create([
             'employee_id' => $employee->id,
             'nid_type_id' => $request->nid_type_id,
-            'province_id' => $request->nid_province_id,
             'register_number' => $request->register_no,
             'register' => $request->register,
             'volume' => $request->volume,
@@ -273,8 +280,12 @@ class EmployeeController extends Controller
             );
         }
 
-
         DB::commit();
+
+        $status = DB::table('status_trans as st')
+            ->where('st.status_id', '=', StatusEnum::active->value)
+            ->select('st.value as status')
+            ->first();
         return response()->json(
             [
                 "employee" => [
@@ -287,6 +298,8 @@ class EmployeeController extends Controller
                     "email" => $request->email,
                     "hire_date" => $request->hire_date,
                     "contact" => $request->contact,
+                    "status" => StatusEnum::active->value,
+                    "status" => $status ? $status->status : 'Active',
                 ],
                 "message" => __('app_translation.success'),
             ],
@@ -305,7 +318,9 @@ class EmployeeController extends Controller
                 $join->on('empt.employee_id', '=', 'emp.id')
                     ->where('empt.language_name', $locale);
             })
+            ->join('employee_nids as nt', 'emp.id', '=', 'nt.employee_id')
             ->join('contacts', 'emp.contact_id', '=', 'contacts.id')
+            ->leftJoin('contacts as fc', 'emp.family_contact_id', '=', 'fc.id')
             ->leftJoin('emails', 'emp.email_id', '=', 'emails.id')
             ->join('genders as gent', function ($join) {
                 $join->on('gent.id', '=', 'emp.gender_id');
@@ -332,6 +347,7 @@ class EmployeeController extends Controller
             'empt.father_name',
             'emp.date_of_birth',
             'contacts.value as contact',
+            'fc.value as family_mem_contact',
             'emails.value as email',
             'emp.gender_id',
             "gent.name_{$locale} as gender",
@@ -352,7 +368,6 @@ class EmployeeController extends Controller
         if (!$employee) {
             return response()->json([
                 'message' => __('app_translation.employee_not_found'),
-                'dd' => $employee,
             ], 404, [], JSON_UNESCAPED_UNICODE);
         }
         $document = DB::table('employee_documents as ed')
@@ -376,6 +391,7 @@ class EmployeeController extends Controller
             'picture' => $employee->picture,
             'date_of_birth' => $employee->date_of_birth,
             'contact' =>  $employee->contact,
+            'family_mem_contact' =>  $employee->family_mem_contact,
             'email' => $employee->email,
             'gender' => ['id' => $employee->gender_id, 'name' => $employee->gender],
             'nationality' => ['id' => $employee->nationality_id, 'name' => $employee->nationality],

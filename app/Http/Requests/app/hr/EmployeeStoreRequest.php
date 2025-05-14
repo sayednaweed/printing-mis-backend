@@ -33,7 +33,7 @@ class EmployeeStoreRequest extends FormRequest
             'permanent_district_id' => 'required',
             'current_province_id' => 'required',
             'current_district_id' => 'required',
-            'family_contact' => 'required|unique:contacts,value',
+            'family_mem_contact' => 'required|unique:contacts,value',
             'contact' => 'required|unique:contacts,value',
             'permanent_area' => 'required',
             'current_area' => 'required',
@@ -48,9 +48,6 @@ class EmployeeStoreRequest extends FormRequest
             'has_attachment' => 'required',
             'nid_type_id' => 'required',
             'register_no' => 'required',
-            'register' => 'required',
-            'volume' => 'string',
-            'page' => 'string',
             'education_level_id' => 'required',
         ];
     }

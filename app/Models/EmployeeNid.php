@@ -9,4 +9,5 @@ class EmployeeNid extends Model
 {
     /** @use HasFactory<\Database\Factories\EmployeeNidFactory> */
     use HasFactory;
+    protected $guarded = [];
 }
