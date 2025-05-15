@@ -52,4 +52,6 @@ return [
     "payment_number_not_found" => "شماره پرداخت نادرست است، توسط سیستم صادر نشده است.",
     "vaccine_card_already_exist" => "کارت واکسن از قبل وجود دارد.",
     "employee_not_found" => "کارمند پیدا نشد.",
+    "salary" => "معاش",
+    'attendance' => "حاضری",
 ];

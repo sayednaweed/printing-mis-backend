@@ -27,4 +27,12 @@ class ReportController extends Controller
             'data' => $data,
         ]);
     }
+
+    public function salaryReport(Request $request)
+    {
+
+
+        // 
+
+    }
 }
