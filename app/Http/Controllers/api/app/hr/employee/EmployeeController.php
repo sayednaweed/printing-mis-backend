@@ -657,23 +657,28 @@ class EmployeeController extends Controller
 
     public function employeeStatuses($id)
     {
-
         $locale = App::getLocale();
-
-        $status = DB::table('employee_trans as emp')
-            ->join('employee_statuses as emps', 'emp.employee_id', '=', 'emps.employee_id')
+        $status = DB::table('employees as emp')
+            ->where('emp.id', $id)
+            ->join('employee_trans as empt', function ($join) use ($locale) {
+                $join->on('emp.id', '=', 'empt.employee_id')
+                    ->where('empt.language_name', '=', $locale);
+            })
+            ->join('employee_statuses as emps', 'emp.id', '=', 'emps.employee_id')
             ->join('status_trans as stt', function ($join) use ($locale) {
                 $join->on('stt.status_id', '=', 'emps.status_id')
                     ->where('stt.language_name', '=', $locale);
             })
-            ->join('users as us', 'us.id', '=', 'emp.user_id')
+            ->join('users as us', 'us.id', '=', 'emps.user_id')
             ->select(
                 'emps.id',
-                DB::raw("CONCAT(emp.first_name, ' ', emp.last_name) as name"),
-                'stt.value as status',
-                'us.full_name as user',
+                DB::raw("CONCAT(empt.first_name, ' ', empt.last_name) as name"),
+                'stt.value as status_name',
+                'stt.status_id',
+                'us.full_name as saved_by',
                 'emps.description',
-                'emps.active'
+                'emps.active',
+                'emps.created_at',
             )
             ->get();
 
