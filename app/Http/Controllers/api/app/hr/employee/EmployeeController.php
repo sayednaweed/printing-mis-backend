@@ -26,6 +26,7 @@ use App\Enums\Status\StatusEnum;
 use App\Enums\Types\NidTypeEnum;
 use App\Models\PositionAssignmentDuration;
 use App\Http\Requests\app\hr\EmployeeStoreRequest;
+use App\Http\Requests\app\hr\EmployeeUpdateMoreRequest;
 use App\Http\Requests\app\hr\EmployeeUpdateRequest;
 use App\Models\EmployeeEducation;
 use App\Models\EmployeeNid;
@@ -483,6 +484,110 @@ class EmployeeController extends Controller
 
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
+
+
+    // update more details 
+    public function updatePersonalMoreDetail(EmployeeUpdateMoreRequest $request)
+    {
+        $request->validate();
+
+        DB::beginTransaction();
+
+        $id = $request->id;
+        $employee = Employee::find($id);
+
+        if (!$employee) {
+            return response()->json([
+                'message' => __('app_translation.employee_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        // Update NID Info
+        $employeeNid = EmployeeNid::where('employee_id', $id)->first();
+        if ($employeeNid) {
+            $employeeNid->nid_type_id = $request->nid_type_id;
+            $employeeNid->register_no = $request->register_no;
+            $employeeNid->register = $request->register ?? '';
+            $employeeNid->volume = $request->volume ?? '';
+            $employeeNid->page = $request->page ?? '';
+            $employeeNid->save();
+        }
+
+        // Update Education
+        $employeeEdu = EmployeeEducation::where('employee_id', $id)->first();
+        if ($employeeEdu) {
+            $employeeEdu->education_level_id = $request->education_level_id;
+            $employeeEdu->save();
+        }
+
+        // Handle Attachment
+        if ($request->has_attachment) {
+            $user = $request->user();
+
+            $document = EmployeeDocument::join('documents', 'documents.id', '=', 'employee_documents.document_id')
+                ->join('check_lists', 'check_lists.id', '=', 'documents.check_list_id')
+                ->where('employee_id', $id)
+                ->where('documents.check_list_id', CheckListEnum::employee_attachment->value)
+                ->select('documents.path', 'documents.id')
+                ->first();
+
+            if ($document) {
+                $this->deleteDocument(storage_path("app/private/{$document->path}"));
+                Document::destroy($document->id);
+            }
+
+            $task = $this->pendingTaskRepository->pendingTaskExist(
+                $user,
+                CheckListTypeEnum::employee->value,
+                CheckListEnum::employee_attachment->value,
+                $employee->id
+            );
+
+            if (!$task) {
+                DB::rollBack();
+                return response()->json([
+                    'message' => __('app_translation.task_not_found'),
+                ], 404);
+            }
+
+            $document_id = null;
+
+            $this->storageRepository->documentStore(
+                CheckListTypeEnum::employee->value,
+                $user->id,
+                $task->id,
+                function ($documentData) use (&$document_id) {
+                    $document = Document::create([
+                        'actual_name' => $documentData['actual_name'],
+                        'size'        => $documentData['size'],
+                        'path'        => $documentData['path'],
+                        'type'        => $documentData['type'],
+                        'check_list_id' => $documentData['check_list_id'],
+                    ]);
+                    $document_id = $document->id;
+                }
+            );
+
+            EmployeeDocument::create([
+                'employee_id' => $employee->id,
+                'document_id' => $document_id,
+            ]);
+
+            $this->pendingTaskRepository->destroyPendingTask(
+                $user,
+                CheckListTypeEnum::employee->value,
+                CheckListEnum::employee_attachment->value,
+                $employee->id
+            );
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'message' => __('app_translation.profile_changed'),
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+
     // personal detail update
     public function updatePersonalDetail(EmployeeUpdateRequest $request)
     {
