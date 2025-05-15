@@ -655,6 +655,38 @@ class EmployeeController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
+    public function employeeStatuses($id)
+    {
+
+        $locale = App::getLocale();
+
+        $status = DB::table('employee_trans as emp')
+            ->join('employee_statuses as emps', 'emp.employee_id', '=', 'emps.employee_id')
+            ->join('status_trans as stt', function ($join) use ($locale) {
+                $join->on('stt.status_id', '=', 'emps.status_id')
+                    ->where('stt.language_name', '=', $locale);
+            })
+            ->join('users as us', 'us.id', '=', 'emp.user_id')
+            ->select(
+                'emps.id',
+                DB::raw("CONCAT(emp.first_name, ' ', emp.last_name) as name"),
+                'stt.value as status',
+                'us.full_name as user',
+                'emps.description',
+                'emps.active'
+            )
+            ->get();
+
+        return response()->json(
+            $status,
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
+    }
+
+
+    // 
     protected function applyDate($query, $request)
     {
         // Apply date filtering conditionally if provided
@@ -668,6 +700,9 @@ class EmployeeController extends Controller
             $query->where('emp.created_at', '<=', $endDate);
         }
     }
+
+
+
     // search function 
     protected function applySearch($query, $request)
     {
@@ -688,6 +723,11 @@ class EmployeeController extends Controller
             }
         }
     }
+
+
+
+
+
     // filter function
     protected function applyFilters($query, $request)
     {
@@ -701,6 +741,9 @@ class EmployeeController extends Controller
             $query->orderBy($allowedColumns[$sort], $order);
         }
     }
+
+
+
     //
     public function employeesCount()
     {

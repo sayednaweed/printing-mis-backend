@@ -5,6 +5,7 @@ use App\Enums\Permission\HrPermissionEnum;
 use Illuminate\Support\Facades\Route;
 use App\Enums\Permission\SubPermissionEnum;
 use App\Http\Controllers\api\app\hr\employee\EmployeeController;
+use App\Models\Employee;
 
 Route::prefix('v1')->middleware(["authorized:" . 'user:api'])->group(function () {
     // Main
@@ -18,5 +19,6 @@ Route::prefix('v1')->middleware(["authorized:" . 'user:api'])->group(function ()
     Route::delete('/employee/delete/profile-picture/{id}', [EmployeeController::class, 'deleteProfilePicture'])->middleware(["HasSubPermission:" . HrPermissionEnum::employees->value . "," . SubPermissionEnum::hr_employees_information->value . ',' . 'delete']);
     Route::post('/employee/update/profile-picture', [EmployeeController::class, 'updateProfilePicture'])->middleware(["HasSubPermission:" . HrPermissionEnum::employees->value . "," . SubPermissionEnum::hr_employees_information->value . ',' . 'edit']);
     Route::post('/employee/update/information', [EmployeeController::class, 'updatePersonalDetail'])->middleware(["HasSubPermission:" . HrPermissionEnum::employees->value . "," . SubPermissionEnum::hr_employees_information->value . ',' . 'edit']);
+    Route::get('/employee/status/{id}', [EmployeeController::class, 'employeeStatuses']);
     Route::post('/employee/update/more/details', [EmployeeController::class, 'updatePersonalDetail'])->middleware(["HasSubPermission:" . HrPermissionEnum::employees->value . "," . SubPermissionEnum::hr_employees_information->value . ',' . 'edit']);
 });
