@@ -23,16 +23,21 @@ class ReportController extends Controller
             ];
         });
 
-        return response()->json([
-            'data' => $data,
-        ]);
+        return response()->json($data, 200, [], JSON_UNESCAPED_UNICODE);
     }
 
     public function salaryReport(Request $request)
     {
 
+        $request->validate([
+            'selection' => 'required|integer',
+            'hr_code' => 'string',
+            'employee_status' => 'required|integer'
 
-        // 
+        ]);
+
+
+        //  
 
     }
 }
