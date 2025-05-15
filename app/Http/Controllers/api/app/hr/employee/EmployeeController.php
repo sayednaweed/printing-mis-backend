@@ -397,6 +397,71 @@ class EmployeeController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
+
+    public function personalMoreDetial($id)
+    {
+        $locale = App::getLocale();
+        $query = DB::table('employees as emp')
+            ->where('emp.id', $id)
+            ->join('employee_nids as empn', 'empn.employee_id', '=', 'emp.id')
+            ->join('nid_type_trans as nit', function ($join) use ($locale) {
+                $join->on('nit.nid_type_id', '=', 'empn.nid_type_id')
+                    ->where('nit.language_name', $locale);
+            })
+            ->join('employee_education as empedu', 'empedu.employee_id', 'emp.id')
+            ->join('education_level_trans as edult', function ($join) use ($locale) {
+                $join->on('edult.education_level_id', '=', 'empedu.education_level_id ')
+                    ->where('edult.language_name', $locale);
+            });
+        $employee = $query->select(
+            'emp.id',
+            'empn.register_number',
+            'empn.register',
+            'empn.volume',
+            'empn.page',
+            'empn.nid_type_id',
+            'nit.value as nid_type',
+            'edult.value as education_level',
+            'edult.education_level_id'
+        )->first();
+
+
+        if (!$employee) {
+            return response()->json([
+                'message' => __('app_translation.employee_not_found'),
+                'dd' => $employee,
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+        $document = DB::table('employee_documents as ed')
+            ->where('ed.employee_id', $employee->id)
+            ->join('documents as d', 'd.id', '=', 'ed.document_id')
+            ->select(
+                'd.actual_name',
+                'd.path',
+                'd.type',
+            )
+            ->first();
+
+
+        $result = [
+            'id' => $employee->id,
+            'register_number' => $employee->register_number,
+            'register' => $employee->register,
+            'volume' => $employee->volume,
+            'page' => $employee->page,
+            'nid_type' => ['id' => $employee->nid_type_id, 'name' => $employee->nid_type],
+            'education_level' => ['id' => $employee->education_level_id, 'name' => $employee->education_level],
+            'attachment' => $document ? [
+                'actual_name' => $document->actual_name,
+                'type' => $document->type,
+                'path' => $document->path,
+            ] : null,
+        ];
+        return response()->json([
+            'employee' => $result,
+
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
     // personal detail update
     public function updatePersonalDetail(EmployeeUpdateRequest $request)
     {

@@ -352,12 +352,6 @@ class IconAndExpenseTypeSeeder extends Seeder
             ],
 
 
-
-
-
-
-
-
         ];
 
         foreach ($items as $item) {
