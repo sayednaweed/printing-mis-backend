@@ -51,4 +51,6 @@ return [
     "payment_number_not_found" => "The payment number is incorrect, it was not issued by the system.",
     "vaccine_card_already_exist" => "Vaccine card already exist.",
     "employee_not_found" => "Employee not found.",
+    "salary" => "Salary",
+    'attendance' => "Attendance",
 ];
