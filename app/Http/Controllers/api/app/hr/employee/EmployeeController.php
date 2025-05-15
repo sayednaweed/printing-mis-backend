@@ -189,6 +189,7 @@ class EmployeeController extends Controller
             'status_id' => StatusEnum::active->value,
             'employee_id' => $employee->id,
             'description' => '',
+            'user_id' => $request->user()->id,
         ]);
 
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
