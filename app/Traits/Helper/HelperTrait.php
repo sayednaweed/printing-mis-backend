@@ -68,8 +68,14 @@ trait HelperTrait
     {
         return unlink(storage_path() . "/app/{$filePath}");
     }
-
-
+    public function getEmployeeFolder($user_id, $check_list_id)
+    {
+        return storage_path() . "/app/private/employee/id_{$user_id}/checlist_{$check_list_id}/";
+    }
+    public function getEmployeeDBPath($user_id, $check_list_id, $fileName)
+    {
+        return "employee/id_{$user_id}/checlist_{$check_list_id}/" . $fileName;
+    }
     public function userFolder($user_type, $user_id, $check_list_id)
     {
         return storage_path() . "/app/private/user/type_{$user_type}/id_{$user_id}/checlist_{$check_list_id}/";

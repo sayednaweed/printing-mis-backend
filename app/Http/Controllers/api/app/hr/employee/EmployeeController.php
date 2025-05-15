@@ -427,7 +427,7 @@ class EmployeeController extends Controller
             })
             ->join('employee_education as empedu', 'empedu.employee_id', 'emp.id')
             ->join('education_level_trans as edult', function ($join) use ($locale) {
-                $join->on('edult.education_level_id', '=', 'empedu.education_level_id ')
+                $join->on('edult.education_level_id', '=', 'empedu.education_level_id')
                     ->where('edult.language_name', $locale);
             });
         $employee = $query->select(
@@ -453,25 +453,29 @@ class EmployeeController extends Controller
             ->where('ed.employee_id', $employee->id)
             ->join('documents as d', 'd.id', '=', 'ed.document_id')
             ->select(
+                'd.id',
                 'd.actual_name',
                 'd.path',
                 'd.type',
+                'd.size',
             )
             ->first();
 
 
         $result = [
             'id' => $employee->id,
-            'register_number' => $employee->register_number,
+            'register_no' => $employee->register_number,
             'register' => $employee->register,
             'volume' => $employee->volume,
             'page' => $employee->page,
-            'nid_type' => ['id' => $employee->nid_type_id, 'name' => $employee->nid_type],
+            'identity_card' => ['id' => $employee->nid_type_id, 'name' => $employee->nid_type],
             'education_level' => ['id' => $employee->education_level_id, 'name' => $employee->education_level],
             'attachment' => $document ? [
-                'actual_name' => $document->actual_name,
-                'type' => $document->type,
+                'id' => $document->id,
+                'name' => $document->actual_name,
+                'extension' => $document->type,
                 'path' => $document->path,
+                'size' => $document->size,
             ] : null,
         ];
         return response()->json([
