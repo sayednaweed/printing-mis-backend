@@ -22,7 +22,6 @@ class EmployeeUpdateMoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
             'nid_type_id' => 'required|integer',
             'register_no' => 'required|string',
             'register' => 'string',

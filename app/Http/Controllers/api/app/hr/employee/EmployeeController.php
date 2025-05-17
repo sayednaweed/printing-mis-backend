@@ -258,7 +258,7 @@ class EmployeeController extends Controller
             }
             $document_id = '';
 
-            $this->storageRepository->documentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
+            $this->storageRepository->employeeDocumentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
                 $checklist_id = $documentData['check_list_id'];
                 $document = Document::create([
                     'actual_name' => $documentData['actual_name'],
@@ -552,7 +552,7 @@ class EmployeeController extends Controller
 
             $document_id = null;
 
-            $this->storageRepository->documentStore(
+            $this->storageRepository->employeeDocumentStore(
                 CheckListTypeEnum::employee->value,
                 $user->id,
                 $task->id,
@@ -684,7 +684,7 @@ class EmployeeController extends Controller
             }
             $document_id = '';
 
-            $this->storageRepository->documentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
+            $this->storageRepository->employeeDocumentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
                 $checklist_id = $documentData['check_list_id'];
                 $document = Document::create([
                     'actual_name' => $documentData['actual_name'],
