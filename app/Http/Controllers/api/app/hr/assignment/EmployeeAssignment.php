@@ -103,14 +103,16 @@ class EmployeeAssignment extends Controller
             [
                 'message' => __('app_translation.success'),
                 'data' => [
+                    'id' => $postAss->id,
                     'employee_id' => $request->employee_id,
-                    'position_id' => $request->position_id,
-                    'department_id' => $request->department_id,
-                    'hire_type_id' => $request->hire_type_id,
-                    'shift_id' => $request->shift_id,
+                    'position' => $request->position,
+                    'department' => $request->department,
+                    'hire_type' => $request->hire_type,
+                    'currency' => $request->currency,
+                    "hire_date" => $postAss->created_at,
+                    'shift' => $request->shift,
                     'salary' => $request->salary,
                     'overtime_rate' => $request->overtime_rate,
-                    'currency_id' => $request->currency_id,
                     'position_change_type_id' => $request->position_change_type_id,
                 ]
             ],
