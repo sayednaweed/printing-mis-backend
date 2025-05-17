@@ -495,16 +495,14 @@ class EmployeeController extends Controller
                 'volume' => 'required',
                 'page' => 'required',
             ]);
-        }
-
-
-        if ($request->nid_type_id == NidTypeEnum::paper_id_card->value) {
-            $request->validate([
-                'register' => 'required',
-                'volume' => 'required',
-                'page' => 'required',
+        } else {
+            $request->merge([
+                'volume' => null,
+                'page' => null,
+                'register' => null,
             ]);
         }
+
         DB::beginTransaction();
 
         $id = $request->id;
@@ -567,8 +565,7 @@ class EmployeeController extends Controller
             $document_id = null;
 
             $this->storageRepository->employeeDocumentStore(
-                CheckListTypeEnum::employee->value,
-                $user->id,
+                $employee->id,
                 $task->id,
                 function ($documentData) use (&$document_id) {
                     $document = Document::create([

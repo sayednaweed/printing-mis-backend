@@ -24,7 +24,7 @@ class MediaController extends Controller
     public function tempMediadownload(Request $request)
     {
         $filePath = $request->input('path');
-        $path = $this->getAppPath($filePath);
+        $path = $this->getPrivatePath($filePath);
         if (!file_exists($path)) {
             return response()->json([
                 'message' => __('app_translation.not_found'),
