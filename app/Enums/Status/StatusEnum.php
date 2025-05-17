@@ -12,4 +12,5 @@ enum StatusEnum: int
     case terminated = 4;
     case absconded = 5;
     case deceased = 6;
+    case lock = 7;
 }

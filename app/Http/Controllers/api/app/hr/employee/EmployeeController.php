@@ -485,7 +485,6 @@ class EmployeeController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-
     // update more details 
     public function updatePersonalMoreDetail(EmployeeUpdateMoreRequest $request)
     {

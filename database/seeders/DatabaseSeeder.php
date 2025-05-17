@@ -311,6 +311,24 @@ class DatabaseSeeder extends Seeder
             "status_id" => $status->id,
             "language_name" => "ps",
         ]);
+        $status = Status::factory()->create([
+            'id' => StatusEnum::lock->value
+        ]);
+        StatusTran::factory()->create([
+            "value" => "Lock",
+            "status_id" => $status->id,
+            "language_name" => "en",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "مسدود",
+            "status_id" => $status->id,
+            "language_name" => "fa",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "مسدود",
+            "status_id" => $status->id,
+            "language_name" => "ps",
+        ]);
     }
 
     public function nidTypes()
