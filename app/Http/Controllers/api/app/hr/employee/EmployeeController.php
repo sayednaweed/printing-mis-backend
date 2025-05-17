@@ -258,17 +258,21 @@ class EmployeeController extends Controller
             }
             $document_id = '';
 
-            $this->storageRepository->employeeDocumentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
-                $checklist_id = $documentData['check_list_id'];
-                $document = Document::create([
-                    'actual_name' => $documentData['actual_name'],
-                    'size' => $documentData['size'],
-                    'path' => $documentData['path'],
-                    'type' => $documentData['type'],
-                    'check_list_id' => $checklist_id,
-                ]);
-                $document_id = $document->id;
-            });
+            $this->storageRepository->employeeDocumentStore(
+                $employee->id,
+                $task->id,
+                function ($documentData) use (&$document_id) {
+                    $checklist_id = $documentData['check_list_id'];
+                    $document = Document::create([
+                        'actual_name' => $documentData['actual_name'],
+                        'size' => $documentData['size'],
+                        'path' => $documentData['path'],
+                        'type' => $documentData['type'],
+                        'check_list_id' => $checklist_id,
+                    ]);
+                    $document_id = $document->id;
+                }
+            );
 
             EmployeeDocument::create([
                 'employee_id' => $employee->id,

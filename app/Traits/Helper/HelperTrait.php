@@ -16,7 +16,7 @@ trait HelperTrait
     }
     public function getTempFullPath()
     {
-        return storage_path() . "/app/temp/";
+        return storage_path() . "/app/private/temp/";
     }
     public function getTempFilePath($fileName)
     {
