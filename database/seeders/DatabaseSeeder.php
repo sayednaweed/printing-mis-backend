@@ -11,6 +11,7 @@ use App\Models\Currency;
 use App\Models\Language;
 use App\Models\ShiftTran;
 use App\Models\StatusTran;
+use App\Models\StatusType;
 use App\Models\CurrencyTran;
 use App\Models\NidTypeTrans;
 use App\Models\MaritalStatus;
@@ -21,12 +22,12 @@ use Illuminate\Database\Seeder;
 use App\Enums\Status\StatusEnum;
 use App\Models\MaritalStatusTran;
 use App\Models\EducationLevelTran;
-use App\Models\EmployeeStatusTran;
+use App\Enums\Types\StatusTypeEnum;
+use App\Models\ReportSelectionTrans;
 use Database\Seeders\CheckListSeeder;
 use App\Enums\Types\EducationLevelEnum;
 use App\Enums\Types\EmployeeStatusEnum;
 use App\Enums\Types\ReportSelectionEnum;
-use App\Models\ReportSelectionTrans;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Current;
 
 /*
@@ -82,7 +83,9 @@ class DatabaseSeeder extends Seeder
         $this->nidTypes();
         $this->maritalStatus();
         $this->currency();
+        $this->statusType();
         $this->status();
+        $this->Userstatus();
         $this->educationLevel();
         $this->reportSelection();
     }
@@ -201,28 +204,40 @@ class DatabaseSeeder extends Seeder
             "language_name" => "ps",
         ]);
     }
+    public function statusType()
+    {
+        $status = StatusType::factory()->create([
+            'id' => StatusTypeEnum::employement->value,
+        ]);
+        $status = StatusType::factory()->create([
+            'id' => StatusTypeEnum::user_status->value,
+        ]);
+    }
+    public function Userstatus() {}
     public function status()
     {
         $status = Status::factory()->create([
-            'id' => StatusEnum::active->value
+            'id' => StatusEnum::hired->value,
+            'status_type_id' => StatusTypeEnum::employement->value,
         ]);
         StatusTran::factory()->create([
-            "value" => "Active",
+            "value" => "Hired",
             "status_id" => $status->id,
             "language_name" => "en",
         ]);
         StatusTran::factory()->create([
-            "value" => "فعال",
+            "value" => "استخدام شده",
             "status_id" => $status->id,
             "language_name" => "fa",
         ]);
         StatusTran::factory()->create([
-            "value" => "فعال",
+            "value" => "ګمارل شوی",
             "status_id" => $status->id,
             "language_name" => "ps",
         ]);
         $status = Status::factory()->create([
-            'id' => StatusEnum::on_leave->value
+            'id' => StatusEnum::on_leave->value,
+            'status_type_id' => StatusTypeEnum::employement->value,
         ]);
         StatusTran::factory()->create([
             "value" => "On leave",
@@ -240,7 +255,8 @@ class DatabaseSeeder extends Seeder
             "language_name" => "ps",
         ]);
         $status = Status::factory()->create([
-            'id' => StatusEnum::resigned->value
+            'id' => StatusEnum::resigned->value,
+            'status_type_id' => StatusTypeEnum::employement->value,
         ]);
         StatusTran::factory()->create([
             "value" => "Resigned",
@@ -258,7 +274,8 @@ class DatabaseSeeder extends Seeder
             "language_name" => "ps",
         ]);
         $status = Status::factory()->create([
-            'id' => StatusEnum::terminated->value
+            'id' => StatusEnum::terminated->value,
+            'status_type_id' => StatusTypeEnum::employement->value,
         ]);
         StatusTran::factory()->create([
             "value" => "Terminated",
@@ -276,7 +293,8 @@ class DatabaseSeeder extends Seeder
             "language_name" => "ps",
         ]);
         $status = Status::factory()->create([
-            'id' => StatusEnum::absconded->value
+            'id' => StatusEnum::absconded->value,
+            'status_type_id' => StatusTypeEnum::employement->value,
         ]);
         StatusTran::factory()->create([
             "value" => "Absconded",
@@ -294,7 +312,8 @@ class DatabaseSeeder extends Seeder
             "language_name" => "ps",
         ]);
         $status = Status::factory()->create([
-            'id' => StatusEnum::deceased->value
+            'id' => StatusEnum::deceased->value,
+            'status_type_id' => StatusTypeEnum::employement->value,
         ]);
         StatusTran::factory()->create([
             "value" => "Deceased",
@@ -312,20 +331,40 @@ class DatabaseSeeder extends Seeder
             "language_name" => "ps",
         ]);
         $status = Status::factory()->create([
-            'id' => StatusEnum::lock->value
+            'id' => StatusEnum::active->value,
+            'status_type_id' => StatusTypeEnum::user_status->value,
         ]);
         StatusTran::factory()->create([
-            "value" => "Lock",
+            "value" => "Active",
             "status_id" => $status->id,
             "language_name" => "en",
         ]);
         StatusTran::factory()->create([
-            "value" => "مسدود",
+            "value" => "فعال",
             "status_id" => $status->id,
             "language_name" => "fa",
         ]);
         StatusTran::factory()->create([
-            "value" => "مسدود",
+            "value" => "فعال",
+            "status_id" => $status->id,
+            "language_name" => "ps",
+        ]);
+        $status = Status::factory()->create([
+            'id' => StatusEnum::in_active->value,
+            'status_type_id' => StatusTypeEnum::user_status->value,
+        ]);
+        StatusTran::factory()->create([
+            "value" => "InActive",
+            "status_id" => $status->id,
+            "language_name" => "en",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "غیرفعال",
+            "status_id" => $status->id,
+            "language_name" => "fa",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "غیرفعال",
             "status_id" => $status->id,
             "language_name" => "ps",
         ]);

@@ -187,7 +187,7 @@ class EmployeeController extends Controller
         $employee->save();
 
         EmployeeStatus::create([
-            'status_id' => StatusEnum::active->value,
+            'status_id' => StatusEnum::hired->value,
             'employee_id' => $employee->id,
             'description' => '',
             'user_id' => $request->user()->id,
@@ -285,7 +285,7 @@ class EmployeeController extends Controller
         DB::commit();
 
         $status = DB::table('status_trans as st')
-            ->where('st.status_id', '=', StatusEnum::active->value)
+            ->where('st.status_id', '=', StatusEnum::hired->value)
             ->select('st.value as status')
             ->first();
         return response()->json(
@@ -300,7 +300,7 @@ class EmployeeController extends Controller
                     "email" => $request->email,
                     "hire_date" => $request->hire_date,
                     "contact" => $request->contact,
-                    "status" => StatusEnum::active->value,
+                    "status" => StatusEnum::hired->value,
                     "status" => $status ? $status->status : 'Active',
                 ],
                 "message" => __('app_translation.success'),
