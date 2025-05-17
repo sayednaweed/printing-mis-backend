@@ -491,6 +491,14 @@ class EmployeeController extends Controller
     {
         $request->validate();
 
+
+        if ($request->nid_type_id == NidTypeEnum::paper_id_card->value) {
+            $request->validate([
+                'register' => 'required',
+                'volume' => 'required',
+                'page' => 'required',
+            ]);
+        }
         DB::beginTransaction();
 
         $id = $request->id;
