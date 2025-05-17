@@ -301,7 +301,7 @@ class EmployeeController extends Controller
                     "hire_date" => $request->hire_date,
                     "contact" => $request->contact,
                     "status" => StatusEnum::hired->value,
-                    "status" => $status ? $status->status : 'Active',
+                    "status_name" => $status ? $status->status : 'Hired',
                 ],
                 "message" => __('app_translation.success'),
             ],
@@ -488,7 +488,14 @@ class EmployeeController extends Controller
     // update more details 
     public function updatePersonalMoreDetail(EmployeeUpdateMoreRequest $request)
     {
-        $request->validate();
+        $request->validated();
+        if ($request->nid_type_id == NidTypeEnum::paper_id_card->value) {
+            $request->validate([
+                'register' => 'required',
+                'volume' => 'required',
+                'page' => 'required',
+            ]);
+        }
 
         DB::beginTransaction();
 
@@ -505,10 +512,10 @@ class EmployeeController extends Controller
         $employeeNid = EmployeeNid::where('employee_id', $id)->first();
         if ($employeeNid) {
             $employeeNid->nid_type_id = $request->nid_type_id;
-            $employeeNid->register_no = $request->register_no;
-            $employeeNid->register = $request->register ?? '';
-            $employeeNid->volume = $request->volume ?? '';
-            $employeeNid->page = $request->page ?? '';
+            $employeeNid->register_number = $request->register_no;
+            $employeeNid->register = $request->register ?? null;
+            $employeeNid->volume = $request->volume ?? null;
+            $employeeNid->page = $request->page ?? null;
             $employeeNid->save();
         }
 

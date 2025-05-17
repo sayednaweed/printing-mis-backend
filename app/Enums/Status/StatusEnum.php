@@ -4,7 +4,7 @@ namespace App\Enums\Status;
 
 enum StatusEnum: int
 {
-    // While Working:
+    // Hr status:
     case hired = 1;
     case on_leave = 2;
         // Upon Leaving:

@@ -24,9 +24,6 @@ class EmployeeUpdateMoreRequest extends FormRequest
         return [
             'nid_type_id' => 'required|integer',
             'register_no' => 'required|string',
-            'register' => 'string',
-            'volume' => 'string',
-            'page' => 'string',
             'education_level_id' => 'required|integer'
         ];
     }
