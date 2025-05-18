@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('leave_type_trans', function (Blueprint $table) {
+        Schema::create('application_configuration_trans', function (Blueprint $table) {
             $table->id();
-            $table->string('value');
-            $table->unsignedBigInteger('leave_type_id');
-            $table->foreign('leave_type_id')->references('id')->on('leave_types')
+            $table->string('company_name');
+            $table->string('application_name');
+            $table->unsignedBigInteger('app_conf_id');
+            $table->foreign('app_conf_id')->references('id')->on('application_configurations')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->string('language_name');
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('leave_type_trans');
+        Schema::dropIfExists('application_configuration_trans');
     }
 };

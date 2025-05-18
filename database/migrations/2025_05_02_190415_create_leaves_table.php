@@ -16,12 +16,10 @@ return new class extends Migration
             $table->string('start_date');
             $table->string('end_date');
             $table->string('reason');
-
-            $table->unsignedBigInteger('leave_type_id');
-            $table->foreign('leave_type_id')->references('id')->on('leave_types')
+            $table->unsignedBigInteger('statuse_id');
+            $table->foreign('statuse_id')->references('id')->on('statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-
             $table->unsignedBigInteger('employee_id');
             $table->foreign('employee_id')->references('id')->on('employees')
                 ->onUpdate('cascade')

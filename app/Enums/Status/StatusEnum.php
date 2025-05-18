@@ -6,13 +6,11 @@ enum StatusEnum: int
 {
     // Hr status:
     case hired = 1;
-    case on_leave = 2;
-        // Upon Leaving:
-    case resigned = 3;
-    case terminated = 4;
-    case absconded = 5;
-    case deceased = 6;
+    case resigned = 2;
+    case terminated = 3;
+    case absconded = 4;
+    case deceased = 5;
         // User status
-    case active = 7;
-    case in_active = 8;
+    case active = 6;
+    case in_active = 7;
 }

@@ -28,6 +28,8 @@ use Database\Seeders\CheckListSeeder;
 use App\Enums\Types\EducationLevelEnum;
 use App\Enums\Types\EmployeeStatusEnum;
 use App\Enums\Types\ReportSelectionEnum;
+use App\Models\ApplicationConfiguration;
+use App\Models\ApplicationConfigurationTrans;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Current;
 
 /*
@@ -212,6 +214,9 @@ class DatabaseSeeder extends Seeder
         $status = StatusType::factory()->create([
             'id' => StatusTypeEnum::user_status->value,
         ]);
+        $status = StatusType::factory()->create([
+            'id' => StatusTypeEnum::leave_type->value,
+        ]);
     }
     public function Userstatus() {}
     public function status()
@@ -232,25 +237,6 @@ class DatabaseSeeder extends Seeder
         ]);
         StatusTran::factory()->create([
             "value" => "ګمارل شوی",
-            "status_id" => $status->id,
-            "language_name" => "ps",
-        ]);
-        $status = Status::factory()->create([
-            'id' => StatusEnum::on_leave->value,
-            'status_type_id' => StatusTypeEnum::employement->value,
-        ]);
-        StatusTran::factory()->create([
-            "value" => "On leave",
-            "status_id" => $status->id,
-            "language_name" => "en",
-        ]);
-        StatusTran::factory()->create([
-            "value" => "در رخصتی",
-            "status_id" => $status->id,
-            "language_name" => "fa",
-        ]);
-        StatusTran::factory()->create([
-            "value" => "په رخصتۍ",
             "status_id" => $status->id,
             "language_name" => "ps",
         ]);

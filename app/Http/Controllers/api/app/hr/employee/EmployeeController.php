@@ -64,7 +64,10 @@ class EmployeeController extends Controller
             })
             ->leftjoin('emails', 'emp.email_id', '=', 'emails.id')
             ->join('contacts', 'emp.contact_id', '=', 'contacts.id')
-            ->join('employee_statuses as es', 'es.employee_id', '=', 'emp.id')
+            ->join('employee_statuses as es', function ($join) {
+                $join->on('es.employee_id', '=', 'emp.id')
+                    ->where('es.active', 1);
+            })
             ->join('status_trans as st', function ($join) use ($locale) {
                 $join->on('st.status_id', '=', 'es.status_id')
                     ->where('st.language_name', $locale);
@@ -774,43 +777,6 @@ class EmployeeController extends Controller
             'message' => __('app_translation.success')
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
-
-    public function employeeStatuses($id)
-    {
-        $locale = App::getLocale();
-        $status = DB::table('employees as emp')
-            ->where('emp.id', $id)
-            ->join('employee_trans as empt', function ($join) use ($locale) {
-                $join->on('emp.id', '=', 'empt.employee_id')
-                    ->where('empt.language_name', '=', $locale);
-            })
-            ->join('employee_statuses as emps', 'emp.id', '=', 'emps.employee_id')
-            ->join('status_trans as stt', function ($join) use ($locale) {
-                $join->on('stt.status_id', '=', 'emps.status_id')
-                    ->where('stt.language_name', '=', $locale);
-            })
-            ->join('users as us', 'us.id', '=', 'emps.user_id')
-            ->select(
-                'emps.id',
-                DB::raw("CONCAT(empt.first_name, ' ', empt.last_name) as name"),
-                'stt.value as status_name',
-                'stt.status_id',
-                'us.full_name as saved_by',
-                'emps.description',
-                'emps.active',
-                'emps.created_at',
-            )
-            ->get();
-
-        return response()->json(
-            $status,
-            200,
-            [],
-            JSON_UNESCAPED_UNICODE
-        );
-    }
-
-
     // 
     protected function applyDate($query, $request)
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\api\app\hr\employee\status;
 
+use App\Enums\Status\StatusEnum;
 use App\Models\StatusTran;
 use Illuminate\Http\Request;
 use App\Models\EmployeeStatus;
@@ -12,26 +13,21 @@ use App\Http\Controllers\Controller;
 
 class StatusController extends Controller
 {
-    //
-
     public function employeeStatusList($id)
     {
-
         $locale = App::getLocale();
-
-        $empActSts =  EmployeeStatus::where('employee_id', $id)
-            ->where('active', 1)->select('status_id')->first();
-
-        $status =   StatusTran::join('status_types')
-            ->select('id', 'value as status')
-            ->whereNotIn('id', $empActSts->id)
-            ->where('status_type_id', StatusTypeEnum::employement->value)->get();
-
+        $status = DB::table('statuses as s')
+            ->where('s.status_type_id', StatusTypeEnum::employement->value)
+            ->whereNotIn('s.id', [StatusEnum::hired->value])
+            ->join('status_trans as st', function ($join) use ($locale) {
+                $join->on('st.status_id', '=', 's.id')
+                    ->where('st.language_name', '=', $locale);
+            })
+            ->select('s.id', 'st.value as name')
+            ->get();
 
         return response()->json(
-            [
-                $status
-            ],
+            $status,
             200,
             [],
             JSON_UNESCAPED_UNICODE
@@ -44,10 +40,6 @@ class StatusController extends Controller
         $locale = App::getLocale();
         $status = DB::table('employees as emp')
             ->where('emp.id', $id)
-            ->join('employee_trans as empt', function ($join) use ($locale) {
-                $join->on('emp.id', '=', 'empt.employee_id')
-                    ->where('empt.language_name', '=', $locale);
-            })
             ->join('employee_statuses as emps', 'emp.id', '=', 'emps.employee_id')
             ->join('status_trans as stt', function ($join) use ($locale) {
                 $join->on('stt.status_id', '=', 'emps.status_id')
@@ -56,7 +48,6 @@ class StatusController extends Controller
             ->join('users as us', 'us.id', '=', 'emps.user_id')
             ->select(
                 'emps.id',
-                DB::raw("CONCAT(empt.first_name, ' ', empt.last_name) as name"),
                 'stt.value as status_name',
                 'stt.status_id',
                 'us.full_name as saved_by',
@@ -76,29 +67,31 @@ class StatusController extends Controller
 
     public function statusUpdate(Request $request)
     {
-
-
-
         $request->validate([
             'employee_id' => 'required|integer|exists:employees,id',
             'status_id' => 'required|integer|exists:statuses,id',
-            'description' => 'nullable|string'
+            'detail' => 'string'
         ]);
-
-        // 
         EmployeeStatus::where('employee_id', $request->employee_id)
             ->update(['active' => 0]);
-
-        EmployeeStatus::create([
+        $status = EmployeeStatus::create([
             'status_id' => $request->status_id,
             'employee_id' => $request->employee_id,
             'user_id' => $request->user()->id,
-            'description' => $request->description,
+            'description' => $request->detail,
             'active' => 1
         ]);
 
-
         return response()->json([
+            "status" => [
+                'id' => $status->id,
+                'status_name' => $request->status,
+                'status_id' => $request->status_id,
+                'name' => $request->user()->username,
+                'active' => 1,
+                'detail' => $request->detail,
+                'created_at' => $status->created_at,
+            ],
             'message' => __('app_translation.success'),
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }

@@ -11,8 +11,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\ApplicationConfiguration;
 use App\Models\CurrencyTran;
 use App\Models\NationalityTrans;
+use Illuminate\Support\Facades\DB;
 
 class ApplicationController extends Controller
 {
