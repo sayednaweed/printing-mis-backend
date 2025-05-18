@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\api\app\hr\attendance;
 
+use App\Enums\Types\StatusTypeEnum;
 use App\Models\Leave;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
+use App\Models\Status;
 
 class LeaveController extends Controller
 {
@@ -131,5 +133,25 @@ class LeaveController extends Controller
         if (in_array($sort, array_keys($allowedColumns))) {
             $query->orderBy($allowedColumns[$sort], $order);
         }
+    }
+
+
+    public function leaveTypes()
+    {
+        $locale = App::getLocale();
+        $query =  Status::join('status_trans as stt', function ($join) use ($locale) {
+            $join->on('stt.status_id', '=', 'leaves.status_id')
+                ->where('stt.language_name', $locale);
+        })
+            ->select('stt.status_id as id', 'stt.value as leave')
+            ->where('statuses.status_type_id', StatusTypeEnum::leave_type->value)
+            ->get();
+
+        return response()->json(
+            $query,
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
     }
 }
