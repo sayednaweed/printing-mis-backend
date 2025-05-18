@@ -59,7 +59,7 @@ class ContractController extends Controller
 
     protected function data($lang, $id)
     {
-        $locale = App::getLocale();
+        $locale = $lang;
 
         // Subquery to get latest position assignment per employee
         $latestPositionAssignmentId = DB::table('position_assignments')

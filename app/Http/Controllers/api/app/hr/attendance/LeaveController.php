@@ -26,13 +26,14 @@ class LeaveController extends Controller
                 $join->on('empt.employee_id', '=', 'emp.id')
                     ->where('empt.language_name', $locale);
             })
-            ->join('leave_type_trans as lett', 'lett.leave_type_id', '=', 'leaves.leave_type_id')
+            ->join('status_trans as stt', 'stt.status_id', '=', 'leaves.status_id')
             ->select(
                 'emp.id as employee_id',
+                'emp.picture',
                 'emp.hr_code',
                 'empt.first_name',
                 'empt.last_name',
-                'lett.value as leave_type',
+                'stt.value as leave_type',
                 'leaves.reason',
                 'leaves.start_date',
                 'leaves.end_date',
@@ -58,7 +59,7 @@ class LeaveController extends Controller
     {
         $request->validate([
             'employee_id' => 'required|exists:employees,id',
-            'leave_type_id' => 'required|exists:leave_types,id',
+            'status_id' => 'required|exists:statuses,id',
             'reason' => 'required|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -68,7 +69,7 @@ class LeaveController extends Controller
 
         $leave = Leave::create([
             'employee_id' => $request->employee_id,
-            'leave_type_id' => $request->leave_type_id,
+            'status_id' => $request->status_id,
             'reason' => $request->reason,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date
