@@ -1,0 +1,145 @@
+.body {
+    font-family: "calibri";
+}
+.page {
+    page-break-after: avoid;
+    /* Add a page break after each pair of student cards */
+}
+
+.page-break {
+    page-break-after: always;
+    /* Add a page break after each pair of student cards */
+}
+
+.card {
+    width: 100%;
+    /* border: 1px solid black; */
+    /* border-radius: 15px; */
+    overflow: hidden;
+    padding-bottom: 20px;
+    margin-bottom: 100px;
+    top: 0;
+    padding-top: -5%;
+    /* page-break-inside: avoid; */
+    /* page-break-inside: avoid; */
+}
+
+/* @media print {
+      .card {
+        page-break-inside: avoid;
+      }
+    } */
+.info {
+    width: 100%;
+    align-items: center;
+    /* border:1px solid red; */
+    grid: auto;
+}
+
+img.app_logo {
+    width: 100px;
+    height: 100px;
+    float: right;
+    margin-top: 0px;
+    margin-right: -20px;
+}
+
+img.employee_photo {
+    width: 108px;
+    height: 150px;
+    float: left;
+    margin-top: 0px;
+    margin-left: -20px;
+    border: 1px solid black;
+}
+
+div.mintext {
+    /* position: ; */
+    text-align: center;
+    float: left;
+    width: auto;
+    margin: 0;
+    padding-top: -1.5%;
+    margin-left: auto;
+    /* margin-top:10px; */
+    font-weight: normal;
+    font-size: 1rem;
+}
+
+div.mintextKey {
+    /* position: ; */
+    text-align: center;
+    float: left;
+    width: auto;
+    margin: 0;
+    margin-top: 0px;
+    margin-left: auto;
+    /* margin-top:10px; */
+    font-size: 0.9rem;
+}
+
+.border {
+    border: 1px solid black;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin: 1px 0 1px 0;
+}
+.gray-400 {
+    background-color: rgba(184, 184, 184, 0.936);
+}
+.gray-300 {
+    background-color: rgb(236, 233, 233);
+}
+.detials {
+    width: 100%;
+    text-align: center;
+}
+
+.title {
+    float: right;
+    /* margin-left:40px;  */
+    text-align: right;
+}
+
+.detail_value {
+    float: right;
+    text-align: center;
+}
+
+.contents {
+    float: right;
+    right: 0;
+    padding-right: -40px;
+    margin-left: 200px;
+}
+
+table.table {
+    width: 95%;
+    text-align: left;
+    /* border: 2px solid black; */
+    padding: 0;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+}
+
+table.table tr td {
+    border: 1px solid black;
+    margin: 0;
+    font-size: 1rem;
+}
+
+table.table tr th {
+    border: 1px solid black;
+    margin: 0;
+    font-size: 1rem;
+    text-align: left;
+}
+
+.bottomdiv {
+    height: 30%;
+    border: 1px solid black;
+    width: 150%;
+    padding: 0px;
+    margin: 0px;
+}

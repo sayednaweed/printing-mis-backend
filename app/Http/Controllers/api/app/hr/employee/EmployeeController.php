@@ -777,7 +777,7 @@ class EmployeeController extends Controller
             'message' => __('app_translation.success')
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
-    // 
+
     protected function applyDate($query, $request)
     {
         // Apply date filtering conditionally if provided
