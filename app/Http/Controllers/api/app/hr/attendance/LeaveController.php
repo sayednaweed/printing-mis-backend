@@ -56,17 +56,15 @@ class LeaveController extends Controller
     {
         $request->validate([
             'employee_id' => 'required|exists:employees,id',
-            'leave_type_id' => 'required|exists:leave_types,id',
+            'status_id' => 'required|exists:statuses,id',
             'reason' => 'required|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
-
-
         $leave = Leave::create([
             'employee_id' => $request->employee_id,
-            'status_id' => $request->leave_type_id,
+            'status_id' => $request->status_id,
             'reason' => $request->reason,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date
@@ -138,10 +136,10 @@ class LeaveController extends Controller
     {
         $locale = App::getLocale();
         $query =  Status::join('status_trans as stt', function ($join) use ($locale) {
-            $join->on('stt.status_id', '=', 'leaves.status_id')
+            $join->on('stt.status_id', '=', 'statuses.id')
                 ->where('stt.language_name', $locale);
         })
-            ->select('stt.status_id as id', 'stt.value as leave')
+            ->select('stt.status_id as id', 'stt.value as name')
             ->where('statuses.status_type_id', StatusTypeEnum::leave_type->value)
             ->get();
 

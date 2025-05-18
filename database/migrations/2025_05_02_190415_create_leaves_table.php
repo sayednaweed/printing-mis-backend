@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('start_date');
             $table->string('end_date');
             $table->string('reason');
-            $table->unsignedBigInteger('statuse_id');
-            $table->foreign('statuse_id')->references('id')->on('statuses')
+            $table->unsignedBigInteger('status_id');
+            $table->foreign('status_id')->references('id')->on('statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('employee_id');
