@@ -39,8 +39,6 @@ class LeaveController extends Controller
                 'leaves.end_date',
             );
 
-
-
         $this->applyDate($tr, $request);
         $this->applyFilters($tr, $request);
         $this->applySearch($tr, $request);

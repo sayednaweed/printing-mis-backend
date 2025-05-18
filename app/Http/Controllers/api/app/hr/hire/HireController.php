@@ -4,11 +4,12 @@ namespace App\Http\Controllers\api\app\hr\hire;
 
 use App\Models\HireType;
 use App\Enums\LanguageEnum;
+use App\Models\HireTypeTran;
 use Illuminate\Http\Request;
+use App\Enums\Status\StatusEnum;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
-use App\Models\HireTypeTran;
 
 class HireController extends Controller
 {
@@ -39,6 +40,28 @@ class HireController extends Controller
     }
 
 
+    public function hrCodes()
+    {
+        $statuses =  [StatusEnum::working->value, StatusEnum::hired->value];
+        $tr = DB::table('employees as emp')
+            ->join('employee_statuses as es', function ($join) use ($statuses) {
+                $join->on('es.employee_id', '=', 'emp.id')
+                    ->where('es.active', 1)
+                    ->whereIn('es.status_id', $statuses);
+            })
+            ->select(
+                "emp.id",
+                "emp.picture",
+                "emp.hr_code as name",
+            )->get();
+
+        return response()->json(
+            $tr,
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
+    }
 
     public function hireType($id)
     {
