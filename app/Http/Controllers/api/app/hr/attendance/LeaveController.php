@@ -7,6 +7,7 @@ use App\Models\Leave;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\Status;
 
 class LeaveController extends Controller
@@ -74,10 +75,33 @@ class LeaveController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date
         ]);
+        $locale = App::getLocale();
+        $emp =     Employee::join('employee_trans as empt', function ($join) use ($locale) {
+            $join->on('empt.employee_id', '=', 'emp.id')
+                ->where('empt.language_name', $locale);
+        })->where('id', $request->employee_id)
+            ->select(
+                'picture',
+                'hr_code',
+                'empt.first_name',
+                'empt.last_name',
+            )->first();
 
+        $data = [
+            'employee_id' => $request->employee_id,
+            'picture' => $emp->picture,
+            'hr_code' => $emp->hr_code,
+            'first_name' => $emp->first_name,
+            'last_name' => $emp->last_name,
+            'status_id' => $request->status_id,
+            'reason' => $request->reason,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date
+        ];
         return response()->json(
             [
                 'message' => __('app_translation.success'),
+                'data' => $data,
             ],
             200,
             [],
