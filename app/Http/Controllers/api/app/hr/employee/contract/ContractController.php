@@ -18,13 +18,8 @@ class ContractController extends Controller
     {
         // $languages = ['en', 'ps', 'fa'];
         $pdfFiles = [];
-
-
         $lang = 'fa';
-
         $mpdf = $this->generatePdf();
-
-
         // $this->setWatermark($mpdf);
         $data = $this->data($lang, $id);
 
@@ -50,12 +45,6 @@ class ContractController extends Controller
 
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
-
-
-
-
-
-
 
     protected function data($lang, $id)
     {
