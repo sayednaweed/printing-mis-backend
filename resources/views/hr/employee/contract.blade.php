@@ -16,7 +16,7 @@
 
                 <div class="info">
 
-                    <img src="images/app-logo.png" alt="" class="app_logo" style="">
+                    <img src="images/app-logo-l.png" alt="" class="app_logo" style="">
                     <img src="images/waheed.jpg" alt="" class="employee_photo" style="">
                     <div class="mintext">
                         {{ $data['company_name'] }}
@@ -151,14 +151,13 @@
                                     <td class="gray-300 border" colspan="2" style="font-weight: bold;"> تاریخ شروع
                                         قرارداد:
                                     </td>
-                                    <td class=" border" colspan="3"> تاریخ شروع
-                                        قرارداد:
+                                    <td class=" border" colspan="3">
+                                        {{ $data['start_date'] }}
                                     </td>
                                     <td class="gray-300 border" colspan="3" style="font-weight: bold;"> تاریخ شروع
                                         قرارداد:
                                     </td>
-                                    <td class="border" colspan="3"> تاریخ شروع
-                                        قرارداد:
+                                    <td class="border" colspan="3"> {{ $data['end_date'] }}
                                     </td>
                                 </tr>
                                 <tr class="gray-300">
@@ -167,11 +166,11 @@
                                 </tr>
                                 <tr class="">
                                     <th colspan="2" class="border gray-300">معاش ماهوار</th>
-                                    <td colspan="2" class="border">4000</td>
+                                    <td colspan="2" class="border"> {{ $data['salary'] }}</td>
                                     <td colspan="2" class="border gray-300">اضافه کاری فی ساعت</td>
-                                    <td colspan="2" class="border">100</td>
+                                    <td colspan="2" class="border"> {{ $data['overtime'] }}</td>
                                     <td colspan="2" class="border gray-300">واحد ارز</td>
-                                    <td colspan="1" class="border">افغانی</td>
+                                    <td colspan="1" class="border"> {{ $data['currency'] }}</td>
 
                                 </tr>
 
