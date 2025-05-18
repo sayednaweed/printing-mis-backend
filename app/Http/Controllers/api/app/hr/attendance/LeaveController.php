@@ -132,4 +132,22 @@ class LeaveController extends Controller
             $query->orderBy($allowedColumns[$sort], $order);
         }
     }
+
+
+    public function leaveTypes()
+    {
+        $locale = App::getLocale();
+        $query =  Leave::join('status_trans as stt', function ($join) use ($locale) {
+            $join->on('stt.status_id', '=', 'leaves.status_id')
+                ->where('stt.language_name', $locale);
+        })
+            ->select('leaves.id', 'stt.value as leave')->get();
+
+        return response()->json(
+            $query,
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
+    }
 }
