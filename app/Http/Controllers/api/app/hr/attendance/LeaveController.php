@@ -26,13 +26,14 @@ class LeaveController extends Controller
                 $join->on('empt.employee_id', '=', 'emp.id')
                     ->where('empt.language_name', $locale);
             })
-            ->join('leave_type_trans as lett', 'lett.leave_type_id', '=', 'leaves.leave_type_id')
+            ->join('status_trans as stt', 'stt.status_id', '=', 'leaves.status_id')
             ->select(
                 'emp.id as employee_id',
+                'emp.picture',
                 'emp.hr_code',
                 'empt.first_name',
                 'empt.last_name',
-                'lett.value as leave_type',
+                'stt.value as leave_type',
                 'leaves.reason',
                 'leaves.start_date',
                 'leaves.end_date',
