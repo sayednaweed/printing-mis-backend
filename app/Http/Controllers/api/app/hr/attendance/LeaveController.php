@@ -36,8 +36,6 @@ class LeaveController extends Controller
                 'leaves.end_date',
             );
 
-
-
         $this->applyDate($tr, $request);
         $this->applyFilters($tr, $request);
         $this->applySearch($tr, $request);
@@ -66,7 +64,7 @@ class LeaveController extends Controller
 
         $leave = Leave::create([
             'employee_id' => $request->employee_id,
-            'leave_type_id' => $request->leave_type_id,
+            'status_id' => $request->leave_type_id,
             'reason' => $request->reason,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date
