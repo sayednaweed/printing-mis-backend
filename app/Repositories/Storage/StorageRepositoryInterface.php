@@ -15,4 +15,14 @@ interface StorageRepositoryInterface
      * @return boolean
      */
     public function documentStore($agreement_id, $ngo_id, $pending_task_id, ?callable $callback);
+    /**
+     * Creates a approval.
+     * 
+     *
+     * @param string employee_id
+     * @param string pending_task_id
+     * @param callable callback
+     * @return boolean
+     */
+    public function employeeDocumentStore($employee_id, $pending_task_id, ?callable $callback);
 }

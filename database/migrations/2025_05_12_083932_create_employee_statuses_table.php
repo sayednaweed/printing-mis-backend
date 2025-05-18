@@ -21,6 +21,10 @@ return new class extends Migration
             $table->foreign('employee_id')->references('id')->on('employees')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+            $table->foreignId('user_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->text('description');
             $table->boolean('active')->default(true);
             $table->timestamps();

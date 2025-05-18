@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('leave_types', function (Blueprint $table) {
+        Schema::create('application_configurations', function (Blueprint $table) {
             $table->id();
+            $table->longText('app_logo_base64')->nullable();
+            $table->longText('report_logo_base64')->nullable();
             $table->timestamps();
         });
     }
@@ -22,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('leave_types');
+        Schema::dropIfExists('application_configurations');
     }
 };

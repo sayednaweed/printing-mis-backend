@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('leave_type_trans', function (Blueprint $table) {
+        Schema::create('user_status_trans', function (Blueprint $table) {
             $table->id();
             $table->string('value');
-            $table->unsignedBigInteger('leave_type_id');
-            $table->foreign('leave_type_id')->references('id')->on('leave_types')
+            $table->unsignedBigInteger('user_statuse_id');
+            $table->foreign('user_statuse_id')->references('id')->on('user_statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->string('language_name');
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('leave_type_trans');
+        Schema::dropIfExists('user_status_trans');
     }
 };

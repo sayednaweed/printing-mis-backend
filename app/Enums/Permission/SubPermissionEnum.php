@@ -9,9 +9,11 @@ enum SubPermissionEnum: int
     */
     case hr_employees_information = 1;
     case hr_employees_promotion_demotion = 2;
+    case hr_employees_status = 3;
     public const HR_EMPLOYEES = [
         1 => "personal_information",
         2 => "promotion_demotion",
+        3 => "status",
     ];
     case hr_user_information = 11;
     case hr_user_password = 12;

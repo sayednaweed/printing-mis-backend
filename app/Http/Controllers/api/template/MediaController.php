@@ -5,7 +5,6 @@ namespace App\Http\Controllers\api\template;
 use App\Http\Controllers\Controller;
 use App\Traits\Helper\HelperTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class MediaController extends Controller
 {
@@ -24,7 +23,7 @@ class MediaController extends Controller
     public function tempMediadownload(Request $request)
     {
         $filePath = $request->input('path');
-        $path = $this->getAppPath($filePath);
+        $path = $this->getPrivatePath($filePath);
         if (!file_exists($path)) {
             return response()->json([
                 'message' => __('app_translation.not_found'),

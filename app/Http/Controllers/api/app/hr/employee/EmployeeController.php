@@ -26,6 +26,7 @@ use App\Enums\Status\StatusEnum;
 use App\Enums\Types\NidTypeEnum;
 use App\Models\PositionAssignmentDuration;
 use App\Http\Requests\app\hr\EmployeeStoreRequest;
+use App\Http\Requests\app\hr\EmployeeUpdateMoreRequest;
 use App\Http\Requests\app\hr\EmployeeUpdateRequest;
 use App\Models\EmployeeEducation;
 use App\Models\EmployeeNid;
@@ -63,7 +64,10 @@ class EmployeeController extends Controller
             })
             ->leftjoin('emails', 'emp.email_id', '=', 'emails.id')
             ->join('contacts', 'emp.contact_id', '=', 'contacts.id')
-            ->join('employee_statuses as es', 'es.employee_id', '=', 'emp.id')
+            ->join('employee_statuses as es', function ($join) {
+                $join->on('es.employee_id', '=', 'emp.id')
+                    ->where('es.active', 1);
+            })
             ->join('status_trans as st', function ($join) use ($locale) {
                 $join->on('st.status_id', '=', 'es.status_id')
                     ->where('st.language_name', $locale);
@@ -186,9 +190,10 @@ class EmployeeController extends Controller
         $employee->save();
 
         EmployeeStatus::create([
-            'status_id' => StatusEnum::active->value,
+            'status_id' => StatusEnum::hired->value,
             'employee_id' => $employee->id,
             'description' => '',
+            'user_id' => $request->user()->id,
         ]);
 
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
@@ -256,17 +261,21 @@ class EmployeeController extends Controller
             }
             $document_id = '';
 
-            $this->storageRepository->documentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
-                $checklist_id = $documentData['check_list_id'];
-                $document = Document::create([
-                    'actual_name' => $documentData['actual_name'],
-                    'size' => $documentData['size'],
-                    'path' => $documentData['path'],
-                    'type' => $documentData['type'],
-                    'check_list_id' => $checklist_id,
-                ]);
-                $document_id = $document->id;
-            });
+            $this->storageRepository->employeeDocumentStore(
+                $employee->id,
+                $task->id,
+                function ($documentData) use (&$document_id) {
+                    $checklist_id = $documentData['check_list_id'];
+                    $document = Document::create([
+                        'actual_name' => $documentData['actual_name'],
+                        'size' => $documentData['size'],
+                        'path' => $documentData['path'],
+                        'type' => $documentData['type'],
+                        'check_list_id' => $checklist_id,
+                    ]);
+                    $document_id = $document->id;
+                }
+            );
 
             EmployeeDocument::create([
                 'employee_id' => $employee->id,
@@ -283,7 +292,7 @@ class EmployeeController extends Controller
         DB::commit();
 
         $status = DB::table('status_trans as st')
-            ->where('st.status_id', '=', StatusEnum::active->value)
+            ->where('st.status_id', '=', StatusEnum::hired->value)
             ->select('st.value as status')
             ->first();
         return response()->json(
@@ -298,8 +307,8 @@ class EmployeeController extends Controller
                     "email" => $request->email,
                     "hire_date" => $request->hire_date,
                     "contact" => $request->contact,
-                    "status" => StatusEnum::active->value,
-                    "status" => $status ? $status->status : 'Active',
+                    "status" => StatusEnum::hired->value,
+                    "status_name" => $status ? $status->status : 'Hired',
                 ],
                 "message" => __('app_translation.success'),
             ],
@@ -413,6 +422,190 @@ class EmployeeController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
+
+    public function personalMoreDetial($id)
+    {
+        $locale = App::getLocale();
+        $query = DB::table('employees as emp')
+            ->where('emp.id', $id)
+            ->join('employee_nids as empn', 'empn.employee_id', '=', 'emp.id')
+            ->join('nid_type_trans as nit', function ($join) use ($locale) {
+                $join->on('nit.nid_type_id', '=', 'empn.nid_type_id')
+                    ->where('nit.language_name', $locale);
+            })
+            ->join('employee_education as empedu', 'empedu.employee_id', 'emp.id')
+            ->join('education_level_trans as edult', function ($join) use ($locale) {
+                $join->on('edult.education_level_id', '=', 'empedu.education_level_id')
+                    ->where('edult.language_name', $locale);
+            });
+        $employee = $query->select(
+            'emp.id',
+            'empn.register_number',
+            'empn.register',
+            'empn.volume',
+            'empn.page',
+            'empn.nid_type_id',
+            'nit.value as nid_type',
+            'edult.value as education_level',
+            'edult.education_level_id'
+        )->first();
+
+
+        if (!$employee) {
+            return response()->json([
+                'message' => __('app_translation.employee_not_found'),
+                'dd' => $employee,
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+        $document = DB::table('employee_documents as ed')
+            ->where('ed.employee_id', $employee->id)
+            ->join('documents as d', 'd.id', '=', 'ed.document_id')
+            ->select(
+                'd.id',
+                'd.actual_name',
+                'd.path',
+                'd.type',
+                'd.size',
+            )
+            ->first();
+
+
+        $result = [
+            'id' => $employee->id,
+            'register_no' => $employee->register_number,
+            'register' => $employee->register,
+            'volume' => $employee->volume,
+            'page' => $employee->page,
+            'identity_card' => ['id' => $employee->nid_type_id, 'name' => $employee->nid_type],
+            'education_level' => ['id' => $employee->education_level_id, 'name' => $employee->education_level],
+            'attachment' => $document ? [
+                'id' => $document->id,
+                'name' => $document->actual_name,
+                'extension' => $document->type,
+                'path' => $document->path,
+                'size' => $document->size,
+            ] : null,
+        ];
+        return response()->json([
+            'employee' => $result,
+
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+
+    // update more details 
+    public function updatePersonalMoreDetail(EmployeeUpdateMoreRequest $request)
+    {
+        $request->validated();
+        if ($request->nid_type_id == NidTypeEnum::paper_id_card->value) {
+            $request->validate([
+                'register' => 'required',
+                'volume' => 'required',
+                'page' => 'required',
+            ]);
+        } else {
+            $request->merge([
+                'volume' => null,
+                'page' => null,
+                'register' => null,
+            ]);
+        }
+
+        DB::beginTransaction();
+
+        $id = $request->id;
+        $employee = Employee::find($id);
+
+        if (!$employee) {
+            return response()->json([
+                'message' => __('app_translation.employee_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        // Update NID Info
+        $employeeNid = EmployeeNid::where('employee_id', $id)->first();
+        if ($employeeNid) {
+            $employeeNid->nid_type_id = $request->nid_type_id;
+            $employeeNid->register_number = $request->register_no;
+            $employeeNid->register = $request->register ?? null;
+            $employeeNid->volume = $request->volume ?? null;
+            $employeeNid->page = $request->page ?? null;
+            $employeeNid->save();
+        }
+
+        // Update Education
+        $employeeEdu = EmployeeEducation::where('employee_id', $id)->first();
+        if ($employeeEdu) {
+            $employeeEdu->education_level_id = $request->education_level_id;
+            $employeeEdu->save();
+        }
+
+        // Handle Attachment
+        if ($request->has_attachment) {
+            $user = $request->user();
+
+            $document = EmployeeDocument::join('documents', 'documents.id', '=', 'employee_documents.document_id')
+                ->join('check_lists', 'check_lists.id', '=', 'documents.check_list_id')
+                ->where('employee_id', $id)
+                ->where('documents.check_list_id', CheckListEnum::employee_attachment->value)
+                ->select('documents.path', 'documents.id')
+                ->first();
+
+            if ($document) {
+                $this->deleteDocument(storage_path("app/private/{$document->path}"));
+                Document::destroy($document->id);
+            }
+
+            $task = $this->pendingTaskRepository->pendingTaskExist(
+                $user,
+                CheckListTypeEnum::employee->value,
+                CheckListEnum::employee_attachment->value,
+                $employee->id
+            );
+
+            if (!$task) {
+                DB::rollBack();
+                return response()->json([
+                    'message' => __('app_translation.task_not_found'),
+                ], 404);
+            }
+
+            $document_id = null;
+
+            $this->storageRepository->employeeDocumentStore(
+                $employee->id,
+                $task->id,
+                function ($documentData) use (&$document_id) {
+                    $document = Document::create([
+                        'actual_name' => $documentData['actual_name'],
+                        'size'        => $documentData['size'],
+                        'path'        => $documentData['path'],
+                        'type'        => $documentData['type'],
+                        'check_list_id' => $documentData['check_list_id'],
+                    ]);
+                    $document_id = $document->id;
+                }
+            );
+
+            EmployeeDocument::create([
+                'employee_id' => $employee->id,
+                'document_id' => $document_id,
+            ]);
+
+            $this->pendingTaskRepository->destroyPendingTask(
+                $user,
+                CheckListTypeEnum::employee->value,
+                CheckListEnum::employee_attachment->value,
+                $employee->id
+            );
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'message' => __('app_translation.profile_changed'),
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+
     // personal detail update
     public function updatePersonalDetail(EmployeeUpdateRequest $request)
     {
@@ -509,7 +702,7 @@ class EmployeeController extends Controller
             }
             $document_id = '';
 
-            $this->storageRepository->documentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
+            $this->storageRepository->employeeDocumentStore(CheckListTypeEnum::employee->value, $user->id, $task->id, function ($documentData) use (&$document_id) {
                 $checklist_id = $documentData['check_list_id'];
                 $document = Document::create([
                     'actual_name' => $documentData['actual_name'],
@@ -584,7 +777,7 @@ class EmployeeController extends Controller
             'message' => __('app_translation.success')
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
-
+    // 
     protected function applyDate($query, $request)
     {
         // Apply date filtering conditionally if provided
@@ -598,6 +791,9 @@ class EmployeeController extends Controller
             $query->where('emp.created_at', '<=', $endDate);
         }
     }
+
+
+
     // search function 
     protected function applySearch($query, $request)
     {
@@ -618,6 +814,11 @@ class EmployeeController extends Controller
             }
         }
     }
+
+
+
+
+
     // filter function
     protected function applyFilters($query, $request)
     {
@@ -631,6 +832,9 @@ class EmployeeController extends Controller
             $query->orderBy($allowedColumns[$sort], $order);
         }
     }
+
+
+
     //
     public function employeesCount()
     {

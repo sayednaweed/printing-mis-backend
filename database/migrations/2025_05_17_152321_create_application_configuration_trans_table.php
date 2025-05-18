@@ -11,17 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('leaves', function (Blueprint $table) {
+        Schema::create('application_configuration_trans', function (Blueprint $table) {
             $table->id();
-            $table->string('start_date');
-            $table->string('end_date');
-            $table->string('reason');
-            $table->unsignedBigInteger('statuse_id');
-            $table->foreign('statuse_id')->references('id')->on('statuses')
+            $table->string('company_name');
+            $table->string('application_name');
+            $table->unsignedBigInteger('app_conf_id');
+            $table->foreign('app_conf_id')->references('id')->on('application_configurations')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('employee_id');
-            $table->foreign('employee_id')->references('id')->on('employees')
+            $table->string('language_name');
+            $table->foreign('language_name')->references('name')->on('languages')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->timestamps();
@@ -33,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('leaves');
+        Schema::dropIfExists('application_configuration_trans');
     }
 };

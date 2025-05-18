@@ -23,14 +23,9 @@ class ReportController extends Controller
             ];
         });
 
-
-        return  response()->json(
-            $data,
-            200,
-            [],
-            JSON_UNESCAPED_UNICODE
-        );
-    
-    }   
+        return response()->json([
+            'data' => $data,
+        ]);
+    }
 }
     
