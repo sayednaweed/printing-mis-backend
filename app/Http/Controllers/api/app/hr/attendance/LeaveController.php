@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 
 class LeaveController extends Controller
 {
-    //
+    
 
     public function leaveList(Request $request)
     {
