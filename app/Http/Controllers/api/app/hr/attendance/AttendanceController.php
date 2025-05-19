@@ -72,16 +72,13 @@ class AttendanceController extends Controller
         $locale = App::getLocale();
         $currentDate = Carbon::now()->toDateString();
 
-        // $time = $time ?: Carbon::now();
         $time = Carbon::now();
 
-        // Define start and end times as Carbon instances today
         $start = Carbon::createFromTime(10, 0, 0); // 10:00 AM today
-        $end = Carbon::createFromTime(2, 0, 0)->addDay(); // 2:00 AM next day
+        $end = Carbon::createFromTime(14, 0, 0);   // 2:00 PM today
 
-        // Because interval crosses midnight, check two conditions:
-        if ($time->between($start, $end)) {
-            // Inside interval: do not return any message
+        if (! $time->between($start, $end)) {
+            // Outside 10 AM - 2 PM interval, return message
             return response()->json([
                 'message' => __('app_translation.worng_time'),
             ], 404, [], JSON_UNESCAPED_UNICODE);
