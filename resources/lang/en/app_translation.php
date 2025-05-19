@@ -53,4 +53,5 @@ return [
     "employee_not_found" => "Employee not found.",
     "salary" => "Salary",
     'attendance' => "Attendance",
+    'already_leave_exists' => "This Employee aleardy in leave",
 ];
