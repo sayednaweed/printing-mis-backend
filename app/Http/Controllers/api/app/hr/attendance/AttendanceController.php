@@ -125,6 +125,7 @@ class AttendanceController extends Controller
                 'picture' => $emp->picture,
                 'first_name' => $emp->first_name,
                 'last_name' => $emp->last_name,
+                'detail' => '',
                 'status' => $statuses->values(),
             ];
         });
