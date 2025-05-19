@@ -6,8 +6,6 @@ use App\Models\Leave;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
-use App\Models\Employee;
-use App\Models\Status;
 use Illuminate\Support\Facades\DB;
 
 class LeaveController extends Controller
