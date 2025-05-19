@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AttendanceStatusTran;
 use App\Enums\Attendance\AttendanceStatusEnum;
 use App\Http\Requests\hr\attendance\StoreAttendanceRequest;
+use App\Models\AttendanceStatus;
 
 class AttendanceController extends Controller
 {
@@ -63,12 +64,29 @@ class AttendanceController extends Controller
 
 
 
+
+
     public function employeeList()
     {
-        $locale = App::getLocale();
-        $currentDate = Carbon::now()->toDateString(); // Already formatted
 
-        // Fetch employees with translations and leave info
+        $locale = App::getLocale();
+        $currentDate = Carbon::now()->toDateString();
+
+        // $time = $time ?: Carbon::now();
+        $time = Carbon::now();
+
+        // Define start and end times as Carbon instances today
+        $start = Carbon::createFromTime(10, 0, 0); // 10:00 AM today
+        $end = Carbon::createFromTime(2, 0, 0)->addDay(); // 2:00 AM next day
+
+        // Because interval crosses midnight, check two conditions:
+        if ($time->between($start, $end)) {
+            // Inside interval: do not return any message
+            return response()->json([
+                'message' => __('app_translation.worng_time'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+
         $employees = DB::table('employees as emp')
             ->join('employee_trans as empt', function ($join) use ($locale) {
                 $join->on('emp.id', '=', 'empt.employee_id')
@@ -85,37 +103,50 @@ class AttendanceController extends Controller
                 'emp.hr_code',
                 'empt.first_name',
                 'empt.last_name',
-                DB::raw('IF(lv.id IS NOT NULL, 1, 0) as is_on_leave')
+                DB::raw('CASE WHEN lv.id IS NOT NULL THEN 1 ELSE 0 END as has_leave')
             )
             ->get();
 
-        // Fetch attendance statuses, separating "Leave" status
-
+        // Attendance statuses without leave
         $leaveStatusValue = AttendanceStatusEnum::leave->value;
+        $absentStatusValue = AttendanceStatusEnum::absent->value;
 
-        $statusWithoutLeave = AttendanceStatusTran::where('language_name', $locale)
-            ->whereNotIn('attendance_status_id', [$leaveStatusValue]) // Exclude "Leave"
+        $statuses = AttendanceStatusTran::where('language_name', $locale)
             ->select('value as status', 'attendance_status_id as status_id')
             ->get();
 
 
-        // Build employee response list
-        $data = $employees->map(function ($emp) {
+
+        $data = $employees->map(function ($emp) use ($statuses, $leaveStatusValue, $absentStatusValue) {
+
+            $statuses = $statuses->map(function ($status) use ($emp, $leaveStatusValue, $absentStatusValue) {
+
+                $selected = $emp->has_leave
+                    ? ($status->status_id === $leaveStatusValue)
+                    : ($status->status_id === $absentStatusValue);
+
+                return [
+                    'status' => $status->status,
+                    'status_id' => $status->status_id,
+                    'selected' => $selected,
+                ];
+            });
+
             return [
                 'id' => $emp->id,
                 'hr_code' => $emp->hr_code,
                 'picture' => $emp->picture,
                 'first_name' => $emp->first_name,
                 'last_name' => $emp->last_name,
-                'status' => $emp->is_on_leave ? 1 : 0
+                'status' => $statuses->values(),
             ];
         });
 
         return response()->json([
-            'statuses' => $statusWithoutLeave->values(),
             'data' => $data,
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
+
 
 
     /**
