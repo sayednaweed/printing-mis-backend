@@ -65,13 +65,20 @@ class LeaveController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
         $locale = App::getLocale();
+        $authUser = $request->user();
         $employee = DB::table('employees as e')
             ->where('e.id', $request->employee_id)
             ->join('employee_trans as et', function ($join) use (&$locale) {
                 $join->on('et.employee_id', '=', 'e.id')
                     ->where('et.language_name', $locale);
             })
-            ->select('et.first_name', 'et.last_name', 'e.hr_code', 'e.picture')
+            ->select(
+                'et.first_name',
+                'et.last_name',
+                'e.hr_code',
+                'e.picture',
+                'e.id'
+            )
             ->first();
         if (!$employee) {
             return response()->json(
@@ -85,6 +92,7 @@ class LeaveController extends Controller
         }
 
         $leave = Leave::create([
+            'user_id' => $authUser->id,
             'employee_id' => $request->employee_id,
             'status_id' => $request->status_id,
             'reason' => $request->reason,
@@ -102,7 +110,7 @@ class LeaveController extends Controller
                     'start_date' => $leave->start_date,
                     'end_date' => $leave->end_date,
                     'leave_type' => $request->status,
-                    'saved_by' => $request->user()->username,
+                    'saved_by' => $authUser->username,
                     'created_at' => $leave->created_at,
                 ]
             ],
@@ -171,8 +179,6 @@ class LeaveController extends Controller
             ]
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
-
-
     // 
     protected function applyDate($query, $request)
     {
