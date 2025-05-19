@@ -5,62 +5,94 @@ namespace App\Http\Controllers\api\app\hr\attendance;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Models\AttendanceStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Models\AttendanceStatusTran;
 use App\Enums\Attendance\AttendanceStatusEnum;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Requests\hr\attendance\StoreAttendanceRequest;
-use App\Models\AttendanceStatus;
 
 class AttendanceController extends Controller
 {
 
+
     public function index(Request $request)
     {
         $locale = App::getLocale();
-        $tr = [];
-        $perPage = $request->input('per_page', 10); // Number of records per page
-        $page = $request->input('page', 1); // Current page
+        $perPage = $request->input('per_page', 10); // Records per page
+        $page = $request->input('page', 1);         // Current page
 
-        $tr =  Attendance::join('employees as emp', 'attendances.employee_id', '=', 'emp.id')
-            ->join('employee_trans as empt', function ($join) use ($locale) {
-                $join->on('empt.employee_id', '=', 'emp.id')
-                    ->where('empt.language_name', $locale);
-            })
-            ->join(
-                'attendance_status_trans as astt',
-                function ($join) use ($locale) {
-                    $join->on('astt.attendance_status_id', '=', 'attendances.attendance_status_id')
-                        ->where('astt.language_name', $locale);
-                }
-            )
+        // Get status IDs
+        $absentId = AttendanceStatusEnum::absent->value;
+        $presentId = AttendanceStatusEnum::present->value;
+        $leaveId = AttendanceStatusEnum::leave->value;
+
+        // Fetch grouped raw attendance data
+        $rawResults = DB::table('attendances as att')
+            ->join('users as us', 'us.id', '=', 'att.taken_by_id')
             ->select(
-                'emp.id as employee_id',
-                'emp.hr_code',
-                'empt.first_name',
-                'empt.last_name',
-                'astt.value as attendance_status',
-                'check_in_time',
-                'check_out_time' ?? '',
+                'att.taken_by_id',
+                DB::raw('DATE(att.created_at) as date'),
+                'att.attendance_status_id',
+                'us.username',
+                DB::raw('COUNT(*) as total')
+            )
+            ->groupBy('att.taken_by_id', DB::raw('DATE(att.created_at)'), 'att.attendance_status_id', 'us.username')
+            ->get();
 
-            );
+        // Group by taken_by_id and date
+        $grouped = $rawResults->groupBy(function ($item) {
+            return $item->taken_by_id . '|' . $item->date;
+        });
 
+        // Format the summary collection
+        $summary = $grouped->map(function ($group) use ($absentId, $presentId, $leaveId) {
+            $result = [
+                'present' => 0,
+                'absent' => 0,
+                'leave' => 0,
+                'other' => 0,
+                'username' => $group->first()->username,
+                'date' => $group->first()->date,
+            ];
 
+            foreach ($group as $record) {
+                switch ($record->attendance_status_id) {
+                    case $presentId:
+                        $result['present'] += $record->total;
+                        break;
+                    case $absentId:
+                        $result['absent'] += $record->total;
+                        break;
+                    case $leaveId:
+                        $result['leave'] += $record->total;
+                        break;
+                    default:
+                        $result['other'] += $record->total;
+                }
+            }
 
-        $this->applyDate($tr, $request);
-        $this->applyFilters($tr, $request);
-        $this->applySearch($tr, $request);
+            return $result;
+        })->values();
 
-        // Apply pagination (ensure you're paginating after sorting and filtering)
-        $query = $tr->paginate($perPage, ['*'], 'page', $page);
-        return response()->json(
-            $query,
-            200,
-            [],
-            JSON_UNESCAPED_UNICODE
-        );
+        // Apply filters **before** pagination
+        $this->applyDate($summary, $request);
+        $this->applyFilters($summary, $request);
+        $this->applySearch($summary, $request);
+
+        // Paginate after filtering
+        $total = $summary->count();
+        $items = $summary->slice(($page - 1) * $perPage, $perPage)->values();
+        $paginated = new LengthAwarePaginator($items, $total, $perPage, $page, [
+            'path' => $request->url(),
+            'query' => $request->query(),
+        ]);
+
+        return response()->json($paginated, 200, [], JSON_UNESCAPED_UNICODE);
     }
+
 
     public function employeeAttendance()
     {
