@@ -198,7 +198,7 @@ class LeaveController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'leave_id' => 'required|exists:leaves,id',
+            'id' => 'required|exists:leaves,id',
             'employee_id' => 'required|exists:employees,id',
             'status_id' => 'required|exists:statuses,id',
             'reason' => 'required|string|max:255',
@@ -225,7 +225,7 @@ class LeaveController extends Controller
         }
 
         // Find the existing leave record
-        $leave = Leave::find($request->leave_id);
+        $leave = Leave::find($request->id);
         if (!$leave) {
             return response()->json([
                 'message' => __('app_translation.leave_not_found'),
