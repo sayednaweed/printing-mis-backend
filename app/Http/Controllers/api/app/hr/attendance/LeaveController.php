@@ -57,7 +57,6 @@ class LeaveController extends Controller
 
     public function store(Request $request)
     {
-
         $request->validate([
             'employee_id' => 'required',
             'status_id' => 'required|exists:statuses,id',
@@ -104,7 +103,7 @@ class LeaveController extends Controller
             );
         }
 
-        DB::transaction();
+        DB::beginTransaction();
 
         $leave = Leave::create([
             'user_id' => $authUser->id,
@@ -143,7 +142,7 @@ class LeaveController extends Controller
         $leave = DB::table('leaves as l')
             ->where('l.id', $id)
             ->join('status_trans as stt', function ($join) use ($locale) {
-                $join->on('stt.status_id', '=', 'leaves.status_id')
+                $join->on('stt.status_id', '=', 'l.status_id')
                     ->where('stt.language_name', $locale);
             })
             ->select(
@@ -171,7 +170,7 @@ class LeaveController extends Controller
                 $join->on('et.employee_id', '=', 'e.id')
                     ->where('et.language_name', $locale);
             })
-            ->select('et.first_name', 'et.last_name', 'e.hr_code')
+            ->select('e.id', 'et.first_name', 'et.last_name', 'e.hr_code')
             ->first();
 
         if (!$employee) {
@@ -182,30 +181,28 @@ class LeaveController extends Controller
 
         return response()->json([
             'leave' => [
-                'id' => $leave->id,
-                'employee_id' => $leave->employee_id,
-                'status' => ['id' => $leave->status_id, 'status' => $leave->status],
+                'leave_id' => $leave->id,
+                'hr_code' => ['name' => $employee->hr_code, 'id' => $employee->id],
+                'leave_type' => ['id' => $leave->status_id, 'name' => $leave->status],
                 'reason' => $leave->reason,
                 'start_date' => $leave->start_date,
                 'end_date' => $leave->end_date,
-                'hr_code' => $employee->hr_code,
                 'employee_name' => $employee->first_name . ' ' . $employee->last_name,
                 'created_at' => $leave->created_at,
             ]
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $leave_id)
     {
         $request->validate([
-            'id' => 'required',
             'status_id' => 'required|exists:statuses,id',
             'reason' => 'required|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
         $locale = App::getLocale();
-        $leave = Leave::find($id);
+        $leave = Leave::find($leave_id);
         if (!$leave) {
             return response()->json([
                 'message' => __('app_translation.leave_not_found'),
@@ -226,7 +223,8 @@ class LeaveController extends Controller
                 'message' => __('app_translation.employee_not_found'),
             ], 404, [], JSON_UNESCAPED_UNICODE);
         }
-        DB::transaction();
+        DB::beginTransaction();
+
         // Update the leave
         $leave->update([
             'status_id' => $request->status_id,
@@ -246,7 +244,7 @@ class LeaveController extends Controller
                 'end_date' => $leave->end_date,
                 'leave_type' => $request->status, // You may want to get the actual status name here
                 'saved_by' => $request->user()->username,
-                'updated_at' => $leave->updated_at,
+                'created_at' => $leave->created_at,
             ]
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
