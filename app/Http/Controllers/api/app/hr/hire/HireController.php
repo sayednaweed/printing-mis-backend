@@ -109,9 +109,9 @@ class HireController extends Controller
 
         $request->validate([
             'description' => 'string',
-            'name_english' => 'required|string',
-            'name_pashto' => 'required|string',
-            'name_farsi' => 'required|string',
+            'english' => 'required|string',
+            'pashto' => 'required|string',
+            'farsi' => 'required|string',
         ]);
 
         $hiretype = HireType::create(['description' => $request->description]);

@@ -6,6 +6,7 @@ use App\Models\Leave;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use Illuminate\Support\Facades\DB;
 
 class LeaveController extends Controller
@@ -56,6 +57,7 @@ class LeaveController extends Controller
 
     public function store(Request $request)
     {
+
         $request->validate([
             'employee_id' => 'required',
             'status_id' => 'required|exists:statuses,id',
@@ -63,6 +65,18 @@ class LeaveController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
+
+        $exists = Leave::where('employee_id', $request->employee_id)
+            ->where('end_date', '>=', now())
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'message' => __('app_translation.already_leave_exists'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+
+
         $locale = App::getLocale();
         $authUser = $request->user();
         $employee = DB::table('employees as e')
@@ -90,6 +104,8 @@ class LeaveController extends Controller
             );
         }
 
+        DB::transaction();
+
         $leave = Leave::create([
             'user_id' => $authUser->id,
             'employee_id' => $request->employee_id,
@@ -98,6 +114,7 @@ class LeaveController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date
         ]);
+        DB::commit();
         return response()->json(
             [
                 'message' => __('app_translation.success'),
@@ -125,12 +142,15 @@ class LeaveController extends Controller
         // Find the leave with joined status
         $leave = DB::table('leaves as l')
             ->where('l.id', $id)
-            ->join('statuses as s', 's.id', '=', 'l.status_id')
+            ->join('status_trans as stt', function ($join) use ($locale) {
+                $join->on('stt.status_id', '=', 'leaves.status_id')
+                    ->where('stt.language_name', $locale);
+            })
             ->select(
                 'l.id',
                 'l.employee_id',
                 'l.status_id',
-                's.name as status',
+                'stt.value as status',
                 'l.reason',
                 'l.start_date',
                 'l.end_date',
@@ -151,7 +171,7 @@ class LeaveController extends Controller
                 $join->on('et.employee_id', '=', 'e.id')
                     ->where('et.language_name', $locale);
             })
-            ->select('et.first_name', 'et.last_name', 'e.hr_code', 'e.picture')
+            ->select('et.first_name', 'et.last_name', 'e.hr_code')
             ->first();
 
         if (!$employee) {
@@ -168,7 +188,6 @@ class LeaveController extends Controller
                 'reason' => $leave->reason,
                 'start_date' => $leave->start_date,
                 'end_date' => $leave->end_date,
-                'profile' => $employee->picture,
                 'hr_code' => $employee->hr_code,
                 'employee_name' => $employee->first_name . ' ' . $employee->last_name,
                 'created_at' => $leave->created_at,
@@ -179,6 +198,7 @@ class LeaveController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
+            'id' => 'required',
             'status_id' => 'required|exists:statuses,id',
             'reason' => 'required|string|max:255',
             'start_date' => 'required|date',
@@ -206,7 +226,7 @@ class LeaveController extends Controller
                 'message' => __('app_translation.employee_not_found'),
             ], 404, [], JSON_UNESCAPED_UNICODE);
         }
-
+        DB::transaction();
         // Update the leave
         $leave->update([
             'status_id' => $request->status_id,
@@ -215,6 +235,7 @@ class LeaveController extends Controller
             'end_date' => $request->end_date
         ]);
 
+        DB::commit();
         return response()->json([
             'message' => __('app_translation.success'),
             'leave' => [
