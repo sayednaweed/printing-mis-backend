@@ -40,8 +40,6 @@ class LeaveController extends Controller
                 'leaves.end_date',
             );
 
-
-
         $this->applyDate($tr, $request);
         $this->applyFilters($tr, $request);
         $this->applySearch($tr, $request);
@@ -65,8 +63,6 @@ class LeaveController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
-
-
 
         $leave = Leave::create([
             'employee_id' => $request->employee_id,
@@ -165,10 +161,10 @@ class LeaveController extends Controller
     {
         $locale = App::getLocale();
         $query =  Status::join('status_trans as stt', function ($join) use ($locale) {
-            $join->on('stt.status_id', '=', 'leaves.status_id')
+            $join->on('stt.status_id', '=', 'statuses.id')
                 ->where('stt.language_name', $locale);
         })
-            ->select('stt.status_id as id', 'stt.value as leave')
+            ->select('stt.status_id as id', 'stt.value as name')
             ->where('statuses.status_type_id', StatusTypeEnum::leave_type->value)
             ->get();
 

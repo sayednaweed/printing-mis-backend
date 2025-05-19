@@ -734,6 +734,7 @@ class EmployeeController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
+
     public function updateProfilePicture(Request $request)
     {
         $request->validate([

@@ -317,6 +317,25 @@ class DatabaseSeeder extends Seeder
             "language_name" => "ps",
         ]);
         $status = Status::factory()->create([
+            'id' => StatusEnum::working->value,
+            'status_type_id' => StatusTypeEnum::employement->value,
+        ]);
+        StatusTran::factory()->create([
+            "value" => "Working",
+            "status_id" => $status->id,
+            "language_name" => "en",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "کار کردن",
+            "status_id" => $status->id,
+            "language_name" => "fa",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "کار کول",
+            "status_id" => $status->id,
+            "language_name" => "ps",
+        ]);
+        $status = Status::factory()->create([
             'id' => StatusEnum::active->value,
             'status_type_id' => StatusTypeEnum::user_status->value,
         ]);
@@ -351,6 +370,25 @@ class DatabaseSeeder extends Seeder
         ]);
         StatusTran::factory()->create([
             "value" => "غیرفعال",
+            "status_id" => $status->id,
+            "language_name" => "ps",
+        ]);
+        $status = Status::factory()->create([
+            'id' => StatusEnum::sick->value,
+            'status_type_id' => StatusTypeEnum::leave_type->value,
+        ]);
+        StatusTran::factory()->create([
+            "value" => "Sick",
+            "status_id" => $status->id,
+            "language_name" => "en",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "بیمار",
+            "status_id" => $status->id,
+            "language_name" => "fa",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "ناروغه",
             "status_id" => $status->id,
             "language_name" => "ps",
         ]);
