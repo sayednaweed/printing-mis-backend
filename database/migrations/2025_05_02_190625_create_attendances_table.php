@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
-            $table->string('check_in_time');
-            $table->string('check_out_time');
+            $table->string('check_in_time')->nullable();
+            $table->string('check_out_time')->nullable();
             $table->string('description');
             $table->unsignedBigInteger('taken_by_id');
             $table->foreign('taken_by_id')->references('id')->on('users')
@@ -24,7 +24,6 @@ return new class extends Migration
             $table->foreign('attendance_status_id')->references('id')->on('attendance_statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-
             $table->unsignedBigInteger('employee_id');
             $table->foreign('employee_id')->references('id')->on('employees')
                 ->onUpdate('cascade')

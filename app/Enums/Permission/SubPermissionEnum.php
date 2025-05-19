@@ -45,8 +45,10 @@ enum SubPermissionEnum: int
     EXPENSE SECTION
     */
     case expense_configuration_expense_type = 51;
+    case expense_configuration_expense_icon = 52;
     public const EXPENSE_CONFIGURATIONS = [
         51 => "expense_type",
+        52 => "expense_icon",
     ];
         /*
     INVENTORY SECTION

@@ -26,7 +26,7 @@ class IconAndExpenseTypeSeeder extends Seeder
         $items = [
 
             [
-                'path' => 'icons/air-conditioner.svg',
+                'path' => 'icons/expense-icons/air-conditioner.svg',
                 'translations' => [
                     'en' => 'conditioner',
                     'fa' => 'برق',
@@ -39,7 +39,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/battery.svg',
+                'path' => 'icons/expense-icons/battery.svg',
                 'translations' => [
                     'en' => 'battery',
                     'fa' => 'بطری',
@@ -52,7 +52,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/bill.svg',
+                'path' => 'icons/expense-icons/bill.svg',
                 'translations' => [
                     'en' => 'bill',
                     'fa' => 'بل',
@@ -65,7 +65,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/bread.svg',
+                'path' => 'icons/expense-icons/bread.svg',
                 'translations' => [
                     'en' => 'bread',
                     'fa' => 'نان',
@@ -78,7 +78,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/calendar.svg',
+                'path' => 'icons/expense-icons/calendar.svg',
                 'translations' => [
                     'en' => 'calendar',
                     'fa' => 'تقویم',
@@ -91,7 +91,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/camera.svg',
+                'path' => 'icons/expense-icons/camera.svg',
                 'translations' => [
                     'en' => 'camera',
                     'fa' => 'کمره',
@@ -104,7 +104,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/cardholder.svg',
+                'path' => 'icons/expense-icons/cardholder.svg',
                 'translations' => [
                     'en' => 'cardholder',
                     'fa' => 'پوش کارت',
@@ -117,7 +117,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/chair.svg',
+                'path' => 'icons/expense-icons/chair.svg',
                 'translations' => [
                     'en' => 'chair',
                     'fa' => 'چوکی ',
@@ -130,7 +130,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/clock.svg',
+                'path' => 'icons/expense-icons/clock.svg',
                 'translations' => [
                     'en' => 'clock',
                     'fa' => 'ساعت ',
@@ -143,7 +143,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/closet.svg',
+                'path' => 'icons/expense-icons/closet.svg',
                 'translations' => [
                     'en' => 'closet',
                     'fa' => 'الماری ',
@@ -156,7 +156,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/monitor.svg',
+                'path' => 'icons/expense-icons/monitor.svg',
                 'translations' => [
                     'en' => 'monitor',
                     'fa' => 'مانیتور ',
@@ -169,7 +169,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/drink.svg',
+                'path' => 'icons/expense-icons/drink.svg',
                 'translations' => [
                     'en' => 'drink',
                     'fa' => 'نوشیدنی  ',
@@ -182,7 +182,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/flash-drive.svg',
+                'path' => 'icons/expense-icons/flash-drive.svg',
                 'translations' => [
                     'en' => 'flash-drive',
                     'fa' => 'فلش درایف',
@@ -195,7 +195,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/fuel.svg',
+                'path' => 'icons/expense-icons/fuel.svg',
                 'translations' => [
                     'en' => 'fuel',
                     'fa' => 'تیل ',
@@ -208,7 +208,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/generator.svg',
+                'path' => 'icons/expense-icons/generator.svg',
                 'translations' => [
                     'en' => 'generator',
                     'fa' => 'جنراتور ',
@@ -221,7 +221,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/wifi.svg',
+                'path' => 'icons/expense-icons/wifi.svg',
                 'translations' => [
                     'en' => 'wifi',
                     'fa' => 'وایفای ',
@@ -234,7 +234,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/hosting.svg',
+                'path' => 'icons/expense-icons/hosting.svg',
                 'translations' => [
                     'en' => 'hosting',
                     'fa' => 'هاستینگ ',
@@ -247,7 +247,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/internet.svg',
+                'path' => 'icons/expense-icons/internet.svg',
                 'translations' => [
                     'en' => 'internet',
                     'fa' => 'انترنیت ',
@@ -260,7 +260,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/internet-cable.svg',
+                'path' => 'icons/expense-icons/internet-cable.svg',
                 'translations' => [
                     'en' => 'internet-cable',
                     'fa' => 'کیبل انترنیت  ',
@@ -273,7 +273,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/keyboard.svg',
+                'path' => 'icons/expense-icons/keyboard.svg',
                 'translations' => [
                     'en' => 'keyboard',
                     'fa' => 'کیبورد',
@@ -286,7 +286,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/laptop.svg',
+                'path' => 'icons/expense-icons/laptop.svg',
                 'translations' => [
                     'en' => 'laptop',
                     'fa' => 'لبتاپ',
@@ -299,7 +299,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/light.svg',
+                'path' => 'icons/expense-icons/light.svg',
                 'translations' => [
                     'en' => 'light',
                     'fa' => 'گروپ',
@@ -312,7 +312,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/maintenance.svg',
+                'path' => 'icons/expense-icons/maintenance.svg',
                 'translations' => [
                     'en' => 'maintenance',
                     'fa' => 'نگهداری ',
@@ -325,7 +325,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/medical-kit.svg',
+                'path' => 'icons/expense-icons/medical-kit.svg',
                 'translations' => [
                     'en' => 'medical kit',
                     'fa' => 'کمک های اولیه',
@@ -338,7 +338,7 @@ class IconAndExpenseTypeSeeder extends Seeder
                 ]
             ],
             [
-                'path' => 'icons/microphone.svg',
+                'path' => 'icons/expense-icons/microphone.svg',
                 'translations' => [
                     'en' => 'microphone',
                     'fa' => 'میکروفون ',
@@ -384,7 +384,7 @@ class IconAndExpenseTypeSeeder extends Seeder
     //  {
 
     //     $icon =   Icon::create([
-    //         'path' => 'icons/'.'',
+    //         'path' => 'icons/expense-icons/'.'',
     //     ]);
     //     IconTran::create([
     //         'language_name' => 'en',
