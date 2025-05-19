@@ -142,12 +142,15 @@ class LeaveController extends Controller
         // Find the leave with joined status
         $leave = DB::table('leaves as l')
             ->where('l.id', $id)
-            ->join('statuses as s', 's.id', '=', 'l.status_id')
+            ->join('status_trans as stt', function ($join) use ($locale) {
+                $join->on('stt.status_id', '=', 'leaves.status_id')
+                    ->where('stt.language_name', $locale);
+            })
             ->select(
                 'l.id',
                 'l.employee_id',
                 'l.status_id',
-                's.value as status',
+                'stt.value as status',
                 'l.reason',
                 'l.start_date',
                 'l.end_date',
