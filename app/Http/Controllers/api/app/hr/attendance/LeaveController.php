@@ -91,6 +91,7 @@ class LeaveController extends Controller
             [
                 'message' => __('app_translation.success'),
                 'leave' => [
+                    'id' => $employee->id,
                     'profile' => $employee->picture,
                     'hr_code' => $employee->hr_code,
                     'employee_name' => $employee->first_name . ' ' . $employee->last_name,
