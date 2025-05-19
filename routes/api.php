@@ -30,6 +30,7 @@ require __DIR__ . '/api/app/hr/positions.php';
 require __DIR__ . '/api/app/hr/attendance.php';
 require __DIR__ . '/api/app/hr/positionChangeType.php';
 require __DIR__ . '/api/app/hr/leave.php';
+require __DIR__ . '/api/app/hr/leaveType.php';
 require __DIR__ . '/api/app/hr/education.php';
 require __DIR__ . '/api/app/hr/report.php';
 require __DIR__ . '/api/app/hr/status.php';
