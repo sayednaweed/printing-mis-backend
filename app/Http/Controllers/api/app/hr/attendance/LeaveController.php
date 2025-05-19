@@ -176,7 +176,6 @@ class LeaveController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-
     public function update(Request $request)
     {
         $request->validate([
