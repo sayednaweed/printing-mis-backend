@@ -30,7 +30,7 @@ class LeaveController extends Controller
             ->select(
                 'leaves.id as id',
                 'emp.picture',
-                'us.full_name as user',
+                'us.full_name as saved_by',
                 'emp.hr_code',
                 DB::raw("CONCAT(empt.first_name, ' ', empt.last_name) as employee_name"),
                 'stt.value as leave_type',
@@ -176,19 +176,21 @@ class LeaveController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function update(Request $request)
+    public function update(Request $request, string $id)
     {
         $request->validate([
-            'leave_id' => 'required|exists:leaves,id',
-            'employee_id' => 'required|exists:employees,id',
             'status_id' => 'required|exists:statuses,id',
             'reason' => 'required|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
-
         $locale = App::getLocale();
-
+        $leave = Leave::find($id);
+        if (!$leave) {
+            return response()->json([
+                'message' => __('app_translation.leave_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
         // Get employee translation
         $employee = DB::table('employees as e')
             ->where('e.id', $request->employee_id)
@@ -205,17 +207,8 @@ class LeaveController extends Controller
             ], 404, [], JSON_UNESCAPED_UNICODE);
         }
 
-        // Find the existing leave record
-        $leave = Leave::find($request->leave_id);
-        if (!$leave) {
-            return response()->json([
-                'message' => __('app_translation.leave_not_found'),
-            ], 404, [], JSON_UNESCAPED_UNICODE);
-        }
-
         // Update the leave
         $leave->update([
-            'employee_id' => $request->employee_id,
             'status_id' => $request->status_id,
             'reason' => $request->reason,
             'start_date' => $request->start_date,
