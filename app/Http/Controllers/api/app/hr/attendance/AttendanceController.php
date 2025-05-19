@@ -134,8 +134,6 @@ class AttendanceController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-
-
     /**
      * Store a newly created resource in storage.
      */
