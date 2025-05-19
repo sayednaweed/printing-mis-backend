@@ -34,8 +34,7 @@ class LeaveController extends Controller
                 'emp.picture',
                 'us.full_name as user',
                 'emp.hr_code',
-                'empt.first_name',
-                'empt.last_name',
+                DB::raw("CONCAT(empt.first_name, ' ', empt.last_name) as employee_name"),
                 'stt.value as leave_type',
                 'leaves.reason',
                 'leaves.start_date',
@@ -113,6 +112,65 @@ class LeaveController extends Controller
             JSON_UNESCAPED_UNICODE
         );
     }
+    public function edit($id)
+    {
+        $locale = App::getLocale();
+
+        // Find the leave with joined status
+        $leave = DB::table('leaves as l')
+            ->where('l.id', $id)
+            ->join('statuses as s', 's.id', '=', 'l.status_id')
+            ->select(
+                'l.id',
+                'l.employee_id',
+                'l.status_id',
+                's.name as status',
+                'l.reason',
+                'l.start_date',
+                'l.end_date',
+                'l.created_at'
+            )
+            ->first();
+
+        if (!$leave) {
+            return response()->json([
+                'message' => __('app_translation.leave_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        // Get employee translation
+        $employee = DB::table('employees as e')
+            ->where('e.id', $leave->employee_id)
+            ->join('employee_trans as et', function ($join) use ($locale) {
+                $join->on('et.employee_id', '=', 'e.id')
+                    ->where('et.language_name', $locale);
+            })
+            ->select('et.first_name', 'et.last_name', 'e.hr_code', 'e.picture')
+            ->first();
+
+        if (!$employee) {
+            return response()->json([
+                'message' => __('app_translation.employee_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        return response()->json([
+            'leave' => [
+                'id' => $leave->id,
+                'employee_id' => $leave->employee_id,
+                'status' => ['id' => $leave->status_id, 'status' => $leave->status],
+                'reason' => $leave->reason,
+                'start_date' => $leave->start_date,
+                'end_date' => $leave->end_date,
+                'profile' => $employee->picture,
+                'hr_code' => $employee->hr_code,
+                'employee_name' => $employee->first_name . ' ' . $employee->last_name,
+                'created_at' => $leave->created_at,
+            ]
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+
+
     public function update(Request $request)
     {
         $request->validate([
