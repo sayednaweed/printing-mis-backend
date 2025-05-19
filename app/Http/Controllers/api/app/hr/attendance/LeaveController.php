@@ -24,10 +24,15 @@ class LeaveController extends Controller
                 $join->on('empt.employee_id', '=', 'emp.id')
                     ->where('empt.language_name', $locale);
             })
-            ->join('status_trans as stt', 'stt.status_id', '=', 'leaves.status_id')
+            ->join('users as us', 'us.id', '=', 'leaves.user_id')
+            ->join('status_trans as stt', function ($join) use ($locale) {
+                $join->on('stt.status_id', '=', 'leaves.status_id')
+                    ->where('stt.language_name', $locale);
+            })
             ->select(
-                'emp.id as employee_id',
+                'leaves.id as id',
                 'emp.picture',
+                'us.full_name as user',
                 'emp.hr_code',
                 'empt.first_name',
                 'empt.last_name',
@@ -35,6 +40,7 @@ class LeaveController extends Controller
                 'leaves.reason',
                 'leaves.start_date',
                 'leaves.end_date',
+                'leaves.created_at'
             );
 
         $this->applyDate($tr, $request);
@@ -110,33 +116,42 @@ class LeaveController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'employee_id' => 'required',
+            'leave_id' => 'required|exists:leaves,id',
+            'employee_id' => 'required|exists:employees,id',
             'status_id' => 'required|exists:statuses,id',
             'reason' => 'required|string|max:255',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
+
         $locale = App::getLocale();
+
+        // Get employee translation
         $employee = DB::table('employees as e')
             ->where('e.id', $request->employee_id)
-            ->join('employee_trans as et', function ($join) use (&$locale) {
+            ->join('employee_trans as et', function ($join) use ($locale) {
                 $join->on('et.employee_id', '=', 'e.id')
                     ->where('et.language_name', $locale);
             })
             ->select('et.first_name', 'et.last_name', 'e.hr_code', 'e.picture')
             ->first();
+
         if (!$employee) {
-            return response()->json(
-                [
-                    'message' => __('app_translation.employee_not_found'),
-                ],
-                404,
-                [],
-                JSON_UNESCAPED_UNICODE
-            );
+            return response()->json([
+                'message' => __('app_translation.employee_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
         }
 
-        $leave = Leave::create([
+        // Find the existing leave record
+        $leave = Leave::find($request->leave_id);
+        if (!$leave) {
+            return response()->json([
+                'message' => __('app_translation.leave_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        // Update the leave
+        $leave->update([
             'employee_id' => $request->employee_id,
             'status_id' => $request->status_id,
             'reason' => $request->reason,
@@ -144,25 +159,21 @@ class LeaveController extends Controller
             'end_date' => $request->end_date
         ]);
 
-        return response()->json(
-            [
-                'message' => __('app_translation.success'),
-                'leave' => [
-                    'profile' => $employee->picture,
-                    'hr_code' => $employee->hr_code,
-                    'employee_name' => $employee->first_name . ' ' . $employee->last_name,
-                    'start_date' => $leave->start_date,
-                    'end_date' => $leave->end_date,
-                    'leave_type' => $request->status,
-                    'saved_by' => $request->user()->username,
-                    'created_at' => $leave->created_at,
-                ]
-            ],
-            200,
-            [],
-            JSON_UNESCAPED_UNICODE
-        );
+        return response()->json([
+            'message' => __('app_translation.success'),
+            'leave' => [
+                'profile' => $employee->picture,
+                'hr_code' => $employee->hr_code,
+                'employee_name' => $employee->first_name . ' ' . $employee->last_name,
+                'start_date' => $leave->start_date,
+                'end_date' => $leave->end_date,
+                'leave_type' => $request->status, // You may want to get the actual status name here
+                'saved_by' => $request->user()->username,
+                'updated_at' => $leave->updated_at,
+            ]
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
+
 
     // 
     protected function applyDate($query, $request)

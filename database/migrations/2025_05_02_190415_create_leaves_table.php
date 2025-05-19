@@ -20,6 +20,10 @@ return new class extends Migration
             $table->foreign('status_id')->references('id')->on('statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
             $table->unsignedBigInteger('employee_id');
             $table->foreign('employee_id')->references('id')->on('employees')
                 ->onUpdate('cascade')
