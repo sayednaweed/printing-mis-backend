@@ -54,5 +54,6 @@ return [
     "salary" => "Salary",
     'attendance' => "Attendance",
     'already_leave_exists' => "This Employee aleardy in leave",
-    'attendance_taken' => "Attendance has been taken"
+    'attendance_taken' => "Attendance has been taken",
+    'already_attendance_taken' => "Attendance aleardy taken",
 ];
