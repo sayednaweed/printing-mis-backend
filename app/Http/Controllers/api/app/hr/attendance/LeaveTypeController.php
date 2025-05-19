@@ -82,7 +82,7 @@ class LeaveTypeController extends Controller
         $status = Status::find($id);
         if (!$status) {
             return response()->json([
-                'message' => __('app_translation.leave_type_not_found'),
+                'message' => __('app_translation.not_found'),
             ], 404, [], JSON_UNESCAPED_UNICODE);
         }
 
