@@ -6,12 +6,10 @@ use App\Http\Controllers\api\app\hr\attendance\AttendanceController;
 
 
 
-Route::get('/attendance/employee', [AttendanceController::class, 'employeeList']);
-Route::get('/attendances', [AttendanceController::class, 'attendaceList']);
-
 Route::prefix('v1')->middleware(["authorized:" . 'user:api'])->group(function () {
-    Route::get('/attendance/employees', [AttendanceController::class, 'employeeList']);
-    Route::post('/attendace/store', [AttendanceController::class, 'store']);
-    Route::get('/attendances', [AttendanceController::class, 'attendaceList']);
-    Route::get('/attendance/statuses', [AttendanceController::class, 'statuses']);
+    Route::get('/attendancies', [AttendanceController::class, 'index']);
+    Route::get('/attendancies/{id}', [AttendanceController::class, 'show']);
+    Route::post('/attendancies', [AttendanceController::class, 'store']);
+    Route::get('/attendancies-employees', [AttendanceController::class, 'employeeAttendance']);
+    Route::get('/attendancies/statuses', [AttendanceController::class, 'statuses']);
 });

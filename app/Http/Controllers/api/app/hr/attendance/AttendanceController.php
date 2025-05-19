@@ -16,7 +16,7 @@ use App\Models\AttendanceStatus;
 class AttendanceController extends Controller
 {
 
-    public function attendaceList(Request $request)
+    public function index(Request $request)
     {
         $locale = App::getLocale();
         $tr = [];
@@ -62,29 +62,16 @@ class AttendanceController extends Controller
         );
     }
 
-
-
-
-
-    public function employeeList()
+    public function employeeAttendance()
     {
-
         $locale = App::getLocale();
         $currentDate = Carbon::now()->toDateString();
 
-        // $time = $time ?: Carbon::now();
-        $time = Carbon::now();
-
-        // Define start and end times as Carbon instances today
-        $start = Carbon::createFromTime(10, 0, 0); // 10:00 AM today
-        $end = Carbon::createFromTime(2, 0, 0)->addDay(); // 2:00 AM next day
-
-        // Because interval crosses midnight, check two conditions:
-        if ($time->between($start, $end)) {
-            // Inside interval: do not return any message
+        $attendance = Attendance::whereDate('created_at', Carbon::today())->first();
+        if ($attendance && $attendance->check_in_time && $attendance->check_out_time) {
             return response()->json([
-                'message' => __('app_translation.worng_time'),
-            ], 404, [], JSON_UNESCAPED_UNICODE);
+                'message' => __('app_translation.attendance_taken'),
+            ], 500, [], JSON_UNESCAPED_UNICODE);
         }
 
         $employees = DB::table('employees as emp')
@@ -126,8 +113,8 @@ class AttendanceController extends Controller
                     : ($status->status_id === $absentStatusValue);
 
                 return [
-                    'status' => $status->status,
-                    'status_id' => $status->status_id,
+                    'name' => $status->status,
+                    'id' => $status->status_id,
                     'selected' => $selected,
                 ];
             });
@@ -200,7 +187,7 @@ class AttendanceController extends Controller
             ->select('as.id', "ast.value as name", 'as.created_at')->get();
         return response()->json($tr, 200, [], JSON_UNESCAPED_UNICODE);
     }
-
+    public function show() {}
     protected function applyDate($query, $request)
     {
         // Apply date filtering conditionally if provided

@@ -54,4 +54,6 @@ return [
     "employee_not_found" => "کارمند پیدا نشد.",
     "salary" => "معاش",
     'attendance' => "حاضری",
+    'attendance_taken' => "حاضری گرفته شده است"
+
 ];
