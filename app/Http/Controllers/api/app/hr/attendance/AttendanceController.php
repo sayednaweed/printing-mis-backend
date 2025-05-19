@@ -152,7 +152,7 @@ class AttendanceController extends Controller
             $employeeId = $entry['employee_id'];
 
             // Find today's attendance record for this employee
-            $attendance = Attendance::where('employees_id', $employeeId)
+            $attendance = Attendance::where('employee_id', $employeeId)
                 ->whereDate('created_at', $today)
                 ->first();
 
@@ -167,20 +167,20 @@ class AttendanceController extends Controller
             // CASE 2: Check-in exists, but no check-out — update same row
             if ($attendance && $attendance->check_in_time && !$attendance->check_out_time) {
                 $attendance->update([
-                    'check_out_time' => $entry['attendance_status_type_id'] === AttendanceStatusEnum::present->value ? now() : '',
+                    'check_out_time' => $entry['status_type_id'] === AttendanceStatusEnum::present->value ? now() : '',
                     'taken_by_id' => $user->id,
                     'description' => $entry['description'] ?? $attendance->description,
-                    'attendance_status_type_id' => $entry['attendance_status_type_id'],
+                    'attendance_status_id' => $entry['status_type_id'],
                 ]);
             }
 
             // CASE 3: No record or no check-in — create a new check-in
             if (!$attendance) {
                 Attendance::create([
-                    'employees_id' => $employeeId,
-                    'check_in_time' => $entry['attendance_status_type_id'] === AttendanceStatusEnum::present->value ? now() : '',
+                    'employee_id' => $employeeId,
+                    'check_in_time' => $entry['status_type_id'] === AttendanceStatusEnum::present->value ? now() : '',
                     'description' => $entry['description'] ?? null,
-                    'attendance_status_type_id' => $entry['attendance_status_type_id'],
+                    'attendance_status_id' => $entry['status_type_id'],
                     'taken_by_id' => $user->id,
                 ]);
             }

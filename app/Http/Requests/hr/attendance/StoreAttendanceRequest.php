@@ -25,7 +25,7 @@ class StoreAttendanceRequest extends FormRequest
             'attendances' => 'required|array',
             'attendances.*.employee_id' => 'required|exists:employees,id',
             'attendances.*.description' => 'nullable|string',
-            'attendances.*.attendance_status_type_id' => 'required|exists:attendance_status_types,id',
+            'attendances.*.status_type_id' => 'required|exists:attendance_statuses,id',
         ];
     }
 }
