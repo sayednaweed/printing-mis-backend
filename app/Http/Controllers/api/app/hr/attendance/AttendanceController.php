@@ -147,25 +147,39 @@ class AttendanceController extends Controller
         $data = $request->validated();
         $today = Carbon::today();
 
+        DB::beginTransaction();
+
         foreach ($data['attendances'] as $entry) {
-            // Check if an attendance record exists for the employee today
-            $existing = Attendance::where('employees_id', $entry['employee_id'])
+            $employeeId = $entry['employee_id'];
+
+            // Find today's attendance record for this employee
+            $attendance = Attendance::where('employees_id', $employeeId)
                 ->whereDate('created_at', $today)
                 ->first();
 
-            if ($existing) {
-                // If already checked in today, update the check-out time
-                $existing->update([
-                    'check_out_time' => now(),
+            // CASE 1: Already both check-in and check-out recorded
+            if ($attendance && $attendance->check_in_time && $attendance->check_out_time) {
+
+                return response()->json([
+                    'message' => __('app_translation.already_attendance_taken')
+                ], 404, [], JSON_UNESCAPED_UNICODE);
+            }
+
+            // CASE 2: Check-in exists, but no check-out — update same row
+            if ($attendance && $attendance->check_in_time && !$attendance->check_out_time) {
+                $attendance->update([
+                    'check_out_time' => $entry['attendance_status_type_id'] === AttendanceStatusEnum::present->value ? now() : '',
                     'taken_by_id' => $user->id,
-                    'description' => $entry['description'] ?? $existing->description,
+                    'description' => $entry['description'] ?? $attendance->description,
                     'attendance_status_type_id' => $entry['attendance_status_type_id'],
                 ]);
-            } else {
-                // No attendance yet today — create new and set check-in time
+            }
+
+            // CASE 3: No record or no check-in — create a new check-in
+            if (!$attendance) {
                 Attendance::create([
-                    'employees_id' => $entry['employee_id'],
-                    'check_in_time' => now(),
+                    'employees_id' => $employeeId,
+                    'check_in_time' => $entry['attendance_status_type_id'] === AttendanceStatusEnum::present->value ? now() : '',
                     'description' => $entry['description'] ?? null,
                     'attendance_status_type_id' => $entry['attendance_status_type_id'],
                     'taken_by_id' => $user->id,
@@ -173,10 +187,13 @@ class AttendanceController extends Controller
             }
         }
 
+        DB::commit();
+
         return response()->json([
             'message' => __('app_translation.success'),
         ]);
     }
+
     public function statuses()
     {
         $locale = App::getLocale();
