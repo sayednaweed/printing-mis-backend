@@ -11,7 +11,6 @@ use App\Http\Controllers\Controller;
 use App\Models\AttendanceStatusTran;
 use App\Enums\Attendance\AttendanceStatusEnum;
 use App\Http\Requests\hr\attendance\StoreAttendanceRequest;
-use App\Models\AttendanceStatus;
 
 class AttendanceController extends Controller
 {
