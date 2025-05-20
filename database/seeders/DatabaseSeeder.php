@@ -17,7 +17,6 @@ use App\Models\CurrencyTran;
 use App\Models\NidTypeTrans;
 use App\Models\MaritalStatus;
 use App\Models\EducationLevel;
-use App\Models\EmployeeStatus;
 use App\Models\ReportSelection;
 use Illuminate\Database\Seeder;
 use App\Enums\Status\StatusEnum;
@@ -28,12 +27,8 @@ use App\Enums\Types\StatusTypeEnum;
 use App\Models\ReportSelectionTrans;
 use Database\Seeders\CheckListSeeder;
 use App\Enums\Types\EducationLevelEnum;
-use App\Enums\Types\EmployeeStatusEnum;
 use App\Enums\Types\ReportSelectionEnum;
-use App\Models\ApplicationConfiguration;
-use App\Models\ApplicationConfigurationTrans;
 use App\Models\PartyTypeTran;
-use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Current;
 
 /*
 1. If you add new Role steps are:
@@ -80,7 +75,6 @@ class DatabaseSeeder extends Seeder
         $this->call(UserPermissionSeeder::class);
         $this->call(RolePermissionSeeder::class);
         $this->call(HireTypeSeeder::class);
-        $this->call(EmployeeSeeder::class);
         $this->call(AttendanceStatusSeeder::class);
 
 

@@ -31,16 +31,16 @@ class AttendanceController extends Controller
         // Execute raw SQL query
         $rawData = DB::select("
         SELECT
-            att.taken_by_id,
-            us.username,
+            att.created_at,
+            us.username as taken_by,
             DATE(att.created_at) AS date,
             SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS present,
             SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS absent,
-            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS leave_count,
+            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS `leave`,
             SUM(CASE WHEN att.attendance_status_id NOT IN (?, ?, ?) THEN 1 ELSE 0 END) AS other
         FROM attendances att
         JOIN users us ON us.id = att.taken_by_id
-        GROUP BY att.taken_by_id, us.username, DATE(att.created_at)
+        GROUP BY att.created_at, us.username, DATE(att.created_at)
         ORDER BY DATE(att.created_at) DESC, us.username ASC
     ", [$presentId, $absentId, $leaveId, $presentId, $absentId, $leaveId]);
 
@@ -66,7 +66,7 @@ class AttendanceController extends Controller
         );
 
         return response()->json([
-            "users" => $paginated,
+            "attendance" => $paginated,
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
