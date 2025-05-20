@@ -237,6 +237,7 @@ class LeaveController extends Controller
         return response()->json([
             'message' => __('app_translation.success'),
             'leave' => [
+                'id' => $leave->id,
                 'profile' => $employee->picture,
                 'hr_code' => $employee->hr_code,
                 'employee_name' => $employee->first_name . ' ' . $employee->last_name,

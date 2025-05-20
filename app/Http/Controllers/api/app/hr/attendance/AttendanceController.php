@@ -42,7 +42,6 @@ class AttendanceController extends Controller
                 'astt.value as attendance_status',
                 'check_in_time',
                 'check_out_time' ?? '',
-
             );
 
 

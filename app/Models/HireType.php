@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class HireType extends Model
 {
-    //
+    protected $guarded = [];
 }

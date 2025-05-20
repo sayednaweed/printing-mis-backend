@@ -9,6 +9,7 @@ use App\Models\Status;
 use App\Models\NidType;
 use App\Models\Currency;
 use App\Models\Language;
+use App\Models\PartyType;
 use App\Models\ShiftTran;
 use App\Models\StatusTran;
 use App\Models\StatusType;
@@ -21,6 +22,7 @@ use App\Models\ReportSelection;
 use Illuminate\Database\Seeder;
 use App\Enums\Status\StatusEnum;
 use App\Models\MaritalStatusTran;
+use App\Enums\Types\PartyTypeEnum;
 use App\Models\EducationLevelTran;
 use App\Enums\Types\StatusTypeEnum;
 use App\Models\ReportSelectionTrans;
@@ -30,6 +32,7 @@ use App\Enums\Types\EmployeeStatusEnum;
 use App\Enums\Types\ReportSelectionEnum;
 use App\Models\ApplicationConfiguration;
 use App\Models\ApplicationConfigurationTrans;
+use App\Models\PartyTypeTran;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Current;
 
 /*
@@ -90,8 +93,48 @@ class DatabaseSeeder extends Seeder
         $this->Userstatus();
         $this->educationLevel();
         $this->reportSelection();
+        $this->partyType();
     }
 
+    public function partyType()
+    {
+        $type = PartyType::factory()->create([
+            'id' => PartyTypeEnum::sellers->value
+        ]);
+        PartyTypeTran::factory()->create([
+            "value" => "Sellers",
+            "party_type_id" => $type->id,
+            "language_name" => "en",
+        ]);
+        PartyTypeTran::factory()->create([
+            "value" => "فروشندگان",
+            "party_type_id" => $type->id,
+            "language_name" => "fa",
+        ]);
+        PartyTypeTran::factory()->create([
+            "value" => "پلورونکي",
+            "party_type_id" => $type->id,
+            "language_name" => "ps",
+        ]);
+        $type = PartyType::factory()->create([
+            'id' => PartyTypeEnum::buyers->value
+        ]);
+        PartyTypeTran::factory()->create([
+            "value" => "Buyers",
+            "party_type_id" => $type->id,
+            "language_name" => "en",
+        ]);
+        PartyTypeTran::factory()->create([
+            "value" => "خریداران",
+            "party_type_id" => $type->id,
+            "language_name" => "fa",
+        ]);
+        PartyTypeTran::factory()->create([
+            "value" => "پیرودونکي",
+            "party_type_id" => $type->id,
+            "language_name" => "ps",
+        ]);
+    }
     public function reportSelection()
     {
         $level = ReportSelection::factory()->create([
