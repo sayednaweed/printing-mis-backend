@@ -38,3 +38,6 @@ require __DIR__ . '/api/app/hr/contract.php';
 require __DIR__ . '/api/app/report/reports.php';
 require __DIR__ . '/api/app/file/file.php';
 require __DIR__ . '/api/app/checklist/checklist.php';
+// 
+require __DIR__ . '/api/app/expense/buyer.php';
+require __DIR__ . '/api/app/expense/expenseType.php';
