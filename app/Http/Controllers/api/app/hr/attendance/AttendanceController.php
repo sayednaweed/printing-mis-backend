@@ -21,78 +21,64 @@ class AttendanceController extends Controller
     public function index(Request $request)
     {
         $locale = App::getLocale();
-        $perPage = $request->input('per_page', 10); // Records per page
-        $page = $request->input('page', 1);         // Current page
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
 
-        // Get status IDs
         $absentId = AttendanceStatusEnum::absent->value;
         $presentId = AttendanceStatusEnum::present->value;
         $leaveId = AttendanceStatusEnum::leave->value;
 
-        // Fetch grouped raw attendance data
-        $rawResults = DB::table('attendances as att')
-            ->join('users as us', 'us.id', '=', 'att.taken_by_id')
-            ->select(
-                'att.taken_by_id',
-                DB::raw('DATE(att.created_at) as date'),
-                'att.attendance_status_id',
-                'us.username',
-                DB::raw('COUNT(*) as total')
-            )
-            ->groupBy('att.taken_by_id', DB::raw('DATE(att.created_at)'), 'att.attendance_status_id', 'us.username')
-            ->get();
+        // Execute raw SQL query
+        $rawData = DB::select("
+        SELECT
+            att.taken_by_id,
+            us.username,
+            DATE(att.created_at) AS date,
+            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS present,
+            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS absent,
+            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS leave_count,
+            SUM(CASE WHEN att.attendance_status_id NOT IN (?, ?, ?) THEN 1 ELSE 0 END) AS other
+        FROM attendances att
+        JOIN users us ON us.id = att.taken_by_id
+        GROUP BY att.taken_by_id, us.username, DATE(att.created_at)
+        ORDER BY DATE(att.created_at) DESC, us.username ASC
+    ", [$presentId, $absentId, $leaveId, $presentId, $absentId, $leaveId]);
 
-        // Group by taken_by_id and date
-        $grouped = $rawResults->groupBy(function ($item) {
-            return $item->taken_by_id . '|' . $item->date;
-        });
+        // Convert to collection
+        $summary = collect($rawData);
 
-        // Format the summary collection
-        $summary = $grouped->map(function ($group) use ($absentId, $presentId, $leaveId) {
-            $result = [
-                'present' => 0,
-                'absent' => 0,
-                'leave' => 0,
-                'other' => 0,
-                'username' => $group->first()->username,
-                'date' => $group->first()->date,
-            ];
-
-            foreach ($group as $record) {
-                switch ($record->attendance_status_id) {
-                    case $presentId:
-                        $result['present'] += $record->total;
-                        break;
-                    case $absentId:
-                        $result['absent'] += $record->total;
-                        break;
-                    case $leaveId:
-                        $result['leave'] += $record->total;
-                        break;
-                    default:
-                        $result['other'] += $record->total;
-                }
-            }
-
-            return $result;
-        })->values();
-
-        // Apply filters **before** pagination
+        // Apply filters
         $this->applyDate($summary, $request);
         $this->applyFilters($summary, $request);
         $this->applySearch($summary, $request);
 
-        // Paginate after filtering
+        // Manual pagination
         $total = $summary->count();
-        $items = $summary->slice(($page - 1) * $perPage, $perPage)->values();
-        $paginated = new LengthAwarePaginator($items, $total, $perPage, $page, [
-            'path' => $request->url(),
-            'query' => $request->query(),
-        ]);
+        $paginated = new LengthAwarePaginator(
+            $summary->slice(($page - 1) * $perPage, $perPage)->values(),
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
 
-        return response()->json($paginated, 200, [], JSON_UNESCAPED_UNICODE);
+        return response()->json([
+            "users" => $paginated,
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
+
+
+
+
+
+
+
+
+    // 
 
     public function employeeAttendance()
     {
