@@ -29,8 +29,10 @@ return new class extends Migration
             $table->foreign('address_id')->references('id')->on('addresses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-
-            $table->string('logo')->nullable();
+            $table->unsignedBigInteger('logo_document_id')->nullable();
+            $table->foreign('logo_document_id')->references('id')->on('documents')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
             $table->timestamps();
         });
     }

@@ -85,6 +85,19 @@ trait HelperTrait
         return "user/{$user_type}/{$user_type}_{$user_id}/checlist_{$check_list_id}/" . $fileName;
     }
 
+
+    // buyer
+    public function getBuyerFolder($buyer_id, $check_list_id)
+    {
+        return storage_path() . "/app/private/party/buyer/id_{$buyer_id}/checlist_{$check_list_id}/";
+    }
+
+    public function getbuyerDBPath($buyer_id, $check_list_id, $fileName)
+    {
+        return "party/buyer/id_{$buyer_id}/checlist_{$check_list_id}/" . $fileName;
+    }
+
+    // end buyer
     public function checkFileWithList($file, $checklist_id)
     {
         // 1. Validate check exist
