@@ -46,4 +46,6 @@ return [
     'vaccine_card_already_exist' => 'د واکسین کارت له مخکې موجود دی.',
     "salary" => "معاش",
     'attendance' => "حاضری",
+    'already_attendance_taken' => "حاضری مخکی نه اخیستل شوی",
+
 ];

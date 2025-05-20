@@ -65,9 +65,12 @@ class AttendanceController extends Controller
             ]
         );
 
-        return response()->json([
-            "users" => $paginated,
-        ], 200, [], JSON_UNESCAPED_UNICODE);
+        return response()->json(
+            $paginated,
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
     }
 
 
