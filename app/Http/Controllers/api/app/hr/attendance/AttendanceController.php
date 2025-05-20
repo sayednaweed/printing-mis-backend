@@ -5,60 +5,75 @@ namespace App\Http\Controllers\api\app\hr\attendance;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Models\AttendanceStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Models\AttendanceStatusTran;
 use App\Enums\Attendance\AttendanceStatusEnum;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Requests\hr\attendance\StoreAttendanceRequest;
 
 class AttendanceController extends Controller
 {
 
+
     public function index(Request $request)
     {
         $locale = App::getLocale();
-        $tr = [];
-        $perPage = $request->input('per_page', 10); // Number of records per page
-        $page = $request->input('page', 1); // Current page
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
 
-        $tr =  Attendance::join('employees as emp', 'attendances.employee_id', '=', 'emp.id')
-            ->join('employee_trans as empt', function ($join) use ($locale) {
-                $join->on('empt.employee_id', '=', 'emp.id')
-                    ->where('empt.language_name', $locale);
-            })
-            ->join(
-                'attendance_status_trans as astt',
-                function ($join) use ($locale) {
-                    $join->on('astt.attendance_status_id', '=', 'attendances.attendance_status_id')
-                        ->where('astt.language_name', $locale);
-                }
-            )
-            ->select(
-                'emp.id as employee_id',
-                'emp.hr_code',
-                'empt.first_name',
-                'empt.last_name',
-                'astt.value as attendance_status',
-                'check_in_time',
-                'check_out_time' ?? '',
-            );
+        $absentId = AttendanceStatusEnum::absent->value;
+        $presentId = AttendanceStatusEnum::present->value;
+        $leaveId = AttendanceStatusEnum::leave->value;
 
+        // Execute raw SQL query
+        $rawData = DB::select("
+        SELECT
+            att.taken_by_id,
+            us.username,
+            DATE(att.created_at) AS date,
+            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS present,
+            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS absent,
+            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS leave_count,
+            SUM(CASE WHEN att.attendance_status_id NOT IN (?, ?, ?) THEN 1 ELSE 0 END) AS other
+        FROM attendances att
+        JOIN users us ON us.id = att.taken_by_id
+        GROUP BY att.taken_by_id, us.username, DATE(att.created_at)
+        ORDER BY DATE(att.created_at) DESC, us.username ASC
+    ", [$presentId, $absentId, $leaveId, $presentId, $absentId, $leaveId]);
 
+        // Convert to collection
+        $summary = collect($rawData);
 
-        $this->applyDate($tr, $request);
-        $this->applyFilters($tr, $request);
-        $this->applySearch($tr, $request);
+        // Apply filters
+        $this->applyDate($summary, $request);
+        $this->applyFilters($summary, $request);
+        $this->applySearch($summary, $request);
 
-        // Apply pagination (ensure you're paginating after sorting and filtering)
-        $query = $tr->paginate($perPage, ['*'], 'page', $page);
-        return response()->json(
-            $query,
-            200,
-            [],
-            JSON_UNESCAPED_UNICODE
+        // Manual pagination
+        $total = $summary->count();
+        $paginated = new LengthAwarePaginator(
+            $summary->slice(($page - 1) * $perPage, $perPage)->values(),
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
         );
+
+        return response()->json([
+            "users" => $paginated,
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
+
+
+
+
+    // 
 
     public function employeeAttendance()
     {
