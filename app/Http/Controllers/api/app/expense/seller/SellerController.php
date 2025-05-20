@@ -2,11 +2,39 @@
 
 namespace App\Http\Controllers\api\app\expense\seller;
 
-use App\Http\Controllers\Controller;
+use App\Models\Email;
+use App\Models\Party;
+use App\Models\Address;
+use App\Models\Contact;
+use App\Models\Document;
+use App\Models\PartyTran;
+use App\Enums\LanguageEnum;
+use App\Models\AddressTran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Enums\Checklist\CheckListEnum;
+use App\Enums\Checklist\CheckListTypeEnum;
+use App\Enums\Types\PartyTypeEnum;
+use App\Http\Requests\app\expense\PartyStoreRequest;
+use App\Repositories\Storage\StorageRepositoryInterface;
+use App\Repositories\PendingTask\PendingTaskRepositoryInterface;
 
 class SellerController extends Controller
 {
+
+
+    protected $pendingTaskRepository;
+    protected $storageRepository;
+
+
+    public function __construct(
+        PendingTaskRepositoryInterface $pendingTaskRepository,
+        StorageRepositoryInterface $storageRepository,
+    ) {
+        $this->pendingTaskRepository = $pendingTaskRepository;
+        $this->storageRepository = $storageRepository;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -73,8 +101,8 @@ class SellerController extends Controller
             ]);
         }
 
-        $buyer = Party::create([
-            'party_type_id' => $request->party_type_id,
+        $seller = Party::create([
+            'party_type_id' => PartyTypeEnum::sellers->value,
             'email_id' => $email->id,
             'contact_id' => $contact->id,
             'address_id' => $address->id,
@@ -86,8 +114,8 @@ class SellerController extends Controller
             $user = $request->user();
             $task = $this->pendingTaskRepository->pendingTaskExist(
                 $request->user(),
-                CheckListTypeEnum::buyers->value,
-                CheckListEnum::buyers_logo->value,
+                CheckListTypeEnum::sellers->value,
+                CheckListEnum::sellers_logo->value,
                 null
             );
 
@@ -99,8 +127,8 @@ class SellerController extends Controller
             $document_id = '';
             $logo_path = '';
 
-            $this->storageRepository->buyerDocumentStore(
-                $buyer->id,
+            $this->storageRepository->sellerDocumentStore(
+                $seller->id,
                 $task->id,
                 function ($documentData) use (&$document_id) {
                     $checklist_id = $documentData['check_list_id'];
@@ -124,13 +152,13 @@ class SellerController extends Controller
                 null
             );
 
-            $buyer->logo_document_id = $document_id;
-            $buyer->save();
+            $seller->logo_document_id = $document_id;
+            $seller->save();
         }
 
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
             PartyTran::create([
-                'employee_id' => $buyer->id,
+                'employee_id' => $seller->id,
                 "name" => $request->name,
                 "company_name" => $request->company_name,
                 "language_name" => $code,
@@ -141,9 +169,9 @@ class SellerController extends Controller
 
         return response()->json(
             [
-                "buyer" => [
+                "seller" => [
                     'logo' => $logo_path,
-                    "id" => $buyer->id,
+                    "id" => $seller->id,
                     "name" => $request->name,
                     "company_name" => $request->company_name,
                     "email" => $request->email,
