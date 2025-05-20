@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('check_in_time')->nullable();
             $table->string('check_out_time')->nullable();
-            $table->string('description');
+            $table->string('description')->nullable();
             $table->unsignedBigInteger('taken_by_id');
             $table->foreign('taken_by_id')->references('id')->on('users')
                 ->onUpdate('cascade')

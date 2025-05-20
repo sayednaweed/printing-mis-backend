@@ -73,11 +73,6 @@ class AttendanceController extends Controller
 
 
 
-
-
-
-
-
     // 
 
     public function employeeAttendance()
@@ -143,6 +138,7 @@ class AttendanceController extends Controller
                 'picture' => $emp->picture,
                 'first_name' => $emp->first_name,
                 'last_name' => $emp->last_name,
+                'detail' => '',
                 'status' => $statuses->values(),
             ];
         });
@@ -151,8 +147,6 @@ class AttendanceController extends Controller
             'data' => $data,
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
-
-
 
     /**
      * Store a newly created resource in storage.

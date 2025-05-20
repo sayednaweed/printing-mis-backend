@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class PartyTran extends Model
 {
-    //
+    protected $guarded = [];
 }
