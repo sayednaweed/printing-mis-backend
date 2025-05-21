@@ -35,14 +35,15 @@ class LeaveTypeController extends Controller
     public function store(Request $request)
     {
 
+        
         $request->validate([
-            'name_english' => 'required|string',
-            'name_pashto' => 'required|string',
-            'name_farsi' => 'required|string'
+            'english' => 'required|string',
+            'pashto' => 'required|string',
+            'farsi' => 'required|string'
         ]);
 
 
-        DB::transaction();
+
 
         $status =  Status::create([
             'status_type_id' => StatusTypeEnum::leave_type->value,
@@ -50,19 +51,20 @@ class LeaveTypeController extends Controller
 
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
             StatusTran::create([
-                "value" => $request["name_{$name}"],
+                "value" => $request["{$name}"],
                 "status_id" => $status->id,
                 "language_name" => $code,
             ]);
         }
-        DB::commit();
+
+
         $locale = App::getLocale();
-        $name = $request->name_english;
+        $name = $request->english;
         if ($locale === 'fa') {
-            $name = $request->name_farsi;
+            $name = $request->farsi;
         }
         if ($locale === 'ps') {
-            $name = $request->name_pashto;
+            $name = $request->pashto;
         }
 
 
