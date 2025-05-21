@@ -139,8 +139,8 @@ class SellerController extends Controller
 
             $this->pendingTaskRepository->destroyPendingTask(
                 $request->user(),
-                CheckListTypeEnum::buyers->value,
-                CheckListEnum::buyers_logo->value,
+                CheckListTypeEnum::sellers->value,
+                CheckListEnum::sellers_logo->value,
                 null
             );
 
