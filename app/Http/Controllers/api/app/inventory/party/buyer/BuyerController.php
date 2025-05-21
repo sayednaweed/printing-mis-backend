@@ -102,7 +102,7 @@ class BuyerController extends Controller
      */
     public function store(PartyStoreRequest $request)
     {
-        $request->validate();
+        $request->validated();
         $email = null;
         DB::beginTransaction();
         if ($request->email != null && !empty($request->email)) {
@@ -129,8 +129,6 @@ class BuyerController extends Controller
             "value" => $request->contact
         ]);
 
-
-
         $address = Address::create([
             'province_id' => $request->province_id,
             'district_id' => $request->district_id,
@@ -144,13 +142,12 @@ class BuyerController extends Controller
         }
 
         $buyer = Party::create([
-            'party_type_id' => $request->party_type_id,
-            'email_id' => $email->id,
+            'party_type_id' => PartyTypeEnum::buyers->value,
+            'email_id' => $email ? $email->id : null,
             'contact_id' => $contact->id,
             'address_id' => $address->id,
-            'logo_document_id' => ''
-
         ]);
+        $logo_path =  null;
 
         if ($request->has_attachment == true) {
             $user = $request->user();
@@ -167,12 +164,11 @@ class BuyerController extends Controller
                 ], 404);
             }
             $document_id = '';
-            $logo_path = '';
 
             $this->storageRepository->buyerDocumentStore(
                 $buyer->id,
                 $task->id,
-                function ($documentData) use (&$document_id) {
+                function ($documentData) use (&$document_id, &$logo_path) {
                     $checklist_id = $documentData['check_list_id'];
                     $document = Document::create([
                         'actual_name' => $documentData['actual_name'],
@@ -200,7 +196,7 @@ class BuyerController extends Controller
 
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
             PartyTran::create([
-                'employee_id' => $buyer->id,
+                'party_id' => $buyer->id,
                 "name" => $request->name,
                 "company_name" => $request->company_name,
                 "language_name" => $code,
@@ -218,7 +214,6 @@ class BuyerController extends Controller
                     "company_name" => $request->company_name,
                     "email" => $request->email,
                     "contact" => $request->contact,
-
                 ],
                 "message" => __('app_translation.success'),
             ],
@@ -249,17 +244,7 @@ class BuyerController extends Controller
     /**
      * Update the specified buyer in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        $buyer = Party::findOrFail($id);
-        $buyer->update($request->only([
-            'party_type_id',
-            'logo_document_id',
-            // add other updatable fields as needed
-        ]));
-        // Optionally update related models (email, contact, address) here
-        return response()->json(['buyer' => $buyer, 'message' => __('app_translation.success')], 200);
-    }
+    public function update(Request $request, string $id) {}
 
     /**
      * Remove the specified resource from storage.
