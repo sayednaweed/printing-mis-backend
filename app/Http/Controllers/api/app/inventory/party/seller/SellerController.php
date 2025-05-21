@@ -56,7 +56,7 @@ class SellerController extends Controller
      */
     public function store(PartyStoreRequest $request)
     {
-        $request->validate();
+        $request->validated();
         $email = null;
         DB::beginTransaction();
         if ($request->email != null && !empty($request->email)) {
@@ -97,12 +97,11 @@ class SellerController extends Controller
 
         $seller = Party::create([
             'party_type_id' => PartyTypeEnum::sellers->value,
-            'email_id' => $email->id,
+            'email_id' => $email ? $email->id : null,
             'contact_id' => $contact->id,
             'address_id' => $address->id,
-            'logo_document_id' => ''
-
         ]);
+        $logo_path =  null;
 
         if ($request->has_attachment == true) {
             $user = $request->user();
@@ -119,7 +118,6 @@ class SellerController extends Controller
                 ], 404);
             }
             $document_id = '';
-            $logo_path = '';
 
             $this->storageRepository->sellerDocumentStore(
                 $seller->id,
@@ -152,7 +150,7 @@ class SellerController extends Controller
 
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
             PartyTran::create([
-                'employee_id' => $seller->id,
+                'party_id' => $seller->id,
                 "name" => $request->name,
                 "company_name" => $request->company_name,
                 "language_name" => $code,
@@ -170,7 +168,6 @@ class SellerController extends Controller
                     "company_name" => $request->company_name,
                     "email" => $request->email,
                     "contact" => $request->contact,
-
                 ],
                 "message" => __('app_translation.success'),
             ],

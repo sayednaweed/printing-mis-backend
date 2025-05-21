@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('address_trans', function (Blueprint $table) {
             $table->id();
-            $table->string("area");
+            $table->string("area")->nullable();
             $table->unsignedBigInteger('address_id');
             $table->foreign('address_id')->references('id')->on('addresses')
                 ->onUpdate('cascade')
