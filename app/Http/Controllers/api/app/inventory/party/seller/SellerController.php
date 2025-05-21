@@ -56,11 +56,7 @@ class SellerController extends Controller
      */
     public function store(PartyStoreRequest $request)
     {
-        //
-
         $request->validate();
-
-
         $email = null;
         DB::beginTransaction();
         if ($request->email != null && !empty($request->email)) {
@@ -86,8 +82,6 @@ class SellerController extends Controller
         $contact = Contact::create([
             "value" => $request->contact
         ]);
-
-
 
         $address = Address::create([
             'province_id' => $request->province_id,

@@ -22,7 +22,12 @@ class PartyStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'email' => 'required',
+            'contact' => 'required',
+            'company_name' => 'required',
+            'name' => 'required',
+            'gender_id' => 'required',
+            'nationality_id' => 'required',
         ];
     }
 }
