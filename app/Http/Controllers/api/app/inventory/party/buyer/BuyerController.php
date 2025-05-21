@@ -7,20 +7,25 @@ use App\Models\Party;
 use App\Models\Address;
 use App\Models\Contact;
 use App\Models\Document;
+use App\Models\PartyTran;
 use App\Enums\LanguageEnum;
 use App\Models\AddressTran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Enums\Checklist\CheckListEnum;
 use App\Enums\Checklist\CheckListTypeEnum;
+use App\Enums\Types\PartyTypeEnum;
 use App\Http\Requests\app\expense\PartyStoreRequest;
-use App\Models\PartyTran;
 use App\Repositories\Storage\StorageRepositoryInterface;
 use App\Repositories\PendingTask\PendingTaskRepositoryInterface;
+use App\Traits\Helper\FilterTrait;
 
 class BuyerController extends Controller
 {
+
+    use FilterTrait;
     protected $pendingTaskRepository;
     protected $storageRepository;
     public function __construct(
@@ -31,11 +36,57 @@ class BuyerController extends Controller
         $this->storageRepository = $storageRepository;
     }
     /**
-     * Display a listing of the resource.
+     * Display a listing of the buyers.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+
+        $locale = App::getLocale();
+        $tr = [];
+        $perPage = $request->input('per_page', 10); // Number of records per page
+        $page = $request->input('page', 1); // Current page
+
+        $query = DB::table('parties as pr')
+            ->where('party_type_id', PartyTypeEnum::buyers->value)
+            ->join('party_trans as prt', function ($join) use ($locale) {
+                $join->on('pr.id', '=', 'prt.party_id')
+                    ->where('language_name', $locale);
+            })
+            ->join('documents as doc', 'doc.id', '=', 'pr.logo_document_id')
+            ->join('emails as em', 'em.id', '=', 'pr.email_id')
+            ->join('contacts as con', 'con.id', '=', 'pr.contact_id')
+            ->select(
+                'pr.id',
+                'prt.name',
+                'prt.company_name',
+                'em.value as email',
+                'con.value as contact',
+                'doc.path as logo',
+                'pr.created_at',
+
+            );
+
+
+        $this->applyDate($query, $request, 'pr.created_at', 'pr.created_at');
+        $allowedColumns = [
+            'name' => 'prt.name',
+            'company_name' => 'prt.company_name',
+        ];
+        $this->applyFilters($query, $request, $allowedColumns);
+        $allowedColumns = [
+            'created_at' => 'pr.created_at',
+            'id' => 'pr.id',
+        ];
+        $this->applySearch($query, $request, $allowedColumns);
+
+        // Apply pagination (ensure you're paginating after sorting and filtering)
+        $tr = $query->paginate($perPage, ['*'], 'page', $page);
+        return response()->json(
+            $tr,
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
     }
 
     /**
@@ -187,19 +238,27 @@ class BuyerController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show the form for editing the specified buyer.
      */
     public function edit(string $id)
     {
-        //
+        $buyer = Party::findOrFail($id);
+        return response()->json(['buyer' => $buyer], 200);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified buyer in storage.
      */
     public function update(Request $request, string $id)
     {
-        //
+        $buyer = Party::findOrFail($id);
+        $buyer->update($request->only([
+            'party_type_id',
+            'logo_document_id',
+            // add other updatable fields as needed
+        ]));
+        // Optionally update related models (email, contact, address) here
+        return response()->json(['buyer' => $buyer, 'message' => __('app_translation.success')], 200);
     }
 
     /**
