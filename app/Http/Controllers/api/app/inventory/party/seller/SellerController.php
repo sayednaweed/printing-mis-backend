@@ -122,7 +122,7 @@ class SellerController extends Controller
             $this->storageRepository->sellerDocumentStore(
                 $seller->id,
                 $task->id,
-                function ($documentData) use (&$document_id) {
+                function ($documentData) use (&$document_id, &$logo_path) {
                     $checklist_id = $documentData['check_list_id'];
                     $document = Document::create([
                         'actual_name' => $documentData['actual_name'],
