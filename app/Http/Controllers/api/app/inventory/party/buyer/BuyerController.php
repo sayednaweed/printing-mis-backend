@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\app\expense\buyer;
+namespace App\Http\Controllers\api\app\inventory\party\buyer;
 
 use App\Models\Email;
 use App\Models\Party;
@@ -10,7 +10,6 @@ use App\Models\Document;
 use App\Enums\LanguageEnum;
 use App\Models\AddressTran;
 use Illuminate\Http\Request;
-use App\Models\EmployeeDocument;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Enums\Checklist\CheckListEnum;
@@ -56,11 +55,7 @@ class BuyerController extends Controller
      */
     public function store(PartyStoreRequest $request)
     {
-        //
-
         $request->validate();
-
-
         $email = null;
         DB::beginTransaction();
         if ($request->email != null && !empty($request->email)) {
