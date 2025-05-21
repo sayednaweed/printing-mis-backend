@@ -21,12 +21,8 @@ use App\Repositories\PendingTask\PendingTaskRepositoryInterface;
 
 class BuyerController extends Controller
 {
-
-
     protected $pendingTaskRepository;
     protected $storageRepository;
-
-
     public function __construct(
         PendingTaskRepositoryInterface $pendingTaskRepository,
         StorageRepositoryInterface $storageRepository,

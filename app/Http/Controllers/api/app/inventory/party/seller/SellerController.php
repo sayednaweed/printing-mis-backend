@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\app\expense\seller;
+namespace App\Http\Controllers\api\app\inventory\party\seller;
 
 use App\Models\Email;
 use App\Models\Party;
