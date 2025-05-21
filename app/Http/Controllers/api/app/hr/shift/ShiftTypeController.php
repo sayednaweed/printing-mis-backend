@@ -12,7 +12,7 @@ use App\Http\Controllers\Controller;
 
 class ShiftTypeController extends Controller
 {
-    public function shifts()
+    public function index()
     {
         $locale = App::getLocale();
         // Start building the query

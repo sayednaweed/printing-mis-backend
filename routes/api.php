@@ -16,6 +16,7 @@ require __DIR__ . '/api/template/audit.php';
 require __DIR__ . '/api/template/location.php';
 require __DIR__ . '/api/template/pendingTask.php';
 require __DIR__ . '/api/app/hr/shift.php';
+require __DIR__ . '/api/app/hr/shiftType.php';
 require __DIR__ . '/api/template/maritalStatus.php';
 require __DIR__ . '/api/template/currency.php';
 require __DIR__ . '/api/app/dashboard/expenseDashboard.php';
