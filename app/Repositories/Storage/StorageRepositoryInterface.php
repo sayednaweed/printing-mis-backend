@@ -25,4 +25,10 @@ interface StorageRepositoryInterface
      * @return boolean
      */
     public function employeeDocumentStore($employee_id, $pending_task_id, ?callable $callback);
+
+
+    public function buyerDocumentStore($buyer_id, $pending_task_id, ?callable $callback);
+
+
+    public function sellerDocumentStore($buyer_id, $pending_task_id, ?callable $callback);
 }

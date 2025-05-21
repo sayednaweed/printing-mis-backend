@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\hr\attendance;
+namespace App\Http\Requests\app\expense;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreAttendanceRequest extends FormRequest
+class PartyStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,10 +22,10 @@ class StoreAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'attendances' => 'required|array',
-            'attendances.*.employee_id' => 'required|exists:employees,id',
-            'attendances.*.description' => 'nullable|string',
-            'attendances.*.status_type_id' => 'required|exists:attendance_statuses,id',
+            'contact' => 'required',
+            'company_name' => 'required',
+            'name' => 'required',
+            'nationality_id' => 'required',
         ];
     }
 }
