@@ -26,332 +26,164 @@ class IconAndExpenseTypeSeeder extends Seeder
         $items = [
 
             [
-                'path' => 'icons/expense-icons/air-conditioner.svg',
+                'path' => 'icons/expense-icons/electricity.svg',
                 'translations' => [
-                    'en' => 'conditioner',
+                    'en' => 'electricity',
                     'fa' => 'برق',
                     'ps' => 'برېښنا',
                 ],
                 'expense_translations' => [
-                    'en' => 'conditioner expense',
+                    'en' => 'electricity expense',
                     'fa' => 'مصرف برق',
                     'ps' => 'د برق مصرف',
                 ]
             ],
             [
-                'path' => 'icons/expense-icons/battery.svg',
+                'path' => 'icons/expense-icons/device.svg',
                 'translations' => [
-                    'en' => 'battery',
-                    'fa' => 'بطری',
-                    'ps' => 'بطری',
+                    'en' => 'device',
+                    'fa' => 'دستگاه ',
+                    'ps' => 'دستگاه ',
                 ],
                 'expense_translations' => [
-                    'en' => 'bettery expense',
-                    'fa' => 'مصرف بطری',
-                    'ps' => ' بطری مصرف',
+                    'en' => 'device expense',
+                    'fa' => 'مصرف برق',
+                    'ps' => 'د برق مصرف',
                 ]
-            ],
+            ],  
             [
-                'path' => 'icons/expense-icons/bill.svg',
+                'path' => 'icons/expense-icons/food.svg',
                 'translations' => [
-                    'en' => 'bill',
-                    'fa' => 'بل',
-                    'ps' => 'بل',
+                    'en' => 'food',
+                    'fa' => 'غذا ',
+                    'ps' => 'خواړه ',
                 ],
                 'expense_translations' => [
-                    'en' => 'bettery expense',
-                    'fa' => 'مصرف بل',
-                    'ps' => ' بل مصرف',
+                    'en' => 'food expense',
+                    'fa' => 'مصرف غذا',
+                    'ps' => 'د خواړه مصرف',
                 ]
-            ],
-            [
-                'path' => 'icons/expense-icons/bread.svg',
-                'translations' => [
-                    'en' => 'bread',
-                    'fa' => 'نان',
-                    'ps' => 'ډوډي',
-                ],
-                'expense_translations' => [
-                    'en' => 'bread expense',
-                    'fa' => 'مصرف نان',
-                    'ps' => ' ډوډي مصرف',
-                ]
-            ],
-            [
-                'path' => 'icons/expense-icons/calendar.svg',
-                'translations' => [
-                    'en' => 'calendar',
-                    'fa' => 'تقویم',
-                    'ps' => 'کلیزه',
-                ],
-                'expense_translations' => [
-                    'en' => 'bread expense',
-                    'fa' => 'مصرف تقویم',
-                    'ps' => ' کلیزه مصرف',
-                ]
-            ],
-            [
-                'path' => 'icons/expense-icons/camera.svg',
-                'translations' => [
-                    'en' => 'camera',
-                    'fa' => 'کمره',
-                    'ps' => 'کامره',
-                ],
-                'expense_translations' => [
-                    'en' => 'camera expense',
-                    'fa' => 'مصرف کمره',
-                    'ps' => ' کامره مصرف',
-                ]
-            ],
-            [
-                'path' => 'icons/expense-icons/cardholder.svg',
-                'translations' => [
-                    'en' => 'cardholder',
-                    'fa' => 'پوش کارت',
-                    'ps' => 'د کارت ځای',
-                ],
-                'expense_translations' => [
-                    'en' => 'cardholder expense',
-                    'fa' => 'مصرف پوش کارت',
-                    'ps' => ' د کارت پوښ مصرف',
-                ]
-            ],
-            [
-                'path' => 'icons/expense-icons/chair.svg',
-                'translations' => [
-                    'en' => 'chair',
-                    'fa' => 'چوکی ',
-                    'ps' => ' څوکی ',
-                ],
-                'expense_translations' => [
-                    'en' => 'chair expense',
-                    'fa' => 'مصرف چوکی ',
-                    'ps' => 'څوکی مصرف',
-                ]
-            ],
-            [
-                'path' => 'icons/expense-icons/clock.svg',
-                'translations' => [
-                    'en' => 'clock',
-                    'fa' => 'ساعت ',
-                    'ps' => ' ساعت ',
-                ],
-                'expense_translations' => [
-                    'en' => 'clock expense',
-                    'fa' => 'مصرف ساعت ',
-                    'ps' => 'ساعت مصرف',
-                ]
-            ],
-            [
-                'path' => 'icons/expense-icons/closet.svg',
-                'translations' => [
-                    'en' => 'closet',
-                    'fa' => 'الماری ',
-                    'ps' => ' الماري ',
-                ],
-                'expense_translations' => [
-                    'en' => 'closet expense',
-                    'fa' => 'مصرف الماری ',
-                    'ps' => 'الماري مصرف',
-                ]
-            ],
-            [
-                'path' => 'icons/expense-icons/monitor.svg',
-                'translations' => [
-                    'en' => 'monitor',
-                    'fa' => 'مانیتور ',
-                    'ps' => ' مانيټر ',
-                ],
-                'expense_translations' => [
-                    'en' => 'monitor expense',
-                    'fa' => 'مصرف مانیتور ',
-                    'ps' => 'مانيټر مصرف',
-                ]
-            ],
-            [
+            ], 
+              [
                 'path' => 'icons/expense-icons/drink.svg',
                 'translations' => [
                     'en' => 'drink',
-                    'fa' => 'نوشیدنی  ',
-                    'ps' => ' څښاک  ',
+                    'fa' => 'نوشیدنی ',
+                    'ps' => 'خواړه ',
                 ],
                 'expense_translations' => [
                     'en' => 'drink expense',
-                    'fa' => 'مصرف نوشیدنی ',
-                    'ps' => 'څښاک مصرف ',
+                    'fa' => 'مصرف نوشیدنی',
+                    'ps' => 'د څښاک مصرف',
                 ]
-            ],
+            ],  
             [
-                'path' => 'icons/expense-icons/flash-drive.svg',
+                'path' => 'icons/expense-icons/stationery.svg',
                 'translations' => [
-                    'en' => 'flash-drive',
-                    'fa' => 'فلش درایف',
-                    'ps' => 'فلش درایف',
+                    'en' => 'stationery',
+                    'fa' => 'قرطاسیه ',
+                    'ps' => 'قرطاسیه ',
                 ],
                 'expense_translations' => [
-                    'en' => 'flash-drive expense',
-                    'fa' => 'مصرف فلش درایق',
-                    'ps' => 'فلش درایف مصرف',
+                    'en' => 'stationery expense',
+                    'fa' => 'مصرف قرطاسیه',
+                    'ps' => 'د قرطاسیه مصرف',
                 ]
-            ],
+            ],  
             [
-                'path' => 'icons/expense-icons/fuel.svg',
+                'path' => 'icons/expense-icons/stationery.svg',
                 'translations' => [
-                    'en' => 'fuel',
-                    'fa' => 'تیل ',
-                    'ps' => 'تیل',
+                    'en' => 'stationery',
+                    'fa' => 'قرطاسیه ',
+                    'ps' => 'قرطاسیه ',
                 ],
                 'expense_translations' => [
-                    'en' => 'fuel expense',
-                    'fa' => 'مصرف تیل',
-                    'ps' => 'تیل مصرف',
+                    'en' => 'stationery expense',
+                    'fa' => 'مصرف قرطاسیه',
+                    'ps' => 'د قرطاسیه مصرف',
                 ]
-            ],
+            ], 
             [
-                'path' => 'icons/expense-icons/generator.svg',
+                'path' => 'icons/expense-icons/oil.svg',
                 'translations' => [
-                    'en' => 'generator',
-                    'fa' => 'جنراتور ',
-                    'ps' => 'جنراتور',
+                    'en' => 'oil',
+                    'fa' => 'روغن ',
+                    'ps' => 'غوړي ',
                 ],
                 'expense_translations' => [
-                    'en' => 'generator expense',
-                    'fa' => 'مصرف جنراتور',
-                    'ps' => ' جنراتور مصرف ',
+                    'en' => 'oil expense',
+                    'fa' => 'مصرف روغن',
+                    'ps' => 'د غوړي مصرف',
                 ]
-            ],
+            ], 
             [
-                'path' => 'icons/expense-icons/wifi.svg',
+                'path' => 'icons/expense-icons/transport.svg',
                 'translations' => [
-                    'en' => 'wifi',
-                    'fa' => 'وایفای ',
-                    'ps' => 'وایفای',
+                    'en' => 'transport',
+                    'fa' => 'ترانسپورت',
+                    'ps' => 'ټرانسپورټ ',
                 ],
                 'expense_translations' => [
-                    'en' => 'wifi expense',
-                    'fa' => 'مصرف وایفای',
-                    'ps' => 'وایفای مصرف ',
+                    'en' => 'transport expense',
+                    'fa' => 'مصرف ترانسپورت',
+                    'ps' => 'د ټرانسپورټ مصرف',
                 ]
-            ],
+            ], 
             [
-                'path' => 'icons/expense-icons/hosting.svg',
+                'path' => 'icons/expense-icons/transport.svg',
                 'translations' => [
-                    'en' => 'hosting',
-                    'fa' => 'هاستینگ ',
-                    'ps' => 'هاستینگ',
+                    'en' => 'transport',
+                    'fa' => 'ترانسپورت',
+                    'ps' => 'ټرانسپورټ ',
                 ],
                 'expense_translations' => [
-                    'en' => 'hosting expense',
-                    'fa' => 'مصرف هاستینگ',
-                    'ps' => 'هاستینگ مصرف ',
+                    'en' => 'transport expense',
+                    'fa' => 'مصرف ترانسپورت',
+                    'ps' => 'د ټرانسپورټ مصرف',
                 ]
-            ],
-            [
-                'path' => 'icons/expense-icons/internet.svg',
-                'translations' => [
-                    'en' => 'internet',
-                    'fa' => 'انترنیت ',
-                    'ps' => 'انترنیت',
-                ],
-                'expense_translations' => [
-                    'en' => 'internet expense',
-                    'fa' => 'مصرف انترنیت',
-                    'ps' => 'انترنیت مصرف ',
-                ]
-            ],
-            [
-                'path' => 'icons/expense-icons/internet-cable.svg',
-                'translations' => [
-                    'en' => 'internet-cable',
-                    'fa' => 'کیبل انترنیت  ',
-                    'ps' => 'انترنیت کیبل',
-                ],
-                'expense_translations' => [
-                    'en' => 'internet-cable expense',
-                    'fa' => 'مصرف کیبل انترنیت',
-                    'ps' => 'انترنیت کیبل مصرف ',
-                ]
-            ],
-            [
-                'path' => 'icons/expense-icons/keyboard.svg',
-                'translations' => [
-                    'en' => 'keyboard',
-                    'fa' => 'کیبورد',
-                    'ps' => 'کیبورد',
-                ],
-                'expense_translations' => [
-                    'en' => 'keyboard expense',
-                    'fa' => 'مصرف کیبورد ',
-                    'ps' => 'کیبورد مصرف ',
-                ]
-            ],
-            [
-                'path' => 'icons/expense-icons/laptop.svg',
-                'translations' => [
-                    'en' => 'laptop',
-                    'fa' => 'لبتاپ',
-                    'ps' => 'لبتاپ',
-                ],
-                'expense_translations' => [
-                    'en' => 'laptop expense',
-                    'fa' => 'مصرف لبتاپ ',
-                    'ps' => ' لبتاپ مصرف',
-                ]
-            ],
-            [
-                'path' => 'icons/expense-icons/light.svg',
-                'translations' => [
-                    'en' => 'light',
-                    'fa' => 'گروپ',
-                    'ps' => 'گروپ',
-                ],
-                'expense_translations' => [
-                    'en' => 'light expense',
-                    'fa' => 'مصرف گروپ ',
-                    'ps' => ' گروپ مصرف',
-                ]
-            ],
+            ], 
             [
                 'path' => 'icons/expense-icons/maintenance.svg',
                 'translations' => [
                     'en' => 'maintenance',
-                    'fa' => 'نگهداری ',
+                    'fa' => 'نگهداری',
                     'ps' => 'ساتنه ',
                 ],
                 'expense_translations' => [
-                    'en' => 'light expense',
+                    'en' => 'maintenance expense',
                     'fa' => 'مصرف نگهداری',
-                    'ps' => ' ساتنی مصرف',
+                    'ps' => 'د ساتنه مصرف',
                 ]
-            ],
+            ], 
             [
-                'path' => 'icons/expense-icons/medical-kit.svg',
+                'path' => 'icons/expense-icons/maintenance.svg',
                 'translations' => [
-                    'en' => 'medical kit',
-                    'fa' => 'کمک های اولیه',
-                    'ps' => 'لومړنۍ مرستې ',
+                    'en' => 'maintenance',
+                    'fa' => 'نگهداری',
+                    'ps' => 'ساتنه ',
                 ],
                 'expense_translations' => [
-                    'en' => 'medical kit expense',
-                    'fa' => 'مصرف کمک های اولیه',
-                    'ps' => ' لومړنۍ مرستې مصرف',
+                    'en' => 'maintenance expense',
+                    'fa' => 'مصرف نگهداری',
+                    'ps' => 'د ساتنه مصرف',
                 ]
-            ],
+            ], 
             [
-                'path' => 'icons/expense-icons/microphone.svg',
+                'path' => 'icons/expense-icons/rent.svg',
                 'translations' => [
-                    'en' => 'microphone',
-                    'fa' => 'میکروفون ',
-                    'ps' => 'میکروفون ',
+                    'en' => 'rent',
+                    'fa' => 'کرایه',
+                    'ps' => 'کرایه ',
                 ],
                 'expense_translations' => [
-                    'en' => 'medical kit expense',
-                    'fa' => 'مصرف کمک های اولیه',
-                    'ps' => ' لومړنۍ مرستې مصرف',
-                ]
-            ],
+                    'en' => 'rent expense',
+                    'fa' => 'مصرف کرایه',
+                    'ps' => 'د کرایه مصرف',
+                ] 
+            ], 
 
 
+           
         ];
 
         foreach ($items as $item) {
