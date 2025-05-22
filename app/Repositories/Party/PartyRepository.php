@@ -141,7 +141,7 @@ class PartyRepository implements PartyRepositoryInterface
 
         return response()->json(
             [
-                "seller" => [
+                "party" => [
                     'logo' => $logo_path,
                     "id" => $seller->id,
                     "name" => $request->name,
@@ -180,7 +180,6 @@ class PartyRepository implements PartyRepositoryInterface
                 'con.value as contact',
                 'doc.path as logo',
                 'pr.created_at',
-
             );
 
 
