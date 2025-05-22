@@ -170,7 +170,7 @@ class PartyRepository implements PartyRepositoryInterface
                     ->where('language_name', $locale);
             })
             ->leftJoin('documents as doc', 'doc.id', '=', 'pr.logo_document_id')
-            ->join('emails as em', 'em.id', '=', 'pr.email_id')
+            ->leftJoin('emails as em', 'em.id', '=', 'pr.email_id')
             ->join('contacts as con', 'con.id', '=', 'pr.contact_id')
             ->select(
                 'pr.id',
