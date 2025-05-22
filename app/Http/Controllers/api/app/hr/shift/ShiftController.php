@@ -37,13 +37,10 @@ class ShiftController extends Controller
             JSON_UNESCAPED_UNICODE
         );
     }
-
     public function shift($id)
     {
-
-
         $locale = App::getLocale();
-
+    
         $query = DB::table('shifts as sh')
             ->leftJoin(DB::raw('(
                 SELECT
@@ -56,17 +53,17 @@ class ShiftController extends Controller
             ) as sht'), 'sh.id', '=', 'sht.shift_id')
             ->select(
                 'sh.id',
-                "sh.start_time",
-                "sh.end_time",
+                'sh.start_time',
+                'sh.end_time',
                 'sh.created_at',
-                'post.farsi',
-                'post.english',
-                'post.pashto'
+                'sht.farsi',
+                'sht.english',
+                'sht.pashto'
             )
             ->where('sh.id', $id);
-
+    
         $result = $query->first();
-
+    
         return response()->json([
             "id" => $result->id,
             "start_time" => $result->start_time,
@@ -75,9 +72,9 @@ class ShiftController extends Controller
             "farsi" => $result->farsi,
             "pashto" => $result->pashto,
             "created_at" => $result->created_at,
-
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
+    
 
     public function store(Request $request)
     {
@@ -85,9 +82,9 @@ class ShiftController extends Controller
         $request->validate([
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i',
-            'name_english' => 'required|string',
-            'name_pashto' => 'required|string',
-            'name_farsi' => 'required|string',
+            'english' => 'required|string',
+            'pashto' => 'required|string',
+            'farsi' => 'required|string',
         ]);
 
         $shift = Shift::create([
@@ -104,11 +101,11 @@ class ShiftController extends Controller
         }
 
         $locale = App::getLocale();
-        $name = $request->name_english;
+        $name = $request->english;
         if ($locale == LanguageEnum::farsi->value) {
-            $name = $request->name_farsi;
+            $name = $request->farsi;
         } else {
-            $name = $request->name_pashto;
+            $name = $request->pashto;
         }
         return response()->json([
             'message' => __('app_translation.success'),

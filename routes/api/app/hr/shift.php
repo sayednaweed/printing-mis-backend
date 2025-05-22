@@ -9,7 +9,7 @@ Route::prefix('v1')->middleware(["authorized:" . 'user:api'])->group(function ()
     Route::get('/shifts', [ShiftController::class, "shifts"]);
     Route::get('/shift/{id}', [ShiftController::class, "shift"]);
     Route::put('/shiftupdate/{id}', [ShiftController::class, 'update']);
-    Route::get('/shift/{id}/edit', [ShiftController::class, 'edit']);
+    Route::get('/shift/{id}', [ShiftController::class, 'edit']);
 
 });
 
