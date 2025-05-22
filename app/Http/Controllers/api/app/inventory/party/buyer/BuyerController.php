@@ -88,8 +88,10 @@ class BuyerController extends Controller
      */
     public function edit(string $id)
     {
-        $buyer = Party::findOrFail($id);
-        return response()->json(['buyer' => $buyer], 200);
+        return $this->partyRepository->party(
+            $id,
+            PartyTypeEnum::buyers->value
+        );
     }
 
     /**

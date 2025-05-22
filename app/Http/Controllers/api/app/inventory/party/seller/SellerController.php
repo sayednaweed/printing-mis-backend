@@ -88,7 +88,10 @@ class SellerController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        return $this->partyRepository->party(
+            $id,
+            PartyTypeEnum::sellers->value
+        );
     }
 
     /**

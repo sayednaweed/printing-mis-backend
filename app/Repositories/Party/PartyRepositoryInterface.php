@@ -24,4 +24,21 @@ interface PartyRepositoryInterface
      * @return mixed
      */
     public function parties($request, $partyType);
+    /**
+     * returns party.
+     *
+     *
+     * @param string $Party   
+     * @param string $partyType
+     * @return mixed
+     */
+    public function party($id, $partyType);
+    /**
+     * returns updated party.
+     *
+     * @param Illuminate\Http\Request $request
+     * @param string $partyType
+     * @return mixed
+     */
+    public function updateParty($request, $partyType);
 }

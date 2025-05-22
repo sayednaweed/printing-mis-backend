@@ -182,7 +182,6 @@ class PartyRepository implements PartyRepositoryInterface
                 'pr.created_at',
             );
 
-
         $this->applyDate($query, $request, 'pr.created_at', 'pr.created_at');
         $allowedColumns = [
             'name' => 'prt.name',
@@ -204,4 +203,6 @@ class PartyRepository implements PartyRepositoryInterface
             JSON_UNESCAPED_UNICODE
         );
     }
+    public function party($id, $partyType) {}
+    public function updateParty($request, $partyType) {}
 }
