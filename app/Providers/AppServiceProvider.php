@@ -13,6 +13,8 @@ use App\Repositories\Notification\NotificationRepository;
 use App\Repositories\Permission\PermissionRepositoryInterface;
 use App\Repositories\PendingTask\PendingTaskRepositoryInterface;
 use App\Repositories\Notification\NotificationRepositoryInterface;
+use App\Repositories\Party\PartyRepository;
+use App\Repositories\Party\PartyRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PendingTaskRepositoryInterface::class, PendingTaskRepository::class);
         $this->app->bind(NotificationRepositoryInterface::class, NotificationRepository::class);
         $this->app->bind(StorageRepositoryInterface::class, StorageRepository::class);
+        $this->app->bind(PartyRepositoryInterface::class, PartyRepository::class);
     }
 
     /**
