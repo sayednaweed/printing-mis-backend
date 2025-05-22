@@ -85,9 +85,9 @@ class ShiftController extends Controller
         $request->validate([
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i',
-            'name_english' => 'required|string',
-            'name_pashto' => 'required|string',
-            'name_farsi' => 'required|string',
+            'english' => 'required|string',
+            'pashto' => 'required|string',
+            'farsi' => 'required|string',
         ]);
 
         $shift = Shift::create([
@@ -104,11 +104,11 @@ class ShiftController extends Controller
         }
 
         $locale = App::getLocale();
-        $name = $request->name_english;
+        $name = $request->english;
         if ($locale == LanguageEnum::farsi->value) {
-            $name = $request->name_farsi;
+            $name = $request->farsi;
         } else {
-            $name = $request->name_pashto;
+            $name = $request->pashto;
         }
         return response()->json([
             'message' => __('app_translation.success'),
@@ -122,77 +122,94 @@ class ShiftController extends Controller
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-//Edit Function
+    //Edit Function
 
-   public function edit($id)
-{
- // First we try to find the shift
-    $shift = Shift::find($id);
+    public function edit($id)
+    {
 
-    if (!$shift) {
-        return response()->json([
-            'message' => __('app_translation.shift_not_found'),
-        ], 404, [], JSON_UNESCAPED_UNICODE);
-    }
-// Find translations for shift
-    $translations = ShiftTran::where('shift_id', $shift->id)->get();
-// Set names based on the current language
-    $locale = App::getLocale();
-    $name = null;
-    foreach ($translations as $translation) {
-        if ($translation->language_name == $locale) {
-            $name = $translation->value;
+
+        $locale = App::getLocale();
+
+
+
+        $query = DB::table('shifts as sh')
+            ->leftJoin(DB::raw('(
+                SELECT
+                    shift_id,
+                    MAX(CASE WHEN language_name = "fa" THEN value END) as farsi,
+                    MAX(CASE WHEN language_name = "en" THEN value END) as english,
+                    MAX(CASE WHEN language_name = "ps" THEN value END) as pashto
+                FROM shift_trans
+                GROUP BY shift_id
+            ) as sht'), 'sh.id', '=', 'sht.shift_id')
+            ->select(
+                'sh.id',
+                "sh.start_time",
+                "sh.end_time",
+                'sh.created_at',
+                'sht.farsi',
+                'sht.english',
+                'sht.pashto'
+            )
+            ->where('sh.id', $id);
+
+        if (!$query) {
+            return response()->json([
+                'message' => __('app_translation.shift_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
         }
+        $result = $query->first();
+
+        return response()->json([
+            "id" => $result->id,
+            "start_time" => $result->start_time,
+            "end_time" => $result->end_time,
+            "english" => $result->english,
+            "farsi" => $result->farsi,
+            "pashto" => $result->pashto,
+            "created_at" => $result->created_at,
+
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+        // First we try to find the shift
+
     }
 
-    return response()->json([
-        'shift' => [
-            'id' => $shift->id,
-            'start_time' => $shift->start_time,
-            'end_time' => $shift->end_time,
-            'name' => $name,  
-            'created_at' => $shift->created_at,
-            'translations' => $translations, 
-        ]
-    ], 200, [], JSON_UNESCAPED_UNICODE);
-}
 
 
-    
 
- //Update Function
-    public function update(Request $request, $id){
+    //Update Function
+    public function update(Request $request, $id)
+    {
         $request->validate([
-            'start_time'=>'required|date_format:H:',
-            'end_time'=>'required|date_format:H',
-            'english'=>'required|string',
-            'pashto'=>'required|string',
-            'farsi'=>'required|string',
-            'detail'=>'required|string'
+            'start_time' => 'required|date_format:H:',
+            'end_time' => 'required|date_format:H',
+            'english' => 'required|string',
+            'pashto' => 'required|string',
+            'farsi' => 'required|string',
+            'detail' => 'required|string'
         ]);
         $shift = Shift::find($id);
-    if (!$shift) {
-        return response()->json([
-            'message' => __('app_translation.shift_not_found'),
-        ], 404, [], JSON_UNESCAPED_UNICODE);
-    }
+        if (!$shift) {
+            return response()->json([
+                'message' => __('app_translation.shift_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
 
-    DB::transaction();
-    $shift->update([
-        'start_time'=>$request->start_time,
-        'end_time'=>$request->end_time,
-        'description'=>$request->detail
+        DB::transaction();
+        $shift->update([
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'description' => $request->detail
 
-    ]);
-    $trans = ShiftTran::where('shift_id',$shift->id)->select('id','language_name','value')->get();
-    //Update
-    foreach(LanguageEnum::LANGUAGES as $code=>$name){
-        $tran = $trans->where('language_name', $code)->first();
-        $tran->value = $request["{$name}"];
-        $tran->save();
-
-    }
-    DB::commit(); 
+        ]);
+        $trans = ShiftTran::where('shift_id', $shift->id)->select('id', 'language_name', 'value')->get();
+        //Update
+        foreach (LanguageEnum::LANGUAGES as $code => $name) {
+            $tran = $trans->where('language_name', $code)->first();
+            $tran->value = $request["{$name}"];
+            $tran->save();
+        }
+        DB::commit();
 
         $locale = App::getLocale();
         $name = $request->english;
@@ -201,22 +218,17 @@ class ShiftController extends Controller
         } else if ($locale == LanguageEnum::pashto->value) {
             $name = $request->pashto;
         }
-    
-    return response()->json([
-        'message' => __('app_translation.success'),
-        'shift' => [
-            'id' => $shift->id,
-            'start_time' => $shift->start_time,
-            'end_time' => $shift->end_time,
-            'name' => $request->name,
-            'created_at' => $shift->created_at,
-        ]
-    ], 200, [], JSON_UNESCAPED_UNICODE);
 
-
-
-
-
+        return response()->json([
+            'message' => __('app_translation.success'),
+            'shift' => [
+                'id' => $shift->id,
+                'start_time' => $shift->start_time,
+                'end_time' => $shift->end_time,
+                'name' => $request->name,
+                'created_at' => $shift->created_at,
+            ]
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
     protected function applyDate($query, $request)
