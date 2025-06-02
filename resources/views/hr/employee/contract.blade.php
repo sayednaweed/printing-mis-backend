@@ -154,7 +154,7 @@
                                     <td class=" border" colspan="3">
                                         {{ $data['start_date'] }}
                                     </td>
-                                    <td class="gray-300 border" colspan="3" style="font-weight: bold;"> تاریخ شروع
+                                    <td class="gray-300 border" colspan="3" style="font-weight: bold;"> تاریخ ختم
                                         قرارداد:
                                     </td>
                                     <td class="border" colspan="3"> {{ $data['end_date'] }}
