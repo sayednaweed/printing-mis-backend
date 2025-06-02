@@ -6,15 +6,16 @@ use Exception;
 use App\Models\Email;
 use App\Models\Gender;
 use App\Models\Contact;
+use App\Models\CurrencyTran;
 use App\Models\NidTypeTrans;
 use Illuminate\Http\Request;
+use App\Models\NationalityTrans;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Lang;
 use App\Models\ApplicationConfiguration;
-use App\Models\CurrencyTran;
-use App\Models\NationalityTrans;
-use Illuminate\Support\Facades\DB;
 
 class ApplicationController extends Controller
 {
@@ -123,5 +124,15 @@ class ApplicationController extends Controller
             [],
             JSON_UNESCAPED_UNICODE
         );
+    }
+    public function getTranslations($lang, $namespace)
+    {
+        App::setLocale($lang);
+
+        $translations = Lang::get($namespace);
+
+        return response()
+            ->json($translations)
+            ->header('Cache-Control', 'no-store'); // disable HTTP caching
     }
 }

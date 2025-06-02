@@ -16,40 +16,9 @@ class ContractController extends Controller
 
     public function generateContract($id)
     {
-        // $languages = ['en', 'ps', 'fa'];
-        $pdfFiles = [];
-        $lang = 'fa';
+        $locale = 'fa';
         $mpdf = $this->generatePdf();
         // $this->setWatermark($mpdf);
-        $data = $this->data($lang, $id);
-
-        // return "ngo.registeration.{$lang}.registeration";
-        // Generate PDF content
-        $this->pdfFilePart($mpdf, "hr.employee.contract", $data);
-        // $mpdf->view('hr.employee.contract')
-        // $this->pdfFilePart($mpdf, "ngo.registeration.{$lang}.registeration", $data);
-        $mpdf->SetProtection(['print']);
-
-        // Store the PDF temporarily
-
-        $fileName = "{employee_registration_contract.pdf";
-        $outputPath = storage_path("app/private/temp/");
-        if (!is_dir($outputPath)) {
-            mkdir($outputPath, 0755, true);
-        }
-        $filePath = $outputPath . $fileName;
-
-        // return $filePath;
-        $mpdf->Output($filePath, 'F'); //  F Save to file
-
-
-        return response()->download($filePath)->deleteFileAfterSend(true);
-    }
-
-    protected function data($lang, $id)
-    {
-        $locale = $lang;
-
         // Subquery to get latest position assignment per employee
         $latestPositionAssignmentId = DB::table('position_assignments')
             ->where('employee_id', $id)
@@ -57,6 +26,7 @@ class ContractController extends Controller
             ->limit(1);
 
         $emp = DB::table('employees as emp')
+            ->where('emp.id', $id)
             ->join('employee_trans as empt', function ($join) use ($locale) {
                 $join->on('empt.employee_id', '=', 'emp.id')
                     ->where('empt.language_name', $locale);
@@ -97,9 +67,7 @@ class ContractController extends Controller
         // Include address joins
         $emp = $this->address($emp, 'p_', 'emp.parmanent_address_id');
         $emp = $this->address($emp, 't_', 'emp.current_address_id');
-
-        // Select final fields
-        $emp = $emp->where('emp.id', $id)->select(
+        $employee = $emp->select(
             'empt.first_name',
             'empt.last_name',
             'emp.hr_code',
@@ -129,6 +97,12 @@ class ContractController extends Controller
 
         )->first();
 
+        if (!$employee) {
+            return response()->json([
+                'message' => __('app_translation.employee_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+
         // Build response data
         $data = [
             'company_name' => 'مطبعه فردای نوین',
@@ -157,7 +131,26 @@ class ContractController extends Controller
             'currency' => $emp->currency
         ];
 
+        // return "ngo.registeration.{$lang}.registeration";
+        // Generate PDF content
+        $this->pdfFilePart($mpdf, "hr.employee.contract", $data);
+        // $mpdf->view('hr.employee.contract')
+        // $this->pdfFilePart($mpdf, "ngo.registeration.{$lang}.registeration", $data);
+        $mpdf->SetProtection(['print']);
 
-        return ['data' => $data];
+        // Store the PDF temporarily
+
+        $fileName = "{employee_registration_contract.pdf";
+        $outputPath = storage_path("app/private/temp/");
+        if (!is_dir($outputPath)) {
+            mkdir($outputPath, 0755, true);
+        }
+        $filePath = $outputPath . $fileName;
+
+        // return $filePath;
+        $mpdf->Output($filePath, 'F'); //  F Save to file
+
+
+        return response()->download($filePath)->deleteFileAfterSend(true);
     }
 }

@@ -572,6 +572,15 @@ class DatabaseSeeder extends Seeder
                     'fa' => 'یورو',
                 ],
             ],
+            [
+                'abbr' => 'GBP',
+                'symbol' => '£',
+                'translations' => [
+                    'en' => 'Pound',
+                    'ps' => 'پوند',
+                    'fa' => 'پوند',
+                ],
+            ],
         ];
 
         foreach ($currencies as $currency) {
