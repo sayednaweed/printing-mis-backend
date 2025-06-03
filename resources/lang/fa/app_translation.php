@@ -58,4 +58,5 @@ return [
     'already_attendance_taken' => "حاضری گرفته شده است",
     'checkout_must_be_before' => "گرفت رفت حاضری باید قبل از وقت ذیل انجام شود:",
     'checkin_must_be_before' => "گرفت امد حاضری باید قبل از وقت ذیل انجام شود:",
+    'leave_type_not_found' => "نوع رخصتی پیدا نشد!",
 ];

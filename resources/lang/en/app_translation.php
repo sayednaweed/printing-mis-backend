@@ -58,4 +58,5 @@ return [
     'already_attendance_taken' => "Attendance aleardy taken",
     'checkin_must_be_before' => "Check-in must be done before the following time:",
     'checkout_must_be_before' => "Check-out must be done before the following time:",
+    'leave_type_not_found' => "Type of leave not found!",
 ];

@@ -13,8 +13,6 @@ use App\Http\Controllers\Controller;
 
 class HireController extends Controller
 {
-    //
-
     public function hireTypes(Request $request)
     {
         $locale = App::getLocale();
