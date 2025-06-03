@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\app\hr\payroll;
+namespace App\Http\Controllers\api\app\hr\salary;
 
 use App\Models\Payroll;
 use Illuminate\Http\Request;

@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('year');
             $table->string('month');
             $table->string('payment_date');
-            $table->decimal('salary', 15, 2);
             $table->decimal('deductions', 15, 2);
             $table->decimal('net_pay', 15, 2);
             $table->decimal('overtime_amount', 15, 2);
@@ -29,6 +28,7 @@ return new class extends Migration
             $table->foreign('account_id')->references('id')->on('accounts')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+            $table->text('detail');
             $table->timestamps();
         });
     }

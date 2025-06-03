@@ -3,7 +3,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Enums\Permission\HrPermissionEnum;
-use App\Http\Controllers\api\app\hr\payroll\PayrollController;
+use App\Http\Controllers\api\app\hr\salary\PayrollController;
 
 Route::prefix('v1')->middleware(["authorized:" . 'user:api'])->group(function () {
     Route::get('/salaries', [PayrollController::class, 'index'])->middleware(["HasMainPermission:" . HrPermissionEnum::salaries->value . ',' . 'view']);
