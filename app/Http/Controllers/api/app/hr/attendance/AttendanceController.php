@@ -13,40 +13,23 @@ use App\Models\AttendanceStatusTran;
 use App\Enums\Attendance\AttendanceStatusEnum;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Requests\hr\attendance\StoreAttendanceRequest;
+use App\Models\ApplicationConfiguration;
+use App\Repositories\Attendance\AttendanceRepositoryInterface;
 
 class AttendanceController extends Controller
 {
-
-
+    protected $attendanceRepository;
+    public function __construct(
+        AttendanceRepositoryInterface $attendanceRepository,
+    ) {
+        $this->attendanceRepository = $attendanceRepository;
+    }
     public function index(Request $request)
     {
-        $locale = App::getLocale();
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
 
-        $absentId = AttendanceStatusEnum::absent->value;
-        $presentId = AttendanceStatusEnum::present->value;
-        $leaveId = AttendanceStatusEnum::leave->value;
-
-        // Execute raw SQL query
-        $rawData = DB::select("
-        SELECT
-            att.created_at,
-            us.username as taken_by,
-            DATE(att.created_at) AS date,
-            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS present,
-            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS absent,
-            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS `leave`,
-            SUM(CASE WHEN att.attendance_status_id NOT IN (?, ?, ?) THEN 1 ELSE 0 END) AS other
-        FROM attendances att
-        JOIN users us ON us.id = att.taken_by_id
-        GROUP BY att.created_at, us.username, DATE(att.created_at)
-        ORDER BY DATE(att.created_at) DESC, us.username ASC
-    ", [$presentId, $absentId, $leaveId, $presentId, $absentId, $leaveId]);
-
-        // Convert to collection
-        $summary = collect($rawData);
-
+        $summary = $this->attendanceRepository->attendancies();
         // Apply filters
         $this->applyDate($summary, $request);
         $this->applyFilters($summary, $request);
@@ -65,88 +48,52 @@ class AttendanceController extends Controller
             ]
         );
 
-
         return response()->json([
             "attendance" => $paginated,
         ], 200, [], JSON_UNESCAPED_UNICODE);
-
     }
 
-
-
-
-    // 
-
-    public function employeeAttendance()
+    public function showAttendance(Request $request)
     {
         $locale = App::getLocale();
-        $currentDate = Carbon::now()->toDateString();
+        $date = $request->query('created_at') ? Carbon::parse($request->query('created_at')) : Carbon::today();
+        $now = Carbon::now();
 
-        $attendance = Attendance::whereDate('created_at', Carbon::today())->first();
-        if ($attendance && $attendance->check_in_time && $attendance->check_out_time) {
-            return response()->json([
-                'message' => __('app_translation.attendance_taken'),
-            ], 500, [], JSON_UNESCAPED_UNICODE);
+        $attendanceTime = DB::table('application_configurations as ac')
+            ->where('ac.id', 1)
+            ->select(
+                'ac.id',
+                'ac.attendance_check_in_time',
+                'ac.attendance_check_out_time',
+            )->first();
+        $attendance = Attendance::whereDate('created_at', $date)
+            ->first();
+        if ($attendance) {
+            if ($attendance->check_out_time != null) {
+                return response()->json([
+                    "message" => __('app_translation.already_attendance_taken'),
+                ], 500, [], JSON_UNESCAPED_UNICODE);
+            } else {
+                // 2. Check check_out_time attendance
+                $checkoutTime  = Carbon::createFromTimeString($attendanceTime->attendance_check_out_time);
+                if ($now->format('H:i:s') < $checkoutTime->format('H:i:s')) {
+                    return response()->json([
+                        "message" => __('app_translation.checkout_must_be_before') . ' ' . $attendanceTime->attendance_check_out_time,
+                    ], 500, [], JSON_UNESCAPED_UNICODE);
+                }
+            }
+        } else {
+            // 3. Check check_in_time attendance
+            $checkInTime  = Carbon::createFromTimeString($attendanceTime->attendance_check_in_time);
+            if ($now->format('H:i:s') > $checkInTime->format('H:i:s')) {
+                return response()->json([
+                    "message" => __('app_translation.checkin_must_be_before') . ' ' . $attendanceTime->attendance_check_in_time,
+                ], 500, [], JSON_UNESCAPED_UNICODE);
+            }
         }
 
-        $employees = DB::table('employees as emp')
-            ->join('employee_trans as empt', function ($join) use ($locale) {
-                $join->on('emp.id', '=', 'empt.employee_id')
-                    ->where('empt.language_name', $locale);
-            })
-            ->leftJoin('leaves as lv', function ($join) use ($currentDate) {
-                $join->on('emp.id', '=', 'lv.employee_id')
-                    ->whereDate('lv.start_date', '<=', $currentDate)
-                    ->whereDate('lv.end_date', '>=', $currentDate);
-            })
-            ->select(
-                'emp.id',
-                'emp.picture',
-                'emp.hr_code',
-                'empt.first_name',
-                'empt.last_name',
-                DB::raw('CASE WHEN lv.id IS NOT NULL THEN 1 ELSE 0 END as has_leave')
-            )
-            ->get();
-
-        // Attendance statuses without leave
-        $leaveStatusValue = AttendanceStatusEnum::leave->value;
-        $absentStatusValue = AttendanceStatusEnum::absent->value;
-
-        $statuses = AttendanceStatusTran::where('language_name', $locale)
-            ->select('value as status', 'attendance_status_id as status_id')
-            ->get();
-
-
-
-        $data = $employees->map(function ($emp) use ($statuses, $leaveStatusValue, $absentStatusValue) {
-
-            $statuses = $statuses->map(function ($status) use ($emp, $leaveStatusValue, $absentStatusValue) {
-
-                $selected = $emp->has_leave
-                    ? ($status->status_id === $leaveStatusValue)
-                    : ($status->status_id === $absentStatusValue);
-
-                return [
-                    'name' => $status->status,
-                    'id' => $status->status_id,
-                    'selected' => $selected,
-                ];
-            });
-
-            return [
-                'id' => $emp->id,
-                'hr_code' => $emp->hr_code,
-                'picture' => $emp->picture,
-                'first_name' => $emp->first_name,
-                'last_name' => $emp->last_name,
-                'detail' => '',
-                'status' => $statuses->values(),
-            ];
-        });
-
         return response()->json([
-            'data' => $data,
+            'data' => $this->attendanceRepository->showAttendance($date, $locale),
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
@@ -156,54 +103,54 @@ class AttendanceController extends Controller
 
     public function store(StoreAttendanceRequest $request)
     {
-        $user = $request->user();
-        $data = $request->validated();
+        $authUser = $request->user();
+        $request->validated();
         $today = Carbon::today();
+        $now = Carbon::now();
+        $tr = [];
 
-        DB::beginTransaction();
+        $attendanceTime = DB::table('application_configurations as ac')
+            ->where('ac.id', 1)
+            ->select(
+                'ac.id',
+                'ac.attendance_check_in_time',
+                'ac.attendance_check_out_time',
+            )->first();
 
-        foreach ($data['attendances'] as $entry) {
-            $employeeId = $entry['employee_id'];
-
-            // Find today's attendance record for this employee
-            $attendance = Attendance::where('employee_id', $employeeId)
-                ->whereDate('created_at', $today)
-                ->first();
-
-            // CASE 1: Already both check-in and check-out recorded
-            if ($attendance && $attendance->check_in_time && $attendance->check_out_time) {
-
+        // 1. Validate for attendance
+        $attendance = Attendance::whereDate('created_at', $today)
+            ->first();
+        if ($attendance) {
+            if ($attendance->check_out_time != null) {
                 return response()->json([
-                    'message' => __('app_translation.already_attendance_taken')
-                ], 404, [], JSON_UNESCAPED_UNICODE);
+                    "message" => __('app_translation.already_attendance_taken'),
+                ], 500, [], JSON_UNESCAPED_UNICODE);
+            } else {
+                // 2. Take check_out_time attendance
+                $checkoutTime  = Carbon::createFromTimeString($attendanceTime->attendance_check_out_time);
+                if ($now->format('H:i:s') < $checkoutTime->format('H:i:s')) {
+                    return response()->json([
+                        "message" => __('app_translation.checkin_must_be_before') . ' ' . $attendanceTime->attendance_check_out_time,
+                    ], 500, [], JSON_UNESCAPED_UNICODE);
+                }
+                // 2.1 Take attendance
+                $tr = $this->attendanceRepository->store($request->attendances, $today, false, $authUser);
             }
-
-            // CASE 2: Check-in exists, but no check-out — update same row
-            if ($attendance && $attendance->check_in_time && !$attendance->check_out_time) {
-                $attendance->update([
-                    'check_out_time' => $entry['status_type_id'] === AttendanceStatusEnum::present->value ? now() : '',
-                    'taken_by_id' => $user->id,
-                    'description' => $entry['description'] ?? $attendance->description,
-                    'attendance_status_id' => $entry['status_type_id'],
-                ]);
+        } else {
+            // 3. Take check_in_time attendance
+            $checkInTime  = Carbon::createFromTimeString($attendanceTime->attendance_check_in_time);
+            if ($now->format('H:i:s') > $checkInTime->format('H:i:s')) {
+                return response()->json([
+                    "message" => __('app_translation.checkout_must_be_before') . ' ' . $attendanceTime->attendance_check_in_time,
+                ], 500, [], JSON_UNESCAPED_UNICODE);
             }
-
-            // CASE 3: No record or no check-in — create a new check-in
-            if (!$attendance) {
-                Attendance::create([
-                    'employee_id' => $employeeId,
-                    'check_in_time' => $entry['status_type_id'] === AttendanceStatusEnum::present->value ? now() : '',
-                    'description' => $entry['description'] ?? null,
-                    'attendance_status_id' => $entry['status_type_id'],
-                    'taken_by_id' => $user->id,
-                ]);
-            }
+            // 2.1 Take attendance
+            $tr = $this->attendanceRepository->store($request->attendances, $today, true, $authUser);
         }
-
-        DB::commit();
 
         return response()->json([
             'message' => __('app_translation.success'),
+            'attendance' => $tr,
         ]);
     }
 
@@ -219,6 +166,7 @@ class AttendanceController extends Controller
         return response()->json($tr, 200, [], JSON_UNESCAPED_UNICODE);
     }
     public function show() {}
+
     protected function applyDate($query, $request)
     {
         // Apply date filtering conditionally if provided
@@ -226,10 +174,10 @@ class AttendanceController extends Controller
         $endDate = $request->input('filters.date.endDate');
 
         if ($startDate) {
-            $query->where('emp.created_at', '>=', $startDate);
+            $query->where('att.created_at', '>=', $startDate);
         }
         if ($endDate) {
-            $query->where('emp.created_at', '<=', $endDate);
+            $query->where('att.created_at', '<=', $endDate);
         }
     }
     // search function 

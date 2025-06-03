@@ -16,9 +16,7 @@ class ContractController extends Controller
 
     public function generateContract($id)
     {
-        // $languages = ['en', 'ps', 'fa'];
-        $pdfFiles = [];
-        $lang = 'fa';
+        $locale = 'fa';
         $mpdf = $this->generatePdf();
         // $this->setWatermark($mpdf);
         $data = $this->data($lang, $id);
@@ -98,9 +96,9 @@ class ContractController extends Controller
         // Include address joins
         $emp = $this->address($emp, 'p_', 'emp.parmanent_address_id');
         $emp = $this->address($emp, 't_', 'emp.current_address_id');
-
         // Select final fields
         $emp = $emp->select(
+
             'empt.first_name',
             'empt.last_name',
             'emp.hr_code',
@@ -135,7 +133,15 @@ class ContractController extends Controller
         if ($emp->end_date) {
             $end_date =  date('Y-m-d', strtotime($emp->end_date));
         }
-        // dd($emp);
+
+
+        if (!$employee) {
+            return response()->json([
+                'message' => __('app_translation.employee_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+
+
         // Build response data
         $data = [
             'company_name' => 'مطبعه فردای نوین',
@@ -164,7 +170,26 @@ class ContractController extends Controller
             'currency' => $emp->currency
         ];
 
+        // return "ngo.registeration.{$lang}.registeration";
+        // Generate PDF content
+        $this->pdfFilePart($mpdf, "hr.employee.contract", $data);
+        // $mpdf->view('hr.employee.contract')
+        // $this->pdfFilePart($mpdf, "ngo.registeration.{$lang}.registeration", $data);
+        $mpdf->SetProtection(['print']);
 
-        return ['data' => $data];
+        // Store the PDF temporarily
+
+        $fileName = "{employee_registration_contract.pdf";
+        $outputPath = storage_path("app/private/temp/");
+        if (!is_dir($outputPath)) {
+            mkdir($outputPath, 0755, true);
+        }
+        $filePath = $outputPath . $fileName;
+
+        // return $filePath;
+        $mpdf->Output($filePath, 'F'); //  F Save to file
+
+
+        return response()->download($filePath)->deleteFileAfterSend(true);
     }
 }

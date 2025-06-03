@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('user_status_trans', function (Blueprint $table) {
             $table->id();
             $table->string('value');
-            $table->unsignedBigInteger('statuse_id');
-            $table->foreign('statuse_id')->references('id')->on('statuses')
+            $table->unsignedBigInteger('user_statuses');
+            $table->foreign('user_statuses')->references('id')->on('statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->string('language_name');

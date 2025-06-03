@@ -13,11 +13,15 @@ return new class extends Migration
     {
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
-            $table->string('check_in_time')->nullable();
+            $table->string('check_in_time');
             $table->string('check_out_time')->nullable();
             $table->string('description')->nullable();
-            $table->unsignedBigInteger('taken_by_id');
-            $table->foreign('taken_by_id')->references('id')->on('users')
+            $table->unsignedBigInteger('check_in_taken_by');
+            $table->foreign('check_in_taken_by')->references('id')->on('users')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
+            $table->unsignedBigInteger('check_out_taken_by')->nullable();
+            $table->foreign('check_out_taken_by')->references('id')->on('users')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('attendance_status_id');

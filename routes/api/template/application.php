@@ -14,4 +14,5 @@ Route::prefix('v1')->group(function () {
     Route::get('/nationalities', [ApplicationController::class, "nationalities"]);
     Route::get('/currencies', [ApplicationController::class, "currencies"]);
     Route::get('/report/selections', [ReportTemplateController::class, 'selections']);
+    Route::get('/locales/{lang}/{namespace}', [ApplicationController::class, 'getTranslations']);
 });
