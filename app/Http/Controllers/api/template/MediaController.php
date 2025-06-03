@@ -11,6 +11,19 @@ class MediaController extends Controller
     use HelperTrait;
     public function downloadProfile(Request $request)
     {
+
+        $filename = $request->query('path');
+        $fullPath = storage_path('app/private/profile/employee/' . $filename);
+
+        if (!file_exists($fullPath)) {
+            abort(404);
+        }
+
+        return response()->file($fullPath, [
+            'Content-Type' => mime_content_type($fullPath)
+        ]);
+
+
         $filePath = $request->input('path');
         $path = $this->getProfilePath($filePath);
         if (!file_exists($path)) {
