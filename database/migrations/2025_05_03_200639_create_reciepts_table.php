@@ -17,8 +17,8 @@ return new class extends Migration
             $table->decimal('amount_paid', 15, 2);
             $table->string('receipt_number');
 
-            $table->unsignedBigInteger('transecation_payment_id');
-            $table->foreign('transecation_payment_id')->references('id')->on('transecation_payments')
+            $table->unsignedBigInteger('transaction_payment_id');
+            $table->foreign('transaction_payment_id')->references('id')->on('transaction_payments')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('document_id');

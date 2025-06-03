@@ -9,4 +9,6 @@ class ContractGenerated extends Model
 {
     /** @use HasFactory<\Database\Factories\ContractGeneratedFactory> */
     use HasFactory;
+
+    protected $guarded = [];
 }

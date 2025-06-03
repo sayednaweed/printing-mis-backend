@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transecation_inventory_movements', function (Blueprint $table) {
+        Schema::create('transaction_type_trans', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('inventory_movement_id');
-            $table->foreign('inventory_movement_id')->references('id')->on('inventory_movements')
+            $table->string('value');
+            $table->unsignedBigInteger('transaction_type_id');
+            $table->foreign('transaction_type_id')->references('id')->on('transaction_types')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('tran_movement_id');
-            $table->foreign('tran_movement_id')->references('id')->on('transecation_movements')
+            $table->string('language_name');
+            $table->foreign('language_name')->references('name')->on('languages')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->timestamps();
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transecation_inventory_movements');
+        Schema::dropIfExists('transaction_type_trans');
     }
 };

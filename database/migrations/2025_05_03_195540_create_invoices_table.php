@@ -19,10 +19,11 @@ return new class extends Migration
             $table->foreign('issued_by')->references('id')->on('users')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('transecation_id');
-            $table->foreign('transecation_id')->references('id')->on('transecations')
+            $table->unsignedBigInteger('transaction_id');
+            $table->foreign('transaction_id')->references('id')->on('transactions')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+
             $table->unsignedBigInteger('document_id');
             $table->foreign('document_id')->references('id')->on('documents')
                 ->onUpdate('cascade')
