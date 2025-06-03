@@ -16,18 +16,18 @@ class ContractController extends Controller
 
     public function generateContract($id)
     {
+<<<<<<< HEAD
         // $languages = ['en', 'ps', 'fa'];
         $pdfFiles = [];
         $lang = 'fa';
+=======
+>>>>>>> fabba70ec0a0ec7a4f00f95601911e9a7ee0d283
         $mpdf = $this->generatePdf();
         // $this->setWatermark($mpdf);
-        $data = $this->data($lang, $id);
-        // return $data;
-        // return "ngo.registeration.{$lang}.registeration";
-        // Generate PDF content
+        $data = $this->data($id);
+
         $this->pdfFilePart($mpdf, "hr.employee.contract", $data);
-        // $mpdf->view('hr.employee.contract')
-        // $this->pdfFilePart($mpdf, "ngo.registeration.{$lang}.registeration", $data);
+
         $mpdf->SetProtection(['print']);
 
         // Store the PDF temporarily
@@ -46,7 +46,7 @@ class ContractController extends Controller
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
 
-    protected function data($lang, $id)
+    protected function data($id)
     {
         $locale = 'fa';
 
@@ -135,8 +135,12 @@ class ContractController extends Controller
         if ($emp->end_date) {
             $end_date =  date('Y-m-d', strtotime($emp->end_date));
         }
+<<<<<<< HEAD
         // dd($emp);
         // Build response data
+=======
+
+>>>>>>> fabba70ec0a0ec7a4f00f95601911e9a7ee0d283
         $data = [
             'company_name' => 'مطبعه فردای نوین',
             'full_name' => $emp->first_name . ' ' . $emp->last_name,
