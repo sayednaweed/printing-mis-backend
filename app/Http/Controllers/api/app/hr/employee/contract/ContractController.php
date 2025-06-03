@@ -19,6 +19,35 @@ class ContractController extends Controller
         $locale = 'fa';
         $mpdf = $this->generatePdf();
         // $this->setWatermark($mpdf);
+        $data = $this->data($lang, $id);
+        // return $data;
+        // return "ngo.registeration.{$lang}.registeration";
+        // Generate PDF content
+        $this->pdfFilePart($mpdf, "hr.employee.contract", $data);
+        // $mpdf->view('hr.employee.contract')
+        // $this->pdfFilePart($mpdf, "ngo.registeration.{$lang}.registeration", $data);
+        $mpdf->SetProtection(['print']);
+
+        // Store the PDF temporarily
+
+        $fileName = "{employee_registration_contract.pdf";
+        $outputPath = storage_path("app/private/temp/");
+        if (!is_dir($outputPath)) {
+            mkdir($outputPath, 0755, true);
+        }
+        $filePath = $outputPath . $fileName;
+
+        // return $filePath;
+        $mpdf->Output($filePath, 'F'); //  F Save to file
+
+
+        return response()->download($filePath)->deleteFileAfterSend(true);
+    }
+
+    protected function data($lang, $id)
+    {
+        $locale = 'fa';
+
         // Subquery to get latest position assignment per employee
         $latestPositionAssignmentId = DB::table('position_assignments')
             ->where('employee_id', $id)
@@ -29,14 +58,14 @@ class ContractController extends Controller
             ->where('emp.id', $id)
             ->join('employee_trans as empt', function ($join) use ($locale) {
                 $join->on('empt.employee_id', '=', 'emp.id')
-                    ->where('empt.language_name', $locale);
+                    ->where('empt.language_name', 'fa');
             })
             ->join('marital_status_trans as mrt', function ($join) use ($locale) {
                 $join->on('mrt.marital_status_id', '=', 'emp.marital_status_id')
                     ->where('mrt.language_name', $locale);
             })
             ->join('genders as gent', 'gent.id', '=', 'emp.gender_id')
-            ->join('employee_nids as nt', 'emp.id', '=', 'nt.employee_id')
+            ->leftJoin('employee_nids as nt', 'emp.id', '=', 'nt.employee_id')
             ->join('employee_education as empedu', 'emp.id', '=', 'empedu.employee_id')
             ->join('education_level_trans as edult', function ($join) use ($locale) {
                 $join->on('edult.education_level_id', '=', 'empedu.education_level_id')
@@ -50,11 +79,11 @@ class ContractController extends Controller
                     ->where('curt.language_name', $locale);
             })
             ->join('positions as pos', 'pos.id', '=', 'posasi.position_id')
-            ->join('position_trans as post', function ($join) use ($locale) {
+            ->leftJoin('position_trans as post', function ($join) use ($locale) {
                 $join->on('post.position_id', '=', 'posasi.position_id')
                     ->where('post.language_name', $locale);
             })
-            ->join('position_assignment_durations as posdur', 'posdur.position_assignment_id', '=', 'posasi.id')
+            ->leftJoin('position_assignment_durations as posdur', 'posdur.position_assignment_id', '=', 'posasi.id')
             ->join('department_trans as dept', function ($join) use ($locale) {
                 $join->on('dept.department_id', '=', 'pos.department_id')
                     ->where('dept.language_name', $locale);
@@ -67,7 +96,9 @@ class ContractController extends Controller
         // Include address joins
         $emp = $this->address($emp, 'p_', 'emp.parmanent_address_id');
         $emp = $this->address($emp, 't_', 'emp.current_address_id');
-        $employee = $emp->select(
+        // Select final fields
+        $emp = $emp->select(
+
             'empt.first_name',
             'empt.last_name',
             'emp.hr_code',
@@ -94,14 +125,22 @@ class ContractController extends Controller
             'posasi.salary',
             'posasi.overtime_rate',
             'curt.value as currency',
+            'emp.created_at'
 
         )->first();
+
+        $end_date = "دایمی";
+        if ($emp->end_date) {
+            $end_date =  date('Y-m-d', strtotime($emp->end_date));
+        }
+
 
         if (!$employee) {
             return response()->json([
                 'message' => __('app_translation.employee_not_found'),
             ], 404, [], JSON_UNESCAPED_UNICODE);
         }
+
 
         // Build response data
         $data = [
@@ -124,8 +163,8 @@ class ContractController extends Controller
             'department' => $emp->department,
             'position' => $emp->position,
             'shift' => $emp->shift,
-            'start_date' => date('Y-d-d', strtotime($emp->start_date)),
-            'end_date' =>  date('Y-d-d', strtotime($emp->end_date)),
+            'start_date' => date('Y-m-d', strtotime($emp->start_date ?? $emp->created_at)),
+            'end_date' => $end_date,
             'salary' => $emp->salary,
             'overtime' => $emp->overtime_rate,
             'currency' => $emp->currency
