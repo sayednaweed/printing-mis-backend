@@ -295,5 +295,7 @@ return [
     'company_name' => 'نام شرکت',
     'add_seller' => 'اضافه کردن فروشنده',
     'logo' => 'لوگو',
-    'add_buyer' => 'اضافه کردن خریدار'
+    'add_buyer' => 'اضافه کردن خریدار',
+    'check_in_taken_by' => 'گرفته زمان ورود توسط',
+    'check_out_taken_by' => 'گرفته زمان رفت توسط'
 ];

@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->longText('app_logo_base64')->nullable();
             $table->longText('report_logo_base64')->nullable();
+            $table->time('attendance_check_in_time');
+            $table->time('attendance_check_out_time');
             $table->timestamps();
         });
     }

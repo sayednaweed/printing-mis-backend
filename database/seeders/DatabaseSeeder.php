@@ -28,6 +28,8 @@ use App\Models\ReportSelectionTrans;
 use Database\Seeders\CheckListSeeder;
 use App\Enums\Types\EducationLevelEnum;
 use App\Enums\Types\ReportSelectionEnum;
+use App\Models\ApplicationConfiguration;
+use App\Models\ApplicationConfigurationTrans;
 use App\Models\PartyTypeTran;
 
 /*
@@ -88,8 +90,34 @@ class DatabaseSeeder extends Seeder
         $this->educationLevel();
         $this->reportSelection();
         $this->partyType();
+        $this->application_configurations();
     }
+    public function application_configurations()
+    {
+        $conf = ApplicationConfiguration::factory()->create([
+            'attendance_check_in_time' => Carbon::createFromTime(9, 0, 0)->toTimeString(),
+            'attendance_check_out_time' => Carbon::createFromTime(16, 0, 0)->toTimeString(),
+        ]);
 
+        ApplicationConfigurationTrans::factory()->create([
+            'company_name' => 'Fardai Naveen Printing Press',
+            'application_name' => 'Printing Press Management System',
+            'app_conf_id' => $conf->id,
+            'language_name' => 'en',
+        ]);
+        ApplicationConfigurationTrans::factory()->create([
+            'company_name' => 'د فردای نوین مطبعه',
+            'application_name' => 'سیستم مدیریت مطبعه',
+            'app_conf_id' => $conf->id,
+            'language_name' => 'fa',
+        ]);
+        ApplicationConfigurationTrans::factory()->create([
+            'company_name' => 'Fardai Naveen Printing Press',
+            'application_name' => 'د چاپ د مطبوعاتو د مدیریت سیسټم',
+            'app_conf_id' => $conf->id,
+            'language_name' => 'ps',
+        ]);
+    }
     public function partyType()
     {
         $type = PartyType::factory()->create([

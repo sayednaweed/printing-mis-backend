@@ -281,8 +281,8 @@ return [
     'employee_name' => 'Employee name',
     'leave_type' => 'Type of leave',
     'reason' => 'Reason',
-    'check_in_time' => 'Check in time',
-    'check_out_time' => 'Check out time',
+    'check_in_time' => 'Check-in time',
+    'check_out_time' => 'Check-out time',
     'present' => 'Present',
     'absent' => 'Absent',
     'other' => 'Other',
@@ -294,5 +294,7 @@ return [
     'company_name' => 'Company name',
     'add_seller' => 'Add seller',
     'logo' => 'Logo',
-    'add_buyer' => 'Add buyer'
+    'add_buyer' => 'Add buyer',
+    'check_in_taken_by' => 'Check-in taken by',
+    'check_out_taken_by' => 'Check-out taken by'
 ];
