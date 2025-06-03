@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\api\app\hr\employee\contract;
 
 
+use App\Models\ContractGenerated;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Traits\Address\AddressTrait;
+use Illuminate\Http\Request;
 use App\Traits\Report\PdfGeneratorTrait;
 
 class ContractController extends Controller
@@ -14,7 +16,9 @@ class ContractController extends Controller
     //
     use PdfGeneratorTrait, AddressTrait;
 
-    public function generateContract($id)
+    protected $postionId = '';
+
+    public function generateContract(Request $request, $id)
     {
         $mpdf = $this->generatePdf();
         // $this->setWatermark($mpdf);
@@ -36,6 +40,13 @@ class ContractController extends Controller
         // return $filePath;
         $mpdf->Output($filePath, 'F'); //  F Save to file
 
+        $authUser = $request->user();
+
+        ContractGenerated::create([
+            'position_assignment_id' => $this->postionId,
+            'user_id' => $authUser->id
+
+        ]);
 
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
@@ -121,11 +132,14 @@ class ContractController extends Controller
             't_dst.value as temprory_district',
             'posasi.salary',
             'posasi.overtime_rate',
+            'posasi.id as postion_assignment_id',
             'curt.value as currency',
             'emp.created_at'
 
         )->first();
 
+
+        $this->postionId = $emp->postion_assignment_id;
         $end_date = "دایمی";
         if ($emp->end_date) {
             $end_date =  date('Y-m-d', strtotime($emp->end_date));

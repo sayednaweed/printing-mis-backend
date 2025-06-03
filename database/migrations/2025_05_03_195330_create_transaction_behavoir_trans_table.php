@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transecation_type_trans', function (Blueprint $table) {
+        Schema::create('transaction_behavoir_trans', function (Blueprint $table) {
             $table->id();
             $table->string('value');
-            $table->unsignedBigInteger('transecation_type_id');
-            $table->foreign('transecation_type_id')->references('id')->on('transecation_types')
+            $table->unsignedBigInteger('transaction_behavoir_id');
+            $table->foreign('transaction_behavoir_id')->references('id')->on('transaction_behavoirs')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->string('language_name');
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transecation_type_trans');
+        Schema::dropIfExists('transaction_behavoir_trans');
     }
 };

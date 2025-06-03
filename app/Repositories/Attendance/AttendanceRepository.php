@@ -101,6 +101,8 @@ class AttendanceRepository implements AttendanceRepositoryInterface
     }
     public function showAttendance($date, $locale)
     {
+
+
         $employees = DB::table('employees as emp')
             ->join('employee_trans as empt', function ($join) use ($locale) {
                 $join->on('emp.id', '=', 'empt.employee_id')
@@ -111,15 +113,30 @@ class AttendanceRepository implements AttendanceRepositoryInterface
                     ->whereDate('lv.start_date', '<=', $date)
                     ->whereDate('lv.end_date', '>=', $date);
             })
+            ->leftJoin('attendances as att', function ($join) use ($date) {
+                $join->on('att.employee_id', '=', 'emp.id')
+                    ->whereDate('att.created_at', $date);
+            })
+            ->leftJoin('users as us_chk_in', 'us_chk_in.id', '=', 'att.check_in_taken_by')
+            ->leftJoin('users as us_chk_out', 'us_chk_out.id', '=', 'att.check_out_taken_by')
             ->select(
                 'emp.id',
                 'emp.picture',
                 'emp.hr_code',
                 'empt.first_name',
                 'empt.last_name',
+                'att.description',
+                'att.check_in_time',
+                'att.check_out_time',
+                'us_chk_in.username as chk_in_username',
+                'us_chk_out.username as chk_out_username',
                 DB::raw('CASE WHEN lv.id IS NOT NULL THEN 1 ELSE 0 END as has_leave')
             )
             ->get();
+
+
+
+
 
         // Attendance statuses without leave
         $leaveStatusValue = AttendanceStatusEnum::leave->value;
@@ -148,7 +165,11 @@ class AttendanceRepository implements AttendanceRepositoryInterface
                 'picture' => $emp->picture,
                 'first_name' => $emp->first_name,
                 'last_name' => $emp->last_name,
-                'detail' => '',
+                'check_in_time' => $emp->check_in_time,
+                'check_out_time' => $emp->check_out_time,
+                'detail' => $emp->description ?? '',
+                'check_in_taken_by' => $emp->chk_in_username,
+                'check_out_taken_by' => $emp->chk_out_username,
                 'status' => $statuses->values(),
             ];
         });

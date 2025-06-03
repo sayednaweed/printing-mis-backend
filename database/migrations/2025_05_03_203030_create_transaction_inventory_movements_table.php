@@ -11,20 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transecation_movements', function (Blueprint $table) {
+        Schema::create('transaction_inventory_movements', function (Blueprint $table) {
             $table->id();
-            $table->string('delivery_date');
-            $table->string('delivery_notes');
-            $table->integer('delivery_status');
-            $table->unsignedBigInteger('werehouse_id');
-            $table->foreign('werehouse_id')->references('id')->on('werehouses')
+            $table->unsignedBigInteger('inventory_movement_id');
+            $table->foreign('inventory_movement_id')->references('id')->on('inventory_movements')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('transecation_item_id');
-            $table->foreign('transecation_item_id')->references('id')->on('transecation_items')
+            $table->unsignedBigInteger('tran_movement_id');
+            $table->foreign('tran_movement_id')->references('id')->on('transaction_movements')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-
             $table->timestamps();
         });
     }
@@ -34,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transecation_movements');
+        Schema::dropIfExists('transaction_inventory_movements');
     }
 };

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transecation_items', function (Blueprint $table) {
+        Schema::create('transaction_items', function (Blueprint $table) {
             $table->id();
             $table->string('paid_at');
             $table->decimal('unit_price', 15, 2);
@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('quantity');
             $table->integer('weight');
 
-            $table->unsignedBigInteger('transecation_id');
-            $table->foreign('transecation_id')->references('id')->on('transecations')
+            $table->unsignedBigInteger('transaction_id');
+            $table->foreign('transaction_id')->references('id')->on('transactions')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('werehouse_id');
@@ -48,12 +48,12 @@ return new class extends Migration
             $table->foreign('color_id')->references('id')->on('colors')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('transecation_behavoir_id');
-            $table->foreign('transecation_behavoir_id')->references('id')->on('transecation_behavoirs')
+            $table->unsignedBigInteger('transaction_behavoir_id');
+            $table->foreign('transaction_behavoir_id')->references('id')->on('transaction_behavoirs')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
 
-            $table->unsignedBigInteger('returned_from_transecation_item');
+            $table->unsignedBigInteger('returned_from_transaction_item');
 
 
             $table->timestamps();
@@ -65,6 +65,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transecation_items');
+        Schema::dropIfExists('transaction_items');
     }
 };
