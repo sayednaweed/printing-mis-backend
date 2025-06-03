@@ -45,8 +45,8 @@ img.app_logo {
 }
 
 img.employee_photo {
-    width: 108px;
-    height: 150px;
+    width: 100px; /* 108 * 0.75 */
+    height: 130.5px; /* 150 * 0.75 */
     float: left;
     margin-top: 0px;
     margin-left: -20px;

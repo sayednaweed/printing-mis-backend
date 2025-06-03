@@ -17,7 +17,17 @@
                 <div class="info">
 
                     <img src="images/app-logo-l.png" alt="" class="app_logo" style="">
-                    <img src="images/waheed.jpg" alt="" class="employee_photo" style="">
+                    @php
+                        $profile = $data['profile']; // e.g., 'waheed.jpg'
+                        $imagePath = storage_path('app/private/profile/employee/' . $profile);
+                    @endphp
+
+                    @if (file_exists($imagePath))
+                        <img src="{{ $imagePath }}" alt="images/waheed.jpg" class="employee_photo">
+                    @else
+                        <img src="images/waheed.jpg" alt="" class="employee_photo" style="">
+                    @endif
+
                     <div class="mintext">
                         {{ $data['company_name'] }}
                         <br>
@@ -39,6 +49,7 @@
                                         style="color:white; ">____________________________________________________________________</span>
                                     نمبر مسلسله :
                                     {{ $data['hr_code'] }}
+
                                 </div>
 
                                 <hr style="width:100%">
@@ -148,13 +159,15 @@
                                 style="border: 1px solid black; border-collapse: collapse; text-align: center; font-size: 12px;">
 
                                 <tr>
-                                    <td class="gray-300 border" colspan="2" style="font-weight: bold;"> تاریخ شروع
+                                    <td class="gray-300 border" colspan="2" style="font-weight: bold;"> تاریخ
+                                        شروع
                                         قرارداد:
                                     </td>
                                     <td class=" border" colspan="3">
                                         {{ $data['start_date'] }}
                                     </td>
-                                    <td class="gray-300 border" colspan="3" style="font-weight: bold;"> تاریخ ختم
+                                    <td class="gray-300 border" colspan="3" style="font-weight: bold;"> تاریخ
+                                        ختم
                                         قرارداد:
                                     </td>
                                     <td class="border" colspan="3"> {{ $data['end_date'] }}
@@ -191,7 +204,8 @@
                                 </tr>
                                 <tr>
                                     <td colspan="12">
-                                        تعهد: طرفین تعهد میسپاریم که تمام ماده ها این قرار داد را به دقت مرور نموده و
+                                        تعهد: طرفین تعهد میسپاریم که تمام ماده ها این قرار داد را به دقت مرور نموده
+                                        و
                                         طبق آن عمل مینمایم همچنان پابند به موارد آن میباشیم.
                                     </td>
                                 </tr>
