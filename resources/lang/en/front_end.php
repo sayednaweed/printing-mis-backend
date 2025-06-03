@@ -297,5 +297,6 @@ return [
     'add_buyer' => 'Add buyer',
     'check_in_taken_by' => 'Check-in taken by',
     'check_out_taken_by' => 'Check-out taken by',
-    'salary_payment' => 'Salary payment'
+    'salary_payment' => 'Salary payment',
+    'payment' => 'Payment'
 ];

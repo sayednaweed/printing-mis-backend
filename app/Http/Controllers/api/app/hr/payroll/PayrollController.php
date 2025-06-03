@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\app\hr\salary;
+namespace App\Http\Controllers\api\app\hr\payroll;
 
 use App\Models\Payroll;
 use Illuminate\Http\Request;
@@ -8,7 +8,7 @@ use App\Models\PayrollPayment;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 
-class SalaryController extends Controller
+class PayrollController extends Controller
 {
     public function salaries() {}
     public function salaryStore(Request $request)
