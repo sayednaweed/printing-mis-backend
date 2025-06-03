@@ -86,13 +86,39 @@ class DatabaseSeeder extends Seeder
         $this->currency();
         $this->statusType();
         $this->status();
-        $this->Userstatus();
         $this->educationLevel();
         $this->reportSelection();
         $this->partyType();
-        $this->application_configurations();
+        $this->applicationConfigurations();
+        $this->deductionTypes();
     }
-    public function application_configurations()
+    public function deductionTypes()
+    {
+        $conf = ApplicationConfiguration::factory()->create([
+            'attendance_check_in_time' => Carbon::createFromTime(9, 0, 0)->toTimeString(),
+            'attendance_check_out_time' => Carbon::createFromTime(16, 0, 0)->toTimeString(),
+        ]);
+
+        ApplicationConfigurationTrans::factory()->create([
+            'company_name' => 'Fardai Naveen Printing Press',
+            'application_name' => 'Printing Press Management System',
+            'app_conf_id' => $conf->id,
+            'language_name' => 'en',
+        ]);
+        ApplicationConfigurationTrans::factory()->create([
+            'company_name' => 'د فردای نوین مطبعه',
+            'application_name' => 'سیستم مدیریت مطبعه',
+            'app_conf_id' => $conf->id,
+            'language_name' => 'fa',
+        ]);
+        ApplicationConfigurationTrans::factory()->create([
+            'company_name' => 'Fardai Naveen Printing Press',
+            'application_name' => 'د چاپ د مطبوعاتو د مدیریت سیسټم',
+            'app_conf_id' => $conf->id,
+            'language_name' => 'ps',
+        ]);
+    }
+    public function applicationConfigurations()
     {
         $conf = ApplicationConfiguration::factory()->create([
             'attendance_check_in_time' => Carbon::createFromTime(9, 0, 0)->toTimeString(),
@@ -282,8 +308,10 @@ class DatabaseSeeder extends Seeder
         $status = StatusType::factory()->create([
             'id' => StatusTypeEnum::leave_type->value,
         ]);
+        $status = StatusType::factory()->create([
+            'id' => StatusTypeEnum::payment_type->value,
+        ]);
     }
-    public function Userstatus() {}
     public function status()
     {
         $status = Status::factory()->create([
@@ -457,6 +485,44 @@ class DatabaseSeeder extends Seeder
             "status_id" => $status->id,
             "language_name" => "ps",
         ]);
+        $status = Status::factory()->create([
+            'id' => StatusEnum::advance_payment->value,
+            'status_type_id' => StatusTypeEnum::payment_type->value,
+        ]);
+        StatusTran::factory()->create([
+            "value" => "Advance payment",
+            "status_id" => $status->id,
+            "language_name" => "en",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "پیش پرداخت",
+            "status_id" => $status->id,
+            "language_name" => "fa",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "مخکې له مخکې تادیه",
+            "status_id" => $status->id,
+            "language_name" => "ps",
+        ]);
+        $status = Status::factory()->create([
+            'id' => StatusEnum::normal_payment->value,
+            'status_type_id' => StatusTypeEnum::payment_type->value,
+        ]);
+        StatusTran::factory()->create([
+            "value" => "Normal payment",
+            "status_id" => $status->id,
+            "language_name" => "en",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "پرداخت عادی",
+            "status_id" => $status->id,
+            "language_name" => "fa",
+        ]);
+        StatusTran::factory()->create([
+            "value" => "عادي تادیه",
+            "status_id" => $status->id,
+            "language_name" => "ps",
+        ]);
     }
 
     public function nidTypes()
@@ -513,8 +579,8 @@ class DatabaseSeeder extends Seeder
     public function shifts()
     {
         $shift = Shift::factory()->create([
-            'start_time' => Carbon::today()->setTime(8, 0)->toTimeString(),  // 8:00 AM
-            'end_time' => Carbon::today()->setTime(4, 0)->toTimeString(),    // 9:00 AM
+            'start_time' => Carbon::today()->setTime(8, 0)->format('h:i A'),  // 8:00 AM
+            'end_time' => Carbon::today()->setTime(4, 0)->format('h:i A'),    // 4:00 PM
             "description" => "",
         ]);
         ShiftTran::factory()->create([
