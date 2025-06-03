@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\DB;
 use App\Enums\Types\StatusTypeEnum;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Log;
 
 class LeaveTypeController extends Controller
 {
