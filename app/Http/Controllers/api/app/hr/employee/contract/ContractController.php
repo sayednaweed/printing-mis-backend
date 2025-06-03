@@ -20,7 +20,6 @@ class ContractController extends Controller
         // $this->setWatermark($mpdf);
         $data = $this->data($id);
 
-
         $this->pdfFilePart($mpdf, "hr.employee.contract", $data);
 
         $mpdf->SetProtection(['print']);
@@ -130,8 +129,7 @@ class ContractController extends Controller
         if ($emp->end_date) {
             $end_date =  date('Y-m-d', strtotime($emp->end_date));
         }
-        // dd($emp);
-        // Build response data
+
         $data = [
             'company_name' => 'مطبعه فردای نوین',
             'full_name' => $emp->first_name . ' ' . $emp->last_name,
