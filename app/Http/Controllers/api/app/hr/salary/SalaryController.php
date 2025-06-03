@@ -10,9 +10,6 @@ use App\Http\Controllers\Controller;
 
 class SalaryController extends Controller
 {
-    //
-
-
     public function salaries() {}
     public function salaryStore(Request $request)
     {

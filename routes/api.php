@@ -35,6 +35,7 @@ require __DIR__ . '/api/app/hr/education.php';
 require __DIR__ . '/api/app/hr/report.php';
 require __DIR__ . '/api/app/hr/status.php';
 require __DIR__ . '/api/app/hr/contract.php';
+require __DIR__ . '/api/app/hr/salary.php';
 require __DIR__ . '/api/app/report/reports.php';
 require __DIR__ . '/api/app/file/file.php';
 require __DIR__ . '/api/app/checklist/checklist.php';

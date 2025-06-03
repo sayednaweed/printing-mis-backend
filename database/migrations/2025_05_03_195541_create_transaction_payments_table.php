@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transecation_payments', function (Blueprint $table) {
+        Schema::create('transaction_payments', function (Blueprint $table) {
             $table->id();
             $table->decimal('amount_paid', 15, 2);
-            $table->unsignedBigInteger('transecation_id');
-            $table->foreign('transecation_id')->references('id')->on('transecations')
+            $table->unsignedBigInteger('transaction_id');
+            $table->foreign('transaction_id')->references('id')->on('transactions')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('invoice_id');

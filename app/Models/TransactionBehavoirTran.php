@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TransecationProjectMovement extends Model
+class TransecationBehavoirTran extends Model
 {
-    //
+    protected $guarded = [];
 }

@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transecations', function (Blueprint $table) {
+        Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->decimal('total_amount', 15, 2);
             $table->decimal('transportation_cost', 15, 2);
             $table->string('quantity');
             $table->string('description');
             $table->string('date');
-            $table->unsignedBigInteger('transecation_id');
-            $table->foreign('transecation_id')->references('id')->on('transecations')
+            $table->unsignedBigInteger('transaction_id');
+            $table->foreign('transaction_id')->references('id')->on('transactions')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('user_id');
