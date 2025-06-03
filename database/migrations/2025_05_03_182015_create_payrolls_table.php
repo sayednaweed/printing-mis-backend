@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('payroll_id');
             $table->string('year');
+            $table->string('month');
             $table->string('payment_date');
             $table->decimal('salary', 15, 2);
             $table->decimal('deductions', 15, 2);

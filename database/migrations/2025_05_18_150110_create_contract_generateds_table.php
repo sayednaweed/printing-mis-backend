@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('contract_generateds', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('position_assignment_id');
+            $table->foreign('position_assignment_id')->references('id')->on('position_assignments')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
             $table->timestamps();
         });
     }
