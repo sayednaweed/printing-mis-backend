@@ -16,12 +16,9 @@ class ContractController extends Controller
 
     public function generateContract($id)
     {
-        // $languages = ['en', 'ps', 'fa'];
-        $pdfFiles = [];
-        $lang = 'fa';
         $mpdf = $this->generatePdf();
         // $this->setWatermark($mpdf);
-        $data = $this->data($lang, $id);
+        $data = $this->data($id);
 
 
         $this->pdfFilePart($mpdf, "hr.employee.contract", $data);
@@ -44,7 +41,7 @@ class ContractController extends Controller
         return response()->download($filePath)->deleteFileAfterSend(true);
     }
 
-    protected function data($lang, $id)
+    protected function data($id)
     {
         $locale = 'fa';
 
