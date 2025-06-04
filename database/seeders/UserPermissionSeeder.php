@@ -203,6 +203,15 @@ class UserPermissionSeeder extends Seeder
             "permission" => InventoryPermissionEnum::reports->value
         ]);
         $this->inventoryReportsSubPermissions($userPermission);
+        $userPermission = UserPermission::factory()->create([
+            "view" => true,
+            "edit" => true,
+            "delete" => true,
+            "add" => true,
+            "user_id" => RoleEnum::super->value,
+            "permission" => InventoryPermissionEnum::accounts->value
+        ]);
+        $this->inventoryAccountsSubPermissions($userPermission);
     }
     public function hrEmployeesSubPermissions($userPermission)
     {
@@ -350,6 +359,19 @@ class UserPermissionSeeder extends Seeder
     public function inventoryReportsSubPermissions($userPermission)
     {
         foreach (SubPermissionEnum::INVENTORY_REPORTS as $id => $role) {
+            UserPermissionSub::factory()->create([
+                "edit" => true,
+                "delete" => true,
+                "add" => true,
+                "view" => true,
+                "user_permission_id" => $userPermission->id,
+                "sub_permission_id" => $id,
+            ]);
+        }
+    }
+    public function inventoryAccountsSubPermissions($userPermission)
+    {
+        foreach (SubPermissionEnum::INVENTORY_ACCOUNTS as $id => $role) {
             UserPermissionSub::factory()->create([
                 "edit" => true,
                 "delete" => true,

@@ -41,7 +41,8 @@ class PermissionSeeder extends Seeder
             ['name' => InventoryPermissionEnum::projects->value, 'icon' => 'icons/projects.svg', 'priority' => 5, 'portal' => PortalEnum::inventory->value],
             ['name' => InventoryPermissionEnum::warehouse->value, 'icon' => 'icons/inventory.svg', 'priority' => 6, 'portal' => PortalEnum::inventory->value],
             ['name' => InventoryPermissionEnum::configurations->value, 'icon' => 'icons/configurations.svg', 'priority' => 7, 'portal' => PortalEnum::inventory->value],
-            ['name' => InventoryPermissionEnum::reports->value, 'icon' => 'icons/reports.svg', 'priority' => 8, 'portal' => PortalEnum::inventory->value],
+            ['name' => InventoryPermissionEnum::accounts->value, 'icon' => 'icons/accounts.svg', 'priority' => 8, 'portal' => PortalEnum::inventory->value],
+            ['name' => InventoryPermissionEnum::reports->value, 'icon' => 'icons/reports.svg', 'priority' => 9, 'portal' => PortalEnum::inventory->value],
         ];
 
         foreach ($hrPermissions as $permission) {

@@ -17,7 +17,7 @@ class ShiftController extends Controller
         $locale = App::getLocale();
         // Start building the query
         $query = DB::table('shifts as sh')
-            ->leftjoin('shift_trans as sht', function ($join) use ($locale) {
+            ->join('shift_trans as sht', function ($join) use ($locale) {
                 $join->on('sh.id', '=', 'sht.shift_id')
                     ->where('sht.language_name', $locale);
             })

@@ -28,6 +28,7 @@ use App\Models\ReportSelectionTrans;
 use Database\Seeders\CheckListSeeder;
 use App\Enums\Types\EducationLevelEnum;
 use App\Enums\Types\ReportSelectionEnum;
+use App\Models\Account;
 use App\Models\ApplicationConfiguration;
 use App\Models\ApplicationConfigurationTrans;
 use App\Models\PartyTypeTran;
@@ -90,33 +91,6 @@ class DatabaseSeeder extends Seeder
         $this->reportSelection();
         $this->partyType();
         $this->applicationConfigurations();
-        $this->deductionTypes();
-    }
-    public function deductionTypes()
-    {
-        $conf = ApplicationConfiguration::factory()->create([
-            'attendance_check_in_time' => Carbon::createFromTime(9, 0, 0)->toTimeString(),
-            'attendance_check_out_time' => Carbon::createFromTime(16, 0, 0)->toTimeString(),
-        ]);
-
-        ApplicationConfigurationTrans::factory()->create([
-            'company_name' => 'Fardai Naveen Printing Press',
-            'application_name' => 'Printing Press Management System',
-            'app_conf_id' => $conf->id,
-            'language_name' => 'en',
-        ]);
-        ApplicationConfigurationTrans::factory()->create([
-            'company_name' => 'د فردای نوین مطبعه',
-            'application_name' => 'سیستم مدیریت مطبعه',
-            'app_conf_id' => $conf->id,
-            'language_name' => 'fa',
-        ]);
-        ApplicationConfigurationTrans::factory()->create([
-            'company_name' => 'Fardai Naveen Printing Press',
-            'application_name' => 'د چاپ د مطبوعاتو د مدیریت سیسټم',
-            'app_conf_id' => $conf->id,
-            'language_name' => 'ps',
-        ]);
     }
     public function applicationConfigurations()
     {
@@ -579,9 +553,8 @@ class DatabaseSeeder extends Seeder
     public function shifts()
     {
         $shift = Shift::factory()->create([
-            'start_time' => Carbon::today()->setTime(8, 0)->format('h:i A'),  // 8:00 AM
-            'end_time' => Carbon::today()->setTime(4, 0)->format('h:i A'),    // 4:00 PM
-            "description" => "",
+            'start_time' => Carbon::today()->setTime(8, 0)->format('h:i'),  // 8:00 AM
+            'end_time' => Carbon::today()->setTime(4, 0)->format('h:i'),    // 4:00 PM
         ]);
         ShiftTran::factory()->create([
             "value" => "8 to 4 Shift",

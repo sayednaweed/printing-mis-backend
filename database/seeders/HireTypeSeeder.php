@@ -24,7 +24,7 @@ class HireTypeSeeder extends Seeder
     {
         $hireTypes = [
             [
-                'description' => '',
+                'detail' => '',
                 'translations' => [
                     'en' => 'Contractual',
                     'ps' => 'قراردادي',
@@ -32,7 +32,7 @@ class HireTypeSeeder extends Seeder
                 ]
             ],
             [
-                'description' => '',
+                'detail' => '',
                 'translations' => [
                     'en' => 'Permanent',
                     'ps' => 'دائمی',
@@ -40,7 +40,7 @@ class HireTypeSeeder extends Seeder
                 ]
             ],
             [
-                'description' => '',
+                'detail' => '',
                 'translations' => [
                     'en' => 'Temporary',
                     'ps' => 'موقتی',
@@ -48,7 +48,7 @@ class HireTypeSeeder extends Seeder
                 ]
             ],
             [
-                'description' => '',
+                'detail' => '',
                 'translations' => [
                     'en' => 'Internship',
                     'ps' => 'موقتی',
@@ -59,7 +59,7 @@ class HireTypeSeeder extends Seeder
 
         foreach ($hireTypes as $typeData) {
             $hireType = HireType::create([
-                'description' => $typeData['description'],
+                'detail' => $typeData['detail'],
             ]);
 
             foreach ($typeData['translations'] as $lang => $value) {

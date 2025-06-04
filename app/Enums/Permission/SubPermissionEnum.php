@@ -77,23 +77,21 @@ enum SubPermissionEnum: int
         91 => "details",
         92 => "payments",
     ];
-    case inventory_configuration_accounts = 111;
-    case inventory_configuration_warehouse = 112;
-    case inventory_configuration_material = 113;
-    case inventory_configuration_material_type = 114;
-    case inventory_configuration_size_unit = 115;
-    case inventory_configuration_size = 116;
-    case inventory_configuration_weight = 117;
-    case inventory_configuration_weight_unit = 118;
+    case inventory_configuration_warehouse = 111;
+    case inventory_configuration_material = 112;
+    case inventory_configuration_material_type = 113;
+    case inventory_configuration_size_unit = 114;
+    case inventory_configuration_size = 115;
+    case inventory_configuration_weight = 116;
+    case inventory_configuration_weight_unit = 117;
     public const INVENTORY_CONFIGURATIONS = [
-        111 => "accounts",
-        112 => "warehouse",
-        113 => "material",
-        114 => "material_type",
-        115 => "size_unit",
-        116 => "size",
-        117 => "weight",
-        118 => "weight_unit",
+        111 => "warehouse",
+        112 => "material",
+        113 => "material_type",
+        114 => "size_unit",
+        115 => "size",
+        116 => "weight",
+        117 => "weight_unit",
     ];
     case inventory_reports_purchases = 121;
     case inventory_reports_sells = 122;
@@ -102,5 +100,17 @@ enum SubPermissionEnum: int
         121 => "reports_purchases",
         122 => "reports_sells",
         123 => "reports_warehouses",
+    ];
+    case inventory_accounts_detail = 161;
+    case inventory_accounts_expenses = 162;
+    case inventory_accounts_sales = 163;
+    case inventory_accounts_purchases = 164;
+    case inventory_accounts_salaries = 165;
+    public const INVENTORY_ACCOUNTS = [
+        161 => "detail",
+        162 => "expenses",
+        163 => "sales",
+        164 => "purchases",
+        165 => "salaries",
     ];
 }

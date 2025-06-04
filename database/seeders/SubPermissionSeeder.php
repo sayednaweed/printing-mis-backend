@@ -98,6 +98,13 @@ class SubPermissionSeeder extends Seeder
                 "name" => $role,
             ]);
         }
+        foreach (SubPermissionEnum::INVENTORY_ACCOUNTS as $id => $role) {
+            SubPermission::factory()->create([
+                "id" => $id,
+                "permission" => InventoryPermissionEnum::reports->value,
+                "name" => $role,
+            ]);
+        }
         foreach (SubPermissionEnum::INVENTORY_REPORTS as $id => $role) {
             SubPermission::factory()->create([
                 "id" => $id,

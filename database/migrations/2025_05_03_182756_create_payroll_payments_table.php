@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('accounts', function (Blueprint $table) {
+        Schema::create('payroll_payments', function (Blueprint $table) {
             $table->id();
-            $table->string('code');
-            $table->text('detail')->nullable();
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')
+            $table->string('paid_date');
+            $table->decimal('paid_amount', 15, 2);
+            $table->unsignedBigInteger('payroll_id');
+            $table->foreign('payroll_id')->references('id')->on('payrolls')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->timestamps();
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('accounts');
+        Schema::dropIfExists('payroll_payments');
     }
 };
