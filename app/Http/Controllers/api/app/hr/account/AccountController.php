@@ -103,7 +103,7 @@ class AccountController extends Controller
 
     public function edit($id)
     {
-
+        $locale = App::getLocale();
         DB::table('accounts as ac')
             ->where('ac.id', $id)
             ->leftJoin('account_trans as act', 'ac.id', '=', 'act.account_id')
