@@ -298,5 +298,11 @@ return [
     'check_in_taken_by' => 'Check-in taken by',
     'check_out_taken_by' => 'Check-out taken by',
     'salary_payment' => 'Salary payment',
-    'payment' => 'Payment'
+    'payment' => 'Payment',
+    'name_farsi' => 'Name farsi',
+    'name_english' => 'Name english',
+    'name_pashto' => 'Name pashto',
+    'code' => 'Code',
+    'balance' => 'Balance',
+    'add_account' => 'Add account',
 ];

@@ -299,5 +299,11 @@ return [
     'check_in_taken_by' => 'گرفته زمان ورود توسط',
     'check_out_taken_by' => 'گرفته زمان رفت توسط',
     'salary_payment' => 'پرداخت حقوق',
-    'payment' => 'پرداخت'
+    'payment' => 'پرداخت',
+    'name_farsi' => 'نام به فارسی',
+    'name_english' => 'نام به انگلیسی',
+    'name_pashto' => 'نام به پشتو',
+    'code' => 'کد',
+    'balance' => 'حساب',
+    'add_account' => 'افزودن حساب',
 ];
