@@ -9,6 +9,10 @@ use App\Traits\Helper\HelperTrait;
 abstract class Controller
 {
     use HelperTrait;
+
+
+
+
     public function storeProfile(Request $request, $dynamic_path = 'user-profile', $columnName = 'profile')
     {
         // 1. If storage not exist create it.
