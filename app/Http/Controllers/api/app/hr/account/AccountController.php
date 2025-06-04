@@ -103,8 +103,11 @@ class AccountController extends Controller
 
     public function edit($id)
     {
+        // Get the current locale
         $locale = App::getLocale();
-        DB::table('accounts as ac')
+
+        // Fetch account details with left join on account_trans table
+        $account = DB::table('accounts as ac')
             ->where('ac.id', $id)
             ->leftJoin('account_trans as act', 'ac.id', '=', 'act.account_id')
             ->select(
@@ -118,10 +121,37 @@ class AccountController extends Controller
             )
             ->groupBy('ac.id')
             ->first();
-        DB::table('account_balances as acb')
+
+        // Fetch account balance details with the correct locale
+        $balance = DB::table('account_balances as acb')
+            ->where('acb.account_id', $id)
             ->join('currencies as cur', function ($join) use ($locale) {
                 $join->on('acb.currency_id', '=', 'cur.id')
-                    ->where('langauge_name', $locale);
-            });
+                    ->where('language_name', $locale); // Corrected typo here
+            })
+            ->select(
+                'acb.id',
+                'acb.balance',
+                'acb.currency_id',
+                'cur.value as currency'
+            )
+            ->get();
+
+        // Prepare the response data
+        $data = [
+            'id' => $account->id,
+            'code' => $account->code,
+            'detail' => $account->detail,
+            'name_english' => $account->english,
+            'name_farsi' => $account->farsi, // Corrected typo here
+            'name_pashto' => $account->pashto,
+            'balance' => $balance,
+            'created_at' => $account->created_at,
+        ];
+
+        // Return the response as JSON
+        return response()->json([
+            'account' => $data
+        ]);
     }
 }
