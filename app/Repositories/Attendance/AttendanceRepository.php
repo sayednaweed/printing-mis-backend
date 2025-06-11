@@ -137,6 +137,14 @@ class AttendanceRepository implements AttendanceRepositoryInterface
             })
             ->leftJoin('users as us_chk_in', 'us_chk_in.id', '=', 'att.check_in_taken_by')
             ->leftJoin('users as us_chk_out', 'us_chk_out.id', '=', 'att.check_out_taken_by')
+            ->leftJoin('attendance_status_trans as chkinast', function ($join) use ($locale) {
+                $join->on('chkinast.attendance_status_id', 'att.check_in_status_id')
+                    ->where('chkinast.language_name', $locale);
+            })
+            ->leftJoin('attendance_status_trans as chkoutast', function ($join) use ($locale) {
+                $join->on('chkoutast.attendance_status_id', 'att.check_out_status_id')
+                    ->where('chkoutast.language_name', $locale);
+            })
             ->select(
                 'emp.id',
                 'emp.picture',
@@ -146,11 +154,12 @@ class AttendanceRepository implements AttendanceRepositoryInterface
                 'att.description',
                 'att.check_in_time',
                 'att.check_out_time',
+                'chkinast.value as check_in_status',
+                'chkoutast.value as check_out_status',
                 'us_chk_in.username as chk_in_username',
                 'us_chk_out.username as chk_out_username',
                 DB::raw('CASE WHEN lv.id IS NOT NULL THEN 1 ELSE 0 END as has_leave')
-            )
-            ->get();
+            )->get();
 
 
         // Attendance statuses without leave
@@ -180,6 +189,8 @@ class AttendanceRepository implements AttendanceRepositoryInterface
                 'picture' => $emp->picture,
                 'first_name' => $emp->first_name,
                 'last_name' => $emp->last_name,
+                'check_in_status' => $emp->check_in_status,
+                'check_out_status' => $emp->check_out_status,
                 'check_in_time' => $emp->check_in_time,
                 'check_out_time' => $emp->check_out_time,
                 'detail' => $emp->description ?? '',
