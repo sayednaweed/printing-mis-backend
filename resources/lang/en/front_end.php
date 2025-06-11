@@ -308,4 +308,6 @@ return [
     'balance' => 'Balance',
     'add_account' => 'Add account',
     'payment_type' => 'Payment type',
+    'check_in' => 'Check-in',
+    'check_out' => 'Check-out',
 ];

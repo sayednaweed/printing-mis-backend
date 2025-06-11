@@ -146,12 +146,7 @@ class UserController extends Controller
     }
     public function validateEmailContact(Request $request)
     {
-        $request->validate(
-            [
-                "email" => "required",
-                "contact" => "required",
-            ]
-        );
+
         $email = Email::where("value", '=', $request->email)->first();
         $contact = Contact::where("value", '=', $request->contact)->first();
         // Check if both models are found
