@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('payroll_payments', function (Blueprint $table) {
             $table->id();
-            $table->string('paid_date');
-            $table->decimal('paid_amount', 15, 2);
+            $table->decimal('amount_paid', 15, 2);
             $table->unsignedBigInteger('payroll_id');
             $table->foreign('payroll_id')->references('id')->on('payrolls')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
+            $table->unsignedBigInteger('payment_type_id');
+            $table->foreign('payment_type_id')->references('id')->on('payment_types')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->timestamps();

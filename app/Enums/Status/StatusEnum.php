@@ -16,7 +16,4 @@ enum StatusEnum: int
     case in_active = 8;
         // Leave status
     case sick = 9;
-        // Salary
-    case normal_payment = 10;
-    case advance_payment = 11;
 }

@@ -23,8 +23,10 @@ class ShiftController extends Controller
             })
             ->select(
                 "sh.id",
-                "sh.start_time",
-                "sh.end_time",
+                "sh.check_in_start",
+                "sh.check_in_end",
+                "sh.check_out_start",
+                "sh.check_out_end",
                 "sht.value as name",
                 "sh.created_at",
                 "sh.detail",
@@ -41,16 +43,21 @@ class ShiftController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'start_time' => 'required',
-            'end_time' => 'required',
+            'check_in_start' => 'required',
+            'check_in_end' => 'required',
+            'check_out_start' => 'required',
+            'check_out_end' => 'required',
             'english' => 'required|string',
             'pashto' => 'required|string',
             'farsi' => 'required|string',
         ]);
 
         $shift = Shift::create([
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
+            'check_in_start' => $request->check_in_start,
+            'check_in_end' => $request->check_in_end,
+            'check_out_start' => $request->check_out_start,
+            'check_out_end' => $request->check_out_end,
+            'user_id' => $request->user()->id,
             'detail' => $request->detail,
         ]);
 
@@ -73,8 +80,10 @@ class ShiftController extends Controller
             'message' => __('app_translation.success'),
             'shift' => [
                 "id" => $shift->id,
-                'start_time' => $request->start_time,
-                'end_time' => $request->end_time,
+                'check_in_start' => $request->check_in_start,
+                'check_in_end' => $request->check_in_end,
+                'check_out_start' => $request->check_out_start,
+                'check_out_end' => $request->check_out_end,
                 "name" => $name,
                 "created_at" => $shift->created_at
             ]
@@ -88,14 +97,23 @@ class ShiftController extends Controller
             ->join('shift_trans as st', 's.id', '=', 'st.shift_id')
             ->select(
                 's.id',
-                's.start_time',
-                's.end_time',
+                's.check_in_start',
+                's.check_in_end',
+                's.check_out_start',
+                's.check_out_end',
                 's.detail',
                 DB::raw("MAX(CASE WHEN st.language_name = 'fa' THEN value END) as farsi"),
                 DB::raw("MAX(CASE WHEN st.language_name = 'en' THEN value END) as english"),
                 DB::raw("MAX(CASE WHEN st.language_name = 'ps' THEN value END) as pashto")
             )
-            ->groupBy('s.id', 's.start_time', 's.end_time', 's.detail')
+            ->groupBy(
+                's.id',
+                's.check_in_start',
+                's.check_in_end',
+                's.check_out_start',
+                's.check_out_end',
+                's.detail'
+            )
             ->first();
         return response()->json(
             [
@@ -103,8 +121,10 @@ class ShiftController extends Controller
                 "english" => $shift->english,
                 "farsi" => $shift->farsi,
                 "pashto" => $shift->pashto,
-                "start_time" => $shift->start_time,
-                "end_time" => $shift->end_time,
+                "check_in_start" => $shift->check_in_start,
+                "check_in_end" => $shift->check_in_end,
+                "check_out_start" => $shift->check_out_start,
+                "check_out_end" => $shift->check_out_end,
                 "detail" => $shift->detail,
             ],
             200,
@@ -116,8 +136,10 @@ class ShiftController extends Controller
     {
         $request->validate([
             'id' => 'required',
-            'start_time' => 'required',
-            'end_time' => 'required',
+            'check_in_start' => 'required',
+            'check_in_end' => 'required',
+            'check_out_start' => 'required',
+            'check_out_end' => 'required',
             'english' => 'required|string',
             'pashto' => 'required|string',
             'farsi' => 'required|string',
@@ -130,8 +152,10 @@ class ShiftController extends Controller
         }
 
         DB::beginTransaction();
-        $shift->start_time = $request->start_time;
-        $shift->end_time = $request->end_time;
+        $shift->check_in_start = $request->check_in_start;
+        $shift->check_in_end = $request->check_in_end;
+        $shift->check_out_start = $request->check_out_start;
+        $shift->check_out_end = $request->check_out_end;
         $shift->detail = $request->detail;
         $shift->save();
 
@@ -156,12 +180,36 @@ class ShiftController extends Controller
             'message' => __('app_translation.success'),
             'shift' => [
                 'id' => $shift->id,
-                'start_time' => $request->start_time,
-                'end_time' => $request->end_time,
+                'check_in_start' => $request->check_in_start,
+                'check_in_end' => $request->check_in_end,
+                'check_out_start' => $request->check_out_start,
+                'check_out_end' => $request->check_out_end,
                 'name' => $name,
                 'detail' => $request->detail,
                 'created_at' => $shift->created_at,
             ]
         ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+    public function names()
+    {
+        $locale = App::getLocale();
+        // Start building the query
+        $query = DB::table('shifts as sh')
+            ->join('shift_trans as sht', function ($join) use ($locale) {
+                $join->on('sh.id', '=', 'sht.shift_id')
+                    ->where('sht.language_name', $locale);
+            })
+            ->select(
+                "sh.id",
+                "sht.value as name",
+                "sh.created_at",
+            )->get();
+
+        return response()->json(
+            $query,
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
     }
 }

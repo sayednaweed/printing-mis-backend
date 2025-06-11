@@ -12,9 +12,10 @@ interface AttendanceRepositoryInterface
      * @param string $today
      * @param boolean $takeCheckIn
      * @param mixed $authUser
+     * @param mixed $shift_id
      * @return void
      */
-    public function store($attendances, $today, $takeCheckIn, $authUser);
+    public function store($attendances, $today, $takeCheckIn, $authUser, $shift_id);
     /**
      * returns attendancies.
      *

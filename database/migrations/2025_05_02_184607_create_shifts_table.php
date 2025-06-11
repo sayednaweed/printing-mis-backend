@@ -13,8 +13,14 @@ return new class extends Migration
     {
         Schema::create('shifts', function (Blueprint $table) {
             $table->id();
-            $table->time('start_time');
-            $table->time('end_time');
+            $table->time('check_in_start');
+            $table->time('check_in_end');
+            $table->time('check_out_start');
+            $table->time('check_out_end');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onUpdate('cascade')
+                ->onDelete('set null');
             $table->string('detail')->nullable();
             $table->timestamps();
         });

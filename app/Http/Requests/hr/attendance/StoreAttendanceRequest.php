@@ -23,6 +23,7 @@ class StoreAttendanceRequest extends FormRequest
     {
         return [
             'attendances' => 'required|array',
+            'shift_id' => 'required',
             'attendances.*.employee_id' => 'required|exists:employees,id',
             'attendances.*.description' => 'nullable|string',
             'attendances.*.status_type_id' => 'required|exists:attendance_statuses,id',

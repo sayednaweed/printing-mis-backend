@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('position_assignments', function (Blueprint $table) {
             $table->id();
             $table->string('salary');
-            $table->string('hire_date');
-            $table->string('overtime_rate');
+            $table->date('hire_date');
+            $table->decimal('overtime_rate', 15, 2);
             $table->unsignedBigInteger('employee_id');
             $table->foreign('employee_id')->references('id')->on('employees')
                 ->onUpdate('cascade')
@@ -36,7 +36,7 @@ return new class extends Migration
             $table->foreign('position_change_type_id')->references('id')->on('position_change_types')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('currency_id')->nullable();
+            $table->unsignedBigInteger('currency_id');
             $table->foreign('currency_id')->references('id')->on('currencies')
                 ->onUpdate('cascade')
                 ->onDelete('no action');

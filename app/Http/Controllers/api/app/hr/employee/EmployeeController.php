@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\api\app\hr\employee;
 
+use Carbon\Carbon;
 use App\Models\Nid;
 use App\Models\Email;
 use App\Models\Address;
@@ -10,10 +11,15 @@ use App\Models\Document;
 use App\Models\Employee;
 use App\Enums\LanguageEnum;
 use App\Models\AddressTran;
+use App\Models\EmployeeNid;
 use App\Models\EmployeeTran;
 use Illuminate\Http\Request;
+use App\Models\EmployeeStatus;
+use App\Enums\Status\StatusEnum;
+use App\Enums\Types\NidTypeEnum;
 use App\Models\EmployeeDocument;
 use App\Enums\Types\HireTypeEnum;
+use App\Models\EmployeeEducation;
 use App\Models\PositionAssignment;
 use App\Traits\Helper\HelperTrait;
 use Illuminate\Support\Facades\DB;
@@ -22,15 +28,10 @@ use App\Http\Controllers\Controller;
 use App\Traits\Address\AddressTrait;
 use App\Enums\Checklist\CheckListEnum;
 use App\Enums\Checklist\CheckListTypeEnum;
-use App\Enums\Status\StatusEnum;
-use App\Enums\Types\NidTypeEnum;
 use App\Models\PositionAssignmentDuration;
 use App\Http\Requests\app\hr\EmployeeStoreRequest;
-use App\Http\Requests\app\hr\EmployeeUpdateMoreRequest;
 use App\Http\Requests\app\hr\EmployeeUpdateRequest;
-use App\Models\EmployeeEducation;
-use App\Models\EmployeeNid;
-use App\Models\EmployeeStatus;
+use App\Http\Requests\app\hr\EmployeeUpdateMoreRequest;
 use App\Repositories\Storage\StorageRepositoryInterface;
 use App\Repositories\PendingTask\PendingTaskRepositoryInterface;
 
@@ -229,7 +230,7 @@ class EmployeeController extends Controller
             'overtime_rate' => $request->overtime_rate,
             'currency_id' => $request->currency_id,
             'department_id' => $request->department_id,
-            'hire_date' => $request->hire_date,
+            'hire_date' => Carbon::parse($request->hire_date)->format('Y-m-d H:i:s'),
         ]);
 
         // Insert PositionAssignmentDuration in case it is not permanent
@@ -239,8 +240,8 @@ class EmployeeController extends Controller
                 'end_date' => 'required',
             ]);
             PositionAssignmentDuration::create([
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
+                'start_date' => Carbon::parse($request->start_date)->format('Y-m-d H:i:s'),
+                'end_date' => Carbon::parse($request->end_date)->format('Y-m-d H:i:s'),
                 'position_assignment_id' => $postAss->id
             ]);
         }

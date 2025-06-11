@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use App\Models\Shift;
 use App\Models\Gender;
 use App\Models\Status;
+use App\Enums\RoleEnum;
+use App\Models\Account;
 use App\Models\NidType;
 use App\Models\Currency;
 use App\Models\Language;
@@ -16,6 +18,7 @@ use App\Models\StatusType;
 use App\Models\CurrencyTran;
 use App\Models\NidTypeTrans;
 use App\Models\MaritalStatus;
+use App\Models\PartyTypeTran;
 use App\Models\EducationLevel;
 use App\Models\ReportSelection;
 use Illuminate\Database\Seeder;
@@ -28,10 +31,8 @@ use App\Models\ReportSelectionTrans;
 use Database\Seeders\CheckListSeeder;
 use App\Enums\Types\EducationLevelEnum;
 use App\Enums\Types\ReportSelectionEnum;
-use App\Models\Account;
 use App\Models\ApplicationConfiguration;
 use App\Models\ApplicationConfigurationTrans;
-use App\Models\PartyTypeTran;
 
 /*
 1. If you add new Role steps are:
@@ -77,7 +78,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CheckListSeeder::class);
         $this->call(UserPermissionSeeder::class);
         $this->call(RolePermissionSeeder::class);
-        $this->call(HireTypeSeeder::class);
+        $this->call(HrSeeder::class);
         $this->call(AttendanceStatusSeeder::class);
 
 
@@ -94,10 +95,7 @@ class DatabaseSeeder extends Seeder
     }
     public function applicationConfigurations()
     {
-        $conf = ApplicationConfiguration::factory()->create([
-            'attendance_check_in_time' => Carbon::createFromTime(9, 0, 0)->toTimeString(),
-            'attendance_check_out_time' => Carbon::createFromTime(16, 0, 0)->toTimeString(),
-        ]);
+        $conf = ApplicationConfiguration::factory()->create([]);
 
         ApplicationConfigurationTrans::factory()->create([
             'company_name' => 'Fardai Naveen Printing Press',
@@ -282,9 +280,6 @@ class DatabaseSeeder extends Seeder
         $status = StatusType::factory()->create([
             'id' => StatusTypeEnum::leave_type->value,
         ]);
-        $status = StatusType::factory()->create([
-            'id' => StatusTypeEnum::payment_type->value,
-        ]);
     }
     public function status()
     {
@@ -459,44 +454,6 @@ class DatabaseSeeder extends Seeder
             "status_id" => $status->id,
             "language_name" => "ps",
         ]);
-        $status = Status::factory()->create([
-            'id' => StatusEnum::advance_payment->value,
-            'status_type_id' => StatusTypeEnum::payment_type->value,
-        ]);
-        StatusTran::factory()->create([
-            "value" => "Advance payment",
-            "status_id" => $status->id,
-            "language_name" => "en",
-        ]);
-        StatusTran::factory()->create([
-            "value" => "پیش پرداخت",
-            "status_id" => $status->id,
-            "language_name" => "fa",
-        ]);
-        StatusTran::factory()->create([
-            "value" => "مخکې له مخکې تادیه",
-            "status_id" => $status->id,
-            "language_name" => "ps",
-        ]);
-        $status = Status::factory()->create([
-            'id' => StatusEnum::normal_payment->value,
-            'status_type_id' => StatusTypeEnum::payment_type->value,
-        ]);
-        StatusTran::factory()->create([
-            "value" => "Normal payment",
-            "status_id" => $status->id,
-            "language_name" => "en",
-        ]);
-        StatusTran::factory()->create([
-            "value" => "پرداخت عادی",
-            "status_id" => $status->id,
-            "language_name" => "fa",
-        ]);
-        StatusTran::factory()->create([
-            "value" => "عادي تادیه",
-            "status_id" => $status->id,
-            "language_name" => "ps",
-        ]);
     }
 
     public function nidTypes()
@@ -553,8 +510,11 @@ class DatabaseSeeder extends Seeder
     public function shifts()
     {
         $shift = Shift::factory()->create([
-            'start_time' => Carbon::today()->setTime(8, 0)->format('h:i'),  // 8:00 AM
-            'end_time' => Carbon::today()->setTime(4, 0)->format('h:i'),    // 4:00 PM
+            'check_in_start' => Carbon::createFromTime(6, 0, 0)->toTimeString(),
+            'check_in_end' => Carbon::createFromTime(9, 0, 0)->toTimeString(),
+            'check_out_start' => Carbon::createFromTime(16, 0, 0)->toTimeString(),
+            'check_out_end' => Carbon::createFromTime(17, 0, 0)->toTimeString(),
+            'user_id' => RoleEnum::super->value,
         ]);
         ShiftTran::factory()->create([
             "value" => "8 to 4 Shift",

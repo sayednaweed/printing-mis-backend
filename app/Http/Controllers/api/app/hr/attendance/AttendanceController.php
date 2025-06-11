@@ -9,11 +9,8 @@ use App\Models\AttendanceStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
-use App\Models\AttendanceStatusTran;
-use App\Enums\Attendance\AttendanceStatusEnum;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Requests\hr\attendance\StoreAttendanceRequest;
-use App\Models\ApplicationConfiguration;
 use App\Repositories\Attendance\AttendanceRepositoryInterface;
 
 class AttendanceController extends Controller
@@ -56,42 +53,71 @@ class AttendanceController extends Controller
     public function showAttendance(Request $request)
     {
         $locale = App::getLocale();
-        $date = $request->query('created_at') ? Carbon::parse($request->query('created_at')) : Carbon::today();
         $now = Carbon::now();
-
-        $attendanceTime = DB::table('application_configurations as ac')
-            ->where('ac.id', 1)
+        $currentTime = $now->format('H:i:s'); // 24-hour format
+        $shiftId = $request->query('shift_id');
+        $viewAttendance = $request->query('created_at') ? true : false;
+        $date = $viewAttendance ? Carbon::parse($request->query('created_at')) : Carbon::today();
+        $shift = DB::table('shifts as s')
+            ->where('s.id', $shiftId)
+            ->join('shift_trans as st', function ($join) use ($locale) {
+                $join->on('st.shift_id', '=', 's.id')
+                    ->where('st.language_name', $locale);
+            })
             ->select(
-                'ac.id',
-                'ac.attendance_check_in_time',
-                'ac.attendance_check_out_time',
+                's.id',
+                's.check_in_start',
+                's.check_in_end',
+                's.check_out_start',
+                's.check_out_end',
+                'st.value',
             )->first();
-        $attendance = Attendance::whereDate('created_at', $date)
-            ->first();
+
+        if (!$shift) {
+            return response()->json([
+                "message" => __('app_translation.shift_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+        if ($viewAttendance) {
+            return response()->json([
+                'data' => $this->attendanceRepository->showAttendance($date, $locale),
+                'shift' => ['id' => $shift->id, 'name' => $shift->value],
+            ], 200, [], JSON_UNESCAPED_UNICODE);
+        }
+        $check_in_start = Carbon::createFromTimeString($shift->check_in_start)->format('H:i:s');
+        $check_in_end = Carbon::createFromTimeString($shift->check_in_end)->format('H:i:s');
+        $check_out_start = Carbon::createFromTimeString($shift->check_out_start)->format('H:i:s');
+        $check_out_end = Carbon::createFromTimeString($shift->check_out_end)->format('H:i:s');
+
+        $attendance = DB::table('attendances as a')
+            ->whereDate('a.created_at', $date)
+            ->where('a.shift_id', $shiftId)
+            ->select(
+                'a.id',
+                'a.check_in_time',
+                'a.check_out_time',
+                'a.created_at',
+            )->first();
+
         if ($attendance) {
-            if ($attendance->check_out_time != null) {
+            if ($attendance->check_in_time == null) {
+                if (!($currentTime >= $check_in_start && $currentTime <= $check_in_end)) {
+                    return response()->json([
+                        "message" => __('app_translation.checkin_must_be') . ' ' . $check_in_start . '-' . $check_in_end,
+                    ], 500, [], JSON_UNESCAPED_UNICODE);
+                }
+            } else if ($attendance->check_out_time == null) {
+                if (!($currentTime >= $check_out_start && $currentTime <= $check_out_end)) {
+                    return response()->json([
+                        "message" => __('app_translation.checkout_must_be') . ' ' . $check_out_start . '-' . $check_out_end,
+                    ], 500, [], JSON_UNESCAPED_UNICODE);
+                }
+            } else {
                 return response()->json([
                     "message" => __('app_translation.already_attendance_taken'),
                 ], 500, [], JSON_UNESCAPED_UNICODE);
-            } else {
-                // 2. Check check_out_time attendance
-                $checkoutTime  = Carbon::createFromTimeString($attendanceTime->attendance_check_out_time);
-                if ($now->format('H:i:s') < $checkoutTime->format('H:i:s')) {
-                    return response()->json([
-                        "message" => __('app_translation.checkout_must_be_before') . ' ' . $attendanceTime->attendance_check_out_time,
-                    ], 500, [], JSON_UNESCAPED_UNICODE);
-                }
-            }
-        } else {
-            // 3. Check check_in_time attendance
-            $checkInTime  = Carbon::createFromTimeString($attendanceTime->attendance_check_in_time);
-            if ($now->format('H:i:s') > $checkInTime->format('H:i:s')) {
-                return response()->json([
-                    "message" => __('app_translation.checkin_must_be_before') . ' ' . $attendanceTime->attendance_check_in_time,
-                ], 500, [], JSON_UNESCAPED_UNICODE);
             }
         }
-
         return response()->json([
             'data' => $this->attendanceRepository->showAttendance($date, $locale),
         ], 200, [], JSON_UNESCAPED_UNICODE);
@@ -108,44 +134,58 @@ class AttendanceController extends Controller
         $today = Carbon::today();
         $now = Carbon::now();
         $tr = [];
-
-        $attendanceTime = DB::table('application_configurations as ac')
-            ->where('ac.id', 1)
+        $currentTime = $now->format('H:i:s'); // 24-hour format
+        $shiftId = $request->shift_id;
+        $shift = DB::table('shifts as s')
+            ->where('s.id', $shiftId)
             ->select(
-                'ac.id',
-                'ac.attendance_check_in_time',
-                'ac.attendance_check_out_time',
+                's.id',
+                's.check_in_start',
+                's.check_in_end',
+                's.check_out_start',
+                's.check_out_end',
             )->first();
 
-        // 1. Validate for attendance
-        $attendance = Attendance::whereDate('created_at', $today)
-            ->first();
+        if (!$shift) {
+            return response()->json([
+                "message" => __('app_translation.shift_not_found'),
+            ], 404, [], JSON_UNESCAPED_UNICODE);
+        }
+        $check_in_start = Carbon::createFromTimeString($shift->check_in_start)->format('H:i:s');
+        $check_in_end = Carbon::createFromTimeString($shift->check_in_end)->format('H:i:s');
+        $check_out_start = Carbon::createFromTimeString($shift->check_out_start)->format('H:i:s');
+        $check_out_end = Carbon::createFromTimeString($shift->check_out_end)->format('H:i:s');
+
+        $attendance = DB::table('attendances as a')
+            ->whereDate('a.created_at', $today)
+            ->where('a.shift_id', $shiftId)
+            ->select(
+                'a.id',
+                'a.check_in_time',
+                'a.check_out_time',
+                'a.created_at',
+            )->first();
+
         if ($attendance) {
-            if ($attendance->check_out_time != null) {
+            if ($attendance->check_out_time == null) {
+                if (!($currentTime >= $check_out_start && $currentTime <= $check_out_end)) {
+                    return response()->json([
+                        "message" => __('app_translation.att_dealine_exp'),
+                    ], 500, [], JSON_UNESCAPED_UNICODE);
+                }
+                $tr = $this->attendanceRepository->store($request->attendances, $today, false, $authUser, $shiftId);
+            } else {
                 return response()->json([
                     "message" => __('app_translation.already_attendance_taken'),
                 ], 500, [], JSON_UNESCAPED_UNICODE);
-            } else {
-                // 2. Take check_out_time attendance
-                $checkoutTime  = Carbon::createFromTimeString($attendanceTime->attendance_check_out_time);
-                if ($now->format('H:i:s') < $checkoutTime->format('H:i:s')) {
-                    return response()->json([
-                        "message" => __('app_translation.checkin_must_be_before') . ' ' . $attendanceTime->attendance_check_out_time,
-                    ], 500, [], JSON_UNESCAPED_UNICODE);
-                }
-                // 2.1 Take attendance
-                $tr = $this->attendanceRepository->store($request->attendances, $today, false, $authUser);
             }
         } else {
-            // 3. Take check_in_time attendance
-            $checkInTime  = Carbon::createFromTimeString($attendanceTime->attendance_check_in_time);
-            if ($now->format('H:i:s') > $checkInTime->format('H:i:s')) {
+            if (!($currentTime >= $check_in_start && $currentTime <= $check_in_end)) {
                 return response()->json([
-                    "message" => __('app_translation.checkout_must_be_before') . ' ' . $attendanceTime->attendance_check_in_time,
+                    "message" => __('app_translation.att_dealine_exp'),
                 ], 500, [], JSON_UNESCAPED_UNICODE);
             }
-            // 2.1 Take attendance
-            $tr = $this->attendanceRepository->store($request->attendances, $today, true, $authUser);
+            $tr = $this->attendanceRepository->store($request->attendances, $today, true, $authUser, $shiftId);
         }
 
         return response()->json([

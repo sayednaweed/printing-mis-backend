@@ -6,38 +6,60 @@ use App\Models\Account;
 use App\Enums\LanguageEnum;
 use App\Models\AccountTran;
 use Illuminate\Http\Request;
+use App\Models\AccountBalance;
+use App\Traits\Helper\FilterTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\app\account\AccountStoreRequest;
-use App\Models\AccountBalance;
 
 class AccountController extends Controller
 {
-    public function index()
+    use FilterTrait;
+    public function index(Request $request)
     {
         $locale = App::getLocale();
+        $tr = [];
+        $perPage = $request->input('per_page', 10); // Number of records per page
+        $page = $request->input('page', 1); // Current page
         // Start building the query
         $query = DB::table('accounts as ac')
             ->join('account_trans as act', function ($join) use ($locale) {
                 $join->on('ac.id', '=', 'act.account_id')
                     ->where('act.language_name', $locale);
             })
+            ->join('currency_trans as ct', function ($join) use ($locale) {
+                $join->on('ct.currency_id', '=', 'ac.currency_id')
+                    ->where('ct.language_name', $locale);
+            })
             ->join('users as u', function ($join) {
                 $join->on('u.id', '=', 'ac.user_id');
             })
             ->select(
                 "ac.id",
-                "ac.balance",
                 "ac.code",
-                "u.username",
+                "ac.balance",
+                "ct.value as currency",
+                "u.username as saved_by",
                 "act.value as name",
                 "ac.created_at",
-                "ac.detail",
-            )->get();
+            );
 
+        $this->applyDate($query, $request, 'emp.created_at', 'emp.created_at');
+        $this->applyFilters($query, $request, [
+            'name' => 'act.value',
+            'balance' => 'ac.balance',
+            'date' => 'ac.created_at',
+        ]);
+        $this->applySearch($query, $request, [
+            'name' => 'act.value',
+            'code' => 'ac.code'
+        ]);
+
+        // Apply pagination (ensure you're paginating after sorting and filtering)
+        $tr = $query->paginate($perPage, ['*'], 'page', $page);
         return response()->json(
-            $query,
+            $tr,
             200,
             [],
             JSON_UNESCAPED_UNICODE
@@ -46,55 +68,42 @@ class AccountController extends Controller
 
     public function store(AccountStoreRequest $request)
     {
-
-        $request->validate();
+        $request->validated();
         $locale = App::getLocale();
-        DB::transaction();
-
+        DB::beginTransaction();
         $authUser = $request->user();
-        $account =    Account::create([
+        $account = Account::create([
             'code' => $request->code,
             'detail' => $request->detail,
-            'user_id' => $authUser->id
+            'user_id' => $authUser->id,
+            'currency_id' => $request->currency_id,
+            'balance' => $request->balance
         ]);
 
         foreach (LanguageEnum::LANGUAGES as $code => $name) {
-
             AccountTran::create([
-                "value" => $request["name_${name}"],
+                "value" => $request["name_{$name}"],
                 "language_name" => $code,
                 "account_id" => $account->id
             ]);
         }
-        foreach ($request->account_balance as $key => $account) {
-            AccountBalance::create(
-                [
-                    'account_id'  => $account->id,
-                    'currency_id' => $account->currency_id,
-                    'balance' => 0.0
-                ]
-            );
-        }
-
+        DB::commit();
         $name = $request['name_english'];
         if ($locale === 'fa') {
             $name = $request['name_farsi'];
-        }
-        if ($locale === 'ps') {
+        } else if ($locale === 'ps') {
             $name = $request['name_pashto'];
         }
 
         $data = [
             'id' => $account->id,
             'code' => $request->code,
-            'username' => $authUser->username,
+            'saved_by' => $authUser->username,
             'name' => $name,
             'created_at' => $account->created_at,
             'detail' => $account->detail
-
         ];
 
-        DB::commit();
         return response()->json([
             'message' => __('app_translation.success'),
             'account' => $data,

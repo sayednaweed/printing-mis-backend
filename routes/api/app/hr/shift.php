@@ -11,4 +11,6 @@ Route::prefix('v1')->middleware(["authorized:" . 'user:api'])->group(function ()
     Route::get('/shifts', [ShiftController::class, "index"])->middleware(["HasSubPermission:" . HrPermissionEnum::configurations->value . "," . SubPermissionEnum::hr_configuration_shifts->value . ',' . 'view']);
     Route::get('/shifts/{id}', [ShiftController::class, "edit"])->middleware(["HasSubPermission:" . HrPermissionEnum::configurations->value . "," . SubPermissionEnum::hr_configuration_shifts->value . ',' . 'view']);
     Route::put('/shifts', [ShiftController::class, 'update'])->middleware(["HasSubPermission:" . HrPermissionEnum::configurations->value . "," . SubPermissionEnum::hr_configuration_shifts->value . ',' . 'edit']);
+
+    Route::get('/shifts-names', [ShiftController::class, "names"]);
 });

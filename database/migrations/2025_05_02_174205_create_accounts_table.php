@@ -19,6 +19,11 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+            $table->unsignedBigInteger('currency_id');
+            $table->foreign('currency_id')->references('id')->on('currencies')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
+            $table->decimal('balance', 15, 2);
             $table->timestamps();
         });
     }

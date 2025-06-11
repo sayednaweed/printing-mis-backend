@@ -19,7 +19,6 @@ return new class extends Migration
             $table->foreign('position_assignment_id')->references('id')->on('position_assignments')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-
             $table->timestamps();
         });
     }

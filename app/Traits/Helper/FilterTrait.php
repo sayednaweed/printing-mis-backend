@@ -6,8 +6,6 @@ use Illuminate\Support\Arr;
 
 trait FilterTrait
 {
-
-
     protected function applyDate($query, $request, $startDateColumn, $endDateColumn)
     {
         // Apply date filtering conditionally if provided
@@ -21,8 +19,6 @@ trait FilterTrait
             $query->where($endDateColumn, '<=', $endDate);
         }
     }
-
-
 
     // search function 
     protected function applySearch($query, $request, array $allowColumns)
@@ -38,10 +34,6 @@ trait FilterTrait
             }
         }
     }
-
-
-
-
 
     // filter function
     protected function applyFilters($query, $request, array $allowColumns)

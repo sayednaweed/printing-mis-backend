@@ -22,9 +22,12 @@ class AccountStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
-
-
+            'name_english' => 'required',
+            'name_farsi' => 'required',
+            'name_pashto' => 'required',
+            'code' => 'required',
+            'currency_id' => 'required',
+            'balance' => 'required',
         ];
     }
 }

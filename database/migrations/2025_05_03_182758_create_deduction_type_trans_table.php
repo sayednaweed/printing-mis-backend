@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('account_balances', function (Blueprint $table) {
+        Schema::create('deduction_type_trans', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('account_id');
-            $table->foreign('account_id')->references('id')->on('accounts')
+            $table->string('value');
+            $table->unsignedBigInteger('deduction_type_id');
+            $table->foreign('deduction_type_id')->references('id')->on('deduction_types')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('currency_id');
-            $table->foreign('currency_id')->references('id')->on('currencies')
+            $table->string('language_name');
+            $table->foreign('language_name')->references('name')->on('languages')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->decimal('balance', 15, 2);
             $table->timestamps();
         });
     }
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('account_balances');
+        Schema::dropIfExists('deduction_type_trans');
     }
 };

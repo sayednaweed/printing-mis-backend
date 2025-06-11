@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Enums\RoleEnum;
 use Illuminate\Http\Request;
 use App\Traits\Helper\HelperTrait;
@@ -108,6 +109,39 @@ class TestController extends Controller
     }
     public function index(Request $request)
     {
+        $now = Carbon::now();
+
+        $attendanceTime = DB::table('application_configurations as ac')
+            ->where('ac.id', 1)
+            ->select(
+                'ac.id',
+                'ac.attendance_check_in_time',
+                'ac.attendance_check_out_time',
+            )->first();
+
+        $checkInTime  = Carbon::createFromTimeString($attendanceTime->attendance_check_in_time);
+        $checkOutTime  = Carbon::createFromTimeString($attendanceTime->attendance_check_out_time);
+        // 3.1. If It Is above 12:00AM and Below Check-in time do not allow
+        $currentTime = Carbon::now()->format('H:i:s'); // 24-hour format
+        $currentTime = '03:00:00'; // 12:00 AM
+        $startTime = '00:00:00'; // 12:00 AM
+        $endTime = '08:00:00';   // 8:00 AM
+
+        // return $currentTime >= $startTime && $currentTime <= $endTime;
+        return response()->json([
+            'data' => $currentTime >= $startTime,
+            'new' =>  $currentTime <= $endTime,
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+
+        if (
+            $now->format('H:i:s') >= Carbon::createFromTime(16, 0, 0)->format('H:i:s')
+            && $now->format('H:i:s') < $checkInTime->format('H:i:s')
+        ) {
+            return 'You are not allowed.';
+        } else {
+            return 'You are allowed.' . $now->format('H:i:s');
+        }
+
         $column = 'edit';
         $perm = HrPermissionEnum::employees->value;
         $permSub = SubPermissionEnum::hr_employees_information->value;
