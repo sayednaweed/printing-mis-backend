@@ -51,5 +51,31 @@ class PayrollController extends Controller
 
         return response()->json(['message' => __('app_translation.success')], 201);
     }
-    public function salaryPayment($hr_code) {}
+    public function salaryPayment($id)
+    {
+        $employee = DB::table('employees as emp')
+            ->where('emp.id', $id)
+            ->join('position_assignments as posa', function ($join) {
+                $join->on('emp.id', '=', 'posa.employee_id')
+                    ->whereRaw('posa.id = (
+                 SELECT MAX(id) FROM position_assignments WHERE employee_id = emp.id
+             )');
+            })
+            ->join('currencies as cur', 'cur.id', '=', 'posa.currency_id')
+            ->select(
+                'emp.picture as profile',
+                'posa.overtime_rate',
+                DB::raw("CONCAT(posa.salary, ' ', cur.symbol) as salary")
+            )
+            ->first();
+
+        return response()->json([
+            'message' => __('app_translation.success'),
+            'salary' => [
+                'profile' => $employee->profile,
+                'overtime' => $employee->overtime_rate,
+                'salary' => $employee->salary
+            ]
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
 }
