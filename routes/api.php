@@ -34,6 +34,7 @@ require __DIR__ . '/api/app/hr/leaveType.php';
 require __DIR__ . '/api/app/hr/education.php';
 require __DIR__ . '/api/app/hr/report.php';
 require __DIR__ . '/api/app/hr/status.php';
+require __DIR__ . '/api/app/hr/types.php';
 require __DIR__ . '/api/app/hr/contract.php';
 require __DIR__ . '/api/app/hr/payrolls.php';
 require __DIR__ . '/api/app/hr/accounts.php';

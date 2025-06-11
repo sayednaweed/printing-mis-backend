@@ -307,4 +307,5 @@ return [
     'code' => 'Code',
     'balance' => 'Balance',
     'add_account' => 'Add account',
+    'payment_type' => 'Payment type',
 ];

@@ -308,4 +308,5 @@ return [
     'code' => 'کد',
     'balance' => 'حساب',
     'add_account' => 'افزودن حساب',
+    'payment_type' => 'نوع پرداخت',
 ];
