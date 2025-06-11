@@ -80,6 +80,7 @@ class AttendanceController extends Controller
         }
         if ($viewAttendance) {
             return response()->json([
+
                 'data' => $this->attendanceRepository->showAttendance($date, $locale),
                 'shift' => ['id' => $shift->id, 'name' => $shift->value],
             ], 200, [], JSON_UNESCAPED_UNICODE);
