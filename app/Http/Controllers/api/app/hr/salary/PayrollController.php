@@ -51,4 +51,5 @@ class PayrollController extends Controller
 
         return response()->json(['message' => __('app_translation.success')], 201);
     }
+    public function salaryPayment($hr_code) {}
 }

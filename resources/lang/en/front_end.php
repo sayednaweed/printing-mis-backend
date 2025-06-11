@@ -310,4 +310,5 @@ return [
     'payment_type' => 'Payment type',
     'check_in' => 'Check-in',
     'check_out' => 'Check-out',
+    'overtime_h' => 'Overtime hours',
 ];
