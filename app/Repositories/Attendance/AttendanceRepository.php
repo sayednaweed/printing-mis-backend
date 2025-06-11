@@ -23,7 +23,7 @@ class AttendanceRepository implements AttendanceRepositoryInterface
                     'employee_id' => $entry['employee_id'],
                     'check_in_time' => $now,
                     'description' => $entry['description'],
-                    'attendance_status_id' => $entry['status_type_id'],
+                    'check_in_status_id' => $entry['status_type_id'],
                     'check_in_taken_by' => $authUser->id,
                     'shift_id' => $shift_id,
                     'created_at' => now(),
@@ -50,7 +50,7 @@ class AttendanceRepository implements AttendanceRepositoryInterface
                         'check_out_time' => $now,
                         'check_out_taken_by' => $authUser->id,
                         'description' => $entry['description'] ?? $attendance->description,
-                        'attendance_status_id' => $entry['status_type_id'],
+                        'check_out_status_id' => $entry['status_type_id'],
                         'updated_at' => now(),
                     ]);
                 }
@@ -77,15 +77,15 @@ class AttendanceRepository implements AttendanceRepositoryInterface
             att.shift_id ,
             usci.username as check_in_taken_by,
             usco.username as check_out_taken_by,
-            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS present,
-            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS absent,
-            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS `leave`,
-            SUM(CASE WHEN att.attendance_status_id NOT IN (?, ?, ?) THEN 1 ELSE 0 END) AS other
+            SUM(CASE WHEN att.check_in_status_id = ? AND (att.check_out_status_id = ? OR att.check_out_status_id IS NULL) THEN 1 ELSE 0 END) AS present,
+            SUM(CASE WHEN att.check_in_status_id = ? OR att.check_out_status_id = ? THEN 1 ELSE 0 END) AS absent,
+            SUM(CASE WHEN att.check_in_status_id = ? OR att.check_out_status_id = ? THEN 1 ELSE 0 END) AS `leave`,
+            SUM(CASE WHEN att.check_in_status_id NOT IN (?, ?, ?) THEN 1 ELSE 0 END) AS other
         FROM attendances att
         JOIN users usci ON usci.id = att.check_in_taken_by
         LEFT JOIN users usco ON usco.id = att.check_out_taken_by
         GROUP BY att.check_in_time, att.check_out_time, usci.username, usco.username, att.shift_id, att.created_at
-    ", [$presentId, $absentId, $leaveId, $presentId, $absentId, $leaveId]);
+    ", [$presentId, $presentId, $absentId, $absentId, $leaveId,  $leaveId, $presentId, $absentId, $leaveId]);
 
         // Convert to collection
         return collect($rawData);
@@ -104,17 +104,17 @@ class AttendanceRepository implements AttendanceRepositoryInterface
             att.check_out_time,
             usci.username as check_in_taken_by,
             usco.username as check_out_taken_by,
-            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS present,
-            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS absent,
-            SUM(CASE WHEN att.attendance_status_id = ? THEN 1 ELSE 0 END) AS `leave`,
-            SUM(CASE WHEN att.attendance_status_id NOT IN (?, ?, ?) THEN 1 ELSE 0 END) AS other
+            SUM(CASE WHEN att.check_in_status_id = ? AND (att.check_out_status_id = ? OR att.check_out_status_id IS NULL) THEN 1 ELSE 0 END) AS present,
+            SUM(CASE WHEN att.check_in_status_id = ? OR att.check_out_status_id = ? THEN 1 ELSE 0 END) AS absent,
+            SUM(CASE WHEN att.check_in_status_id = ? OR att.check_out_status_id = ? THEN 1 ELSE 0 END) AS `leave`,
+            SUM(CASE WHEN att.check_in_status_id NOT IN (?, ?, ?) THEN 1 ELSE 0 END) AS other
         FROM attendances att
         JOIN users usci ON usci.id = att.check_in_taken_by
         LEFT JOIN users usco ON usco.id = att.check_out_taken_by
         WHERE DATE(att.created_at) = CURDATE()
         GROUP BY att.check_in_time, att.check_out_time, usci.username, usco.username, att.created_at
         LIMIT 1
-    ", [$presentId, $absentId, $leaveId, $presentId, $absentId, $leaveId]);
+    ", [$presentId, $presentId, $absentId, $absentId, $leaveId, $leaveId, $presentId, $absentId, $leaveId]);
 
         // Convert to collection
         return $rawData[0] ?? [];
