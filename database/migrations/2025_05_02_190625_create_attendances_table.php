@@ -24,8 +24,12 @@ return new class extends Migration
             $table->foreign('check_out_taken_by')->references('id')->on('users')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('attendance_status_id');
-            $table->foreign('attendance_status_id')->references('id')->on('attendance_statuses')
+            $table->unsignedBigInteger('check_in_status_id');
+            $table->foreign('check_in_status_id')->references('id')->on('attendance_statuses')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
+            $table->unsignedBigInteger('check_out_status_id')->nullable();
+            $table->foreign('check_out_status_id')->references('id')->on('attendance_statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('employee_id');
