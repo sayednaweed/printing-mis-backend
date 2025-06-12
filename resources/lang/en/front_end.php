@@ -311,4 +311,5 @@ return [
     'check_in' => 'Check-in',
     'check_out' => 'Check-out',
     'overtime_h' => 'Overtime hours',
+    'remaining' => 'Remaining',
 ];

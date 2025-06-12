@@ -71,7 +71,7 @@ class PayrollController extends Controller
 
         return response()->json([
             'message' => __('app_translation.success'),
-            'salary' => [
+            'data' => [
                 'profile' => $employee->profile,
                 'overtime' => $employee->overtime_rate,
                 'salary' => $employee->salary

@@ -312,4 +312,5 @@ return [
     'check_in' => 'ورود',
     'check_out' => 'خروج',
     'overtime_h' => 'ساعات اضافه کاری',
+    'remaining' => 'باقی مانده',
 ];
