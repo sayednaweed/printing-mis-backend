@@ -156,6 +156,8 @@ class HireController extends Controller
     {
         $statuses =  [StatusEnum::working->value, StatusEnum::hired->value];
         $tr = DB::table('employees as emp')
+            ->join('employee_trans as empt', 'empt.employee_id', 'emp.id')
+            ->where('empt.language_name', 'fa')
             ->join('employee_statuses as es', function ($join) use ($statuses) {
                 $join->on('es.employee_id', '=', 'emp.id')
                     ->where('es.active', 1)
@@ -164,9 +166,8 @@ class HireController extends Controller
             ->select(
                 "emp.id",
                 "emp.picture",
-                "emp.hr_code as name",
+                DB::raw("CONCAT(empt.first_name, ' ~ ', emp.hr_code) as name")
             )->get();
-
         return response()->json(
             $tr,
             200,
