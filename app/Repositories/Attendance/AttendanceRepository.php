@@ -78,7 +78,7 @@ class AttendanceRepository implements AttendanceRepositoryInterface
             usci.username as check_in_taken_by,
             usco.username as check_out_taken_by,
             SUM(CASE WHEN att.check_in_status_id = ? AND (att.check_out_status_id = ? OR att.check_out_status_id IS NULL) THEN 1 ELSE 0 END) AS present,
-            SUM(CASE WHEN att.check_in_status_id = ? AND (att.check_out_status_id = ?) THEN 1 ELSE 0 END) AS absent,
+            SUM(CASE WHEN att.check_in_status_id = ? OR (att.check_out_status_id = ?) THEN 1 ELSE 0 END) AS absent,
             SUM(CASE WHEN att.check_in_status_id = ? OR att.check_out_status_id = ? THEN 1 ELSE 0 END) AS `leave`,
             SUM(CASE WHEN att.check_in_status_id NOT IN (?, ?, ?) OR att.check_out_status_id NOT IN (?, ?, ?) THEN 1 ELSE 0 END) AS other
           FROM attendances att
