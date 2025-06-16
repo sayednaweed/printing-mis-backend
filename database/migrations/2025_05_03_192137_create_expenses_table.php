@@ -35,8 +35,12 @@ return new class extends Migration
             $table->foreign('currency_id')->references('id')->on('currencies')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('employee_id');
-            $table->foreign('employee_id')->references('id')->on('employees')
+            $table->unsignedBigInteger('buyer_id');
+            $table->foreign('buyer_id')->references('id')->on('employees')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
+            $table->unsignedBigInteger('recorder_by_id');
+            $table->foreign('recorder_by_id')->references('id')->on('employees')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('company_id')->nullable();

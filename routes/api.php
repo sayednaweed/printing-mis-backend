@@ -45,4 +45,5 @@ require __DIR__ . '/api/app/checklist/checklist.php';
 require __DIR__ . '/api/app/inventory/buyer.php';
 require __DIR__ . '/api/app/inventory/seller.php';
 require __DIR__ . '/api/app/expense/expenseType.php';
+require __DIR__ . '/api/app/expense/expense.php';
 require __DIR__ . '/api/app/expense/icons.php';
