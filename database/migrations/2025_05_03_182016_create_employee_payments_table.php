@@ -21,8 +21,8 @@ return new class extends Migration
             $table->foreign('account_id')->references('id')->on('accounts')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->decimal('amount', 15, 2);
-            $table->decimal('repaid_amount', 15, 2);
+            $table->decimal('total_amount', 15, 2);
+            $table->decimal('remain_amount', 15, 2);
             $table->boolean('is_repaid_fully')->default(false);
             $table->timestamps();
         });
