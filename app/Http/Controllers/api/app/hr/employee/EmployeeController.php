@@ -28,6 +28,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\Address\AddressTrait;
 use App\Enums\Checklist\CheckListEnum;
 use App\Enums\Checklist\CheckListTypeEnum;
+use App\Enums\Types\PayPeriodsTypeEnum;
 use App\Models\PositionAssignmentDuration;
 use App\Http\Requests\app\hr\EmployeeStoreRequest;
 use App\Http\Requests\app\hr\EmployeeUpdateRequest;
@@ -230,6 +231,7 @@ class EmployeeController extends Controller
             'overtime_rate' => $request->overtime_rate,
             'currency_id' => $request->currency_id,
             'department_id' => $request->department_id,
+            'pay_period_id' => PayPeriodsTypeEnum::monthly->value,
             'hire_date' => Carbon::parse($request->hire_date)->format('Y-m-d H:i:s'),
         ]);
 
