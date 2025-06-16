@@ -11,22 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payroll_payments', function (Blueprint $table) {
+        Schema::create('employee_payment_cashes', function (Blueprint $table) {
             $table->id();
-            $table->decimal('amount_paid', 15, 2);
-            $table->decimal('overtime_hours', 15, 2);
-            $table->unsignedBigInteger('payroll_id');
-            $table->foreign('payroll_id')->references('id')->on('payrolls')
+            $table->unsignedBigInteger('employee_payment_id');
+            $table->foreign('employee_payment_id')->references('id')->on('employee_payments')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('payment_type_id');
-            $table->foreign('payment_type_id')->references('id')->on('payment_types')
-                ->onUpdate('cascade')
-                ->onDelete('no action');
+            $table->decimal('paid_amount', 15, 2);
             $table->timestamps();
         });
     }
@@ -36,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payroll_payments');
+        Schema::dropIfExists('employee_payment_cashes');
     }
 };

@@ -21,6 +21,14 @@ return new class extends Migration
             $table->foreign('account_id')->references('id')->on('accounts')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+            $table->unsignedBigInteger('employee_payment_type_id');
+            $table->foreign('employee_payment_type_id')->references('id')->on('employee_payment_types')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
             $table->decimal('total_amount', 15, 2);
             $table->decimal('remain_amount', 15, 2);
             $table->boolean('is_repaid_fully')->default(false);

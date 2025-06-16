@@ -21,6 +21,10 @@ return new class extends Migration
             $table->foreign('payroll_id')->references('id')->on('payrolls')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
             $table->decimal('paid_amount', 15, 2);
             $table->timestamps();
         });

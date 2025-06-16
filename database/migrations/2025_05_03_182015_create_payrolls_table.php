@@ -25,6 +25,10 @@ return new class extends Migration
             $table->foreign('account_id')->references('id')->on('accounts')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
             $table->text('detail')->nullable();
             $table->boolean('is_complete')->default(false);
             $table->timestamps();
