@@ -44,6 +44,10 @@ return new class extends Migration
             $table->foreign('department_id')->references('id')->on('departments')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
+            $table->unsignedBigInteger('pay_period_id');
+            $table->foreign('pay_period_id')->references('id')->on('pay_periods')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
             $table->timestamps();
         });
     }
