@@ -45,7 +45,6 @@ class ExpenseController extends Controller
                 'e.id',
                 'e.total_amount',
                 'e.bill_no',
-                'e.quantity',
                 'e.date',
                 'e.created_at',
             )->orderBy('e.id', 'desc');
@@ -104,7 +103,6 @@ class ExpenseController extends Controller
         $order = $request->input('filters.order', 'asc'); // Sorting order (default 
         $allowedColumns = [
             'total_amount' => 'e.total_amount',
-            'quantity' => 'e.quantity',
             'date' => 'e.date',
         ];
         if (in_array($sort, array_keys($allowedColumns))) {

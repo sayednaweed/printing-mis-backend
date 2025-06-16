@@ -238,4 +238,31 @@ class ExpenseTypeController extends Controller
                 'message' => __('app_translation.failed'),
             ], 400, [], JSON_UNESCAPED_UNICODE);
     }
+
+    public function expenseIcons($id)
+    {
+        $locale = App::getLocale();
+        $tr = DB::table('expense_type_icons as eti')
+            ->where('eti.expense_type_id', '=', $id)
+            ->join('icons as i', 'i.id', '=', 'eti.icon_id')
+            ->join('icon_trans as it', function ($join) use ($locale) {
+                $join->on('i.id', '=', 'it.icon_id')
+                    ->where('it.language_name', $locale);
+            })
+            ->select(
+                'eti.id',
+                'i.path',
+                'it.value as name',
+                'i.created_at',
+            )
+            ->orderBy('eti.id', 'desc')
+            ->get();
+
+        return response()->json(
+            $tr,
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
+    }
 }

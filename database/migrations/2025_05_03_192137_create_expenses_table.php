@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->decimal('total_amount', 15, 2);
             $table->string('bill_no');
-            $table->integer('quantity');
             $table->date('date');
             $table->text('file_no');
             $table->text('detail')->nullable();

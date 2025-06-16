@@ -190,4 +190,32 @@ class AccountController extends Controller
             JSON_UNESCAPED_UNICODE
         );
     }
+    public function accountByCurrency($id)
+    {
+        $locale = App::getLocale();
+        // Start building the query
+        $tr = DB::table('accounts as ac')
+            ->where('ac.currency_id', $id)
+            ->join('account_trans as act', function ($join) use ($locale) {
+                $join->on('ac.id', '=', 'act.account_id')
+                    ->where('act.language_name', $locale);
+            })
+            ->join('currency_trans as ct', function ($join) use ($locale) {
+                $join->on('ct.currency_id', '=', 'ac.currency_id')
+                    ->where('ct.language_name', $locale);
+            })
+            ->select(
+                "ac.id",
+                "ac.code as name",
+            )->get();
+
+
+        // Apply pagination (ensure you're paginating after sorting and filtering)
+        return response()->json(
+            $tr,
+            200,
+            [],
+            JSON_UNESCAPED_UNICODE
+        );
+    }
 }
