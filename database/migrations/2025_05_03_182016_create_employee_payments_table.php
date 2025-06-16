@@ -31,7 +31,7 @@ return new class extends Migration
                 ->onDelete('no action');
             $table->decimal('total_amount', 15, 2);
             $table->decimal('remain_amount', 15, 2);
-            $table->boolean('is_repaid_fully')->default(false);
+            $table->boolean('is_remain')->default(false);
             $table->timestamps();
         });
     }
