@@ -11,22 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payrolls', function (Blueprint $table) {
+        Schema::create('employee_payments', function (Blueprint $table) {
             $table->id();
-            $table->string('payroll_id');
-            $table->date('payment_date');
-            $table->decimal('net_salary', 15, 2)->comment('Added to ease reporting and tracking');
-            $table->decimal('gross_salary', 15, 2)->comment('Added to ease reporting and tracking');
-            $table->unsignedBigInteger('position_assignment_id');
-            $table->foreign('position_assignment_id')->references('id')->on('position_assignments')
+            $table->unsignedBigInteger('employee_id');
+            $table->foreign('employee_id')->references('id')->on('employees')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('account_id');
             $table->foreign('account_id')->references('id')->on('accounts')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->text('detail')->nullable();
-            $table->boolean('is_complete')->default(false);
+            $table->decimal('amount', 15, 2);
+            $table->decimal('repaid_amount', 15, 2);
+            $table->boolean('is_repaid_fully')->default(false);
             $table->timestamps();
         });
     }
@@ -36,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payrolls');
+        Schema::dropIfExists('employee_payments');
     }
 };

@@ -15,6 +15,9 @@ use App\Models\PositionChangeType;
 use App\Models\AttendanceTimeTable;
 use App\Enums\Types\PaymentTypeEnum;
 use App\Enums\Types\DeductionTypeEnum;
+use App\Enums\Types\PayPeriodsTypeEnum;
+use App\Models\PayPeriod;
+use App\Models\PayPeriodTran;
 use App\Models\PositionChangeTypeTran;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
@@ -29,6 +32,7 @@ class HrSeeder extends Seeder
         $this->positionChangeType();
         $this->paymentType();
         $this->deductionType();
+        $this->payPeriodsType();
     }
     protected function deductionType()
     {
@@ -108,6 +112,65 @@ class HrSeeder extends Seeder
         PaymentTypeTrans::factory()->create([
             "value" => "بشپړ تادیه",
             "payment_type_id" => $item->id,
+            "language_name" => "ps",
+        ]);
+    }
+
+    protected function payPeriodsType()
+    {
+        $item = PayPeriod::factory()->create([
+            'id' => PayPeriodsTypeEnum::monthly->value,
+        ]);
+        PayPeriodTran::factory()->create([
+            "value" => "Monthly",
+            "pay_period_id" => $item->id,
+            "language_name" => "en",
+        ]);
+        PayPeriodTran::factory()->create([
+            "value" => "ماهانه",
+            "pay_period_id" => $item->id,
+            "language_name" => "fa",
+        ]);
+        PayPeriodTran::factory()->create([
+            "value" => "میاشتنی",
+            "pay_period_id" => $item->id,
+            "language_name" => "ps",
+        ]);
+
+        $item = PayPeriod::factory()->create([
+            'id' => PayPeriodsTypeEnum::weekly->value,
+        ]);
+        PayPeriodTran::factory()->create([
+            "value" => "Weekly",
+            "pay_period_id" => $item->id,
+            "language_name" => "en",
+        ]);
+        PayPeriodTran::factory()->create([
+            "value" => "هفته وار",
+            "pay_period_id" => $item->id,
+            "language_name" => "fa",
+        ]);
+        PayPeriodTran::factory()->create([
+            "value" => "اونی وار",
+            "pay_period_id" => $item->id,
+            "language_name" => "ps",
+        ]);
+        $item = PayPeriod::factory()->create([
+            'id' => PayPeriodsTypeEnum::biweekly->value,
+        ]);
+        PayPeriodTran::factory()->create([
+            "value" => "Biweekly",
+            "pay_period_id" => $item->id,
+            "language_name" => "en",
+        ]);
+        PayPeriodTran::factory()->create([
+            "value" => "دوهفتی",
+            "pay_period_id" => $item->id,
+            "language_name" => "fa",
+        ]);
+        PayPeriodTran::factory()->create([
+            "value" => "دوه اونی",
+            "pay_period_id" => $item->id,
             "language_name" => "ps",
         ]);
     }
