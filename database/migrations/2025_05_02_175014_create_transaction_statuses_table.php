@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('icons', function (Blueprint $table) {
+        Schema::create('transaction_statuses', function (Blueprint $table) {
             $table->id();
-            $table->string('path');
-            $table->string('extension');
-            $table->string('type');
             $table->timestamps();
         });
     }
@@ -25,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('icons');
+        Schema::dropIfExists('transaction_statuses');
     }
 };

@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class IconTran extends Model
 {
-    //
+    protected $guarded = [];
 }

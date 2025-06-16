@@ -166,6 +166,7 @@ class AttendanceController extends Controller
                 'a.check_out_time',
                 'a.created_at',
             )->first();
+        DB::beginTransaction();
 
         if ($attendance) {
             if ($attendance->check_out_time == null) {
@@ -188,6 +189,7 @@ class AttendanceController extends Controller
             }
             $tr = $this->attendanceRepository->store($request->attendances, $today, true, $authUser, $shiftId);
         }
+        DB::commit();
 
         return response()->json([
             'message' => __('app_translation.success'),

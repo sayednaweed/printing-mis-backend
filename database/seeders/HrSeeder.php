@@ -54,25 +54,6 @@ class HrSeeder extends Seeder
     protected function paymentType()
     {
         $item = PaymentType::factory()->create([
-            'id' => PaymentTypeEnum::advance_payment->value,
-            'detail' => 'Early part of salary',
-        ]);
-        PaymentTypeTrans::factory()->create([
-            "value" => "Advance payment",
-            "payment_type_id" => $item->id,
-            "language_name" => "en",
-        ]);
-        PaymentTypeTrans::factory()->create([
-            "value" => "پیش پرداخت",
-            "payment_type_id" => $item->id,
-            "language_name" => "fa",
-        ]);
-        PaymentTypeTrans::factory()->create([
-            "value" => "مخکې له مخکې تادیه",
-            "payment_type_id" => $item->id,
-            "language_name" => "ps",
-        ]);
-        $item = PaymentType::factory()->create([
             'id' => PaymentTypeEnum::partial_payment->value,
             'detail' => 'In-between payment (not necessarily early)',
         ]);

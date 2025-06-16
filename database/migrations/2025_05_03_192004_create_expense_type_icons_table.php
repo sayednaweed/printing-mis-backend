@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payroll_overtimes', function (Blueprint $table) {
+        Schema::create('expense_type_icons', function (Blueprint $table) {
             $table->id();
-            $table->decimal('overtime_rate', 15, 2);
-            $table->decimal('overtime_hours', 15, 2);
-            $table->unsignedBigInteger('payroll_payment_id');
-            $table->foreign('payroll_payment_id')->references('id')->on('payroll_payments')
+            $table->unsignedBigInteger('icon_id');
+            $table->foreign('icon_id')->references('id')->on('icons')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
+            $table->unsignedBigInteger('expense_type_id');
+            $table->foreign('expense_type_id')->references('id')->on('expense_types')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->timestamps();
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payroll_overtimes');
+        Schema::dropIfExists('expense_type_icons');
     }
 };

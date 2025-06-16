@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payroll_payments', function (Blueprint $table) {
+        Schema::create('transaction_status_trans', function (Blueprint $table) {
             $table->id();
-            $table->decimal('amount_paid', 15, 2);
-            $table->decimal('overtime_hours', 15, 2);
-            $table->unsignedBigInteger('payroll_id');
-            $table->foreign('payroll_id')->references('id')->on('payrolls')
+            $table->string('value');
+            $table->unsignedBigInteger('transaction_status_id');
+            $table->foreign('transaction_status_id')->references('id')->on('transaction_statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('payment_type_id');
-            $table->foreign('payment_type_id')->references('id')->on('payment_types')
+            $table->string('language_name');
+            $table->foreign('language_name')->references('name')->on('languages')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->timestamps();
@@ -32,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payroll_payments');
+        Schema::dropIfExists('transaction_status_trans');
     }
 };

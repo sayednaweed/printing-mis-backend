@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Enums\RoleEnum;
+use App\Models\ExpenseType;
 use Illuminate\Http\Request;
 use App\Traits\Helper\HelperTrait;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
 use App\Traits\Address\AddressTrait;
 use Illuminate\Support\Facades\Http;
 use App\Enums\Permission\HrPermissionEnum;
@@ -109,7 +111,38 @@ class TestController extends Controller
     }
     public function index(Request $request)
     {
-        $now = Carbon::now();
+        $locale = App::getLocale();
+        $expenseTypeId = 1;
+        $type = DB::table('expense_type_trans as ett')
+            ->where('ett.expense_type_id', $expenseTypeId)
+            ->select(
+                'ett.expense_type_id as id',
+                DB::raw("MAX(CASE WHEN ett.language_name = 'fa' THEN value END) as farsi"),
+                DB::raw("MAX(CASE WHEN ett.language_name = 'en' THEN value END) as english"),
+                DB::raw("MAX(CASE WHEN ett.language_name = 'ps' THEN value END) as pashto")
+            )
+            ->groupBy('ett.expense_type_id')
+            ->first();
+        $icons = DB::table('icons as i')
+            ->leftJoin('expense_type_icons as eti', function ($join) use ($expenseTypeId) {
+                $join->on('eti.icon_id', '=', 'i.id')
+                    ->where('eti.expense_type_id', $expenseTypeId);
+            })
+            ->leftJoin('icon_trans as it', function ($join) use ($locale) {
+                $join->on('it.icon_id', '=', 'i.id')
+                    ->where('it.language_name', $locale);
+            })
+            ->select(
+                'i.id',
+                'it.value as name',
+                'i.path',
+                DB::raw('CASE WHEN eti.icon_id IS NOT NULL THEN true ELSE false END as selected')
+            )
+            ->get();
+        return response()->json([
+            'expenseType' => $type,
+            'icons' => $icons
+        ], 201);
 
         $attendanceTime = DB::table('application_configurations as ac')
             ->where('ac.id', 1)

@@ -13,11 +13,6 @@ return new class extends Migration
     {
         Schema::create('expense_types', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('icon_id');
-            $table->foreign('icon_id')->references('id')->on('icons')
-                ->onUpdate('cascade')
-                ->onDelete('no action');
-
             $table->timestamps();
         });
     }

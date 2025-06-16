@@ -80,6 +80,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RolePermissionSeeder::class);
         $this->call(HrSeeder::class);
         $this->call(AttendanceStatusSeeder::class);
+        $this->call(ExpenseSeeder::class);
 
 
         $this->shifts();

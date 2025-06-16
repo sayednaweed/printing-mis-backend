@@ -15,15 +15,11 @@ return new class extends Migration
             $table->id();
             $table->decimal('total_amount', 15, 2);
             $table->string('bill_no');
-            $table->string('quantity');
-            $table->string('date');
-            $table->string('file_no');
-            $table->string('description');
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->foreign('user_id')->references('id')->on('users')
-                ->onUpdate('cascade')
-                ->onDelete('no action');
-            $table->unsignedBigInteger('document_id')->nullable();
+            $table->integer('quantity');
+            $table->date('date');
+            $table->text('file_no');
+            $table->text('detail')->nullable();
+            $table->unsignedBigInteger('document_id');
             $table->foreign('document_id')->references('id')->on('documents')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
@@ -31,12 +27,8 @@ return new class extends Migration
             $table->foreign('expense_type_id')->references('id')->on('expense_types')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-            $table->unsignedBigInteger('account_id');
-            $table->foreign('account_id')->references('id')->on('accounts')
-                ->onUpdate('cascade')
-                ->onDelete('no action');
-            $table->unsignedBigInteger('status_id');
-            $table->foreign('status_id')->references('id')->on('statuses')
+            $table->unsignedBigInteger('transaction_status_id');
+            $table->foreign('transaction_status_id')->references('id')->on('transaction_statuses')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
             $table->unsignedBigInteger('currency_id');
@@ -51,7 +43,10 @@ return new class extends Migration
             $table->foreign('company_id')->references('id')->on('parties')
                 ->onUpdate('cascade')
                 ->onDelete('no action');
-
+            $table->unsignedBigInteger('account_id');
+            $table->foreign('account_id')->references('id')->on('accounts')
+                ->onUpdate('cascade')
+                ->onDelete('no action');
             $table->timestamps();
         });
     }

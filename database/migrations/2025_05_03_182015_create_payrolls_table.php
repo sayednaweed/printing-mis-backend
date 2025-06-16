@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('payroll_id');
             $table->date('payment_date');
+            $table->decimal('net_salary', 15, 2)->comment('Added to ease reporting and tracking');
+            $table->decimal('gross_salary', 15, 2)->comment('Added to ease reporting and tracking');
             $table->unsignedBigInteger('position_assignment_id');
             $table->foreign('position_assignment_id')->references('id')->on('position_assignments')
                 ->onUpdate('cascade')
