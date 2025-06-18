@@ -11,9 +11,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Enums\Attendance\AttendanceStatusEnum;
+use App\Traits\Hr\Salary\TaxTrait;
 
 class PayrollController extends Controller
 {
+    use TaxTrait;
     public function salaries() {}
     public function salaryStore(Request $request)
     {
@@ -123,10 +125,11 @@ class PayrollController extends Controller
         $month_day = Carbon::now()->daysInMonth;
 
 
-        // 5. Calculate per-day and net salary
-        $per_day_salary = $employee->month_salary / $month_day;
-        $net_salary = round($per_day_salary * $present_day, 2);
+        $salary_tax =  $this->salaryTax($employee->month_salary);
 
+        // 5. Calculate per-day and net salary
+        $per_day_salary = ($employee->month_salary - $salary_tax) / $month_day;
+        $net_salary = round($per_day_salary * $present_day, 2);
 
         return response()->json([
             'message' => __('app_translation.success'),
@@ -137,7 +140,8 @@ class PayrollController extends Controller
                 'pay_period' => $employee->pay_period,
                 'present_day' => $present_day,
                 'net_salary' => $net_salary,
-                'advance_payment' => $advance ?? 0
+                'advance_payment' => $advance ?? 0,
+                'salary_tax' => $salary_tax
             ]
         ], 200, [], JSON_UNESCAPED_UNICODE);
     }

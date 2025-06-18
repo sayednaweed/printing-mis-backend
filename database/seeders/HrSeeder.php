@@ -19,6 +19,7 @@ use App\Enums\Types\PayPeriodsTypeEnum;
 use App\Models\PayPeriod;
 use App\Models\PayPeriodTran;
 use App\Models\PositionChangeTypeTran;
+use App\Models\SalaryTaxRange;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class HrSeeder extends Seeder
@@ -33,6 +34,40 @@ class HrSeeder extends Seeder
         $this->paymentType();
         $this->deductionType();
         $this->payPeriodsType();
+        $this->tax();
+    }
+
+    protected function tax()
+    {
+
+        SalaryTaxRange::create([
+            'start' => 0,
+            'end' => 5000,
+            'fixed_tax' => null,
+            'percentage_tax' => null,
+            'is_active' => true
+        ]);
+        SalaryTaxRange::create([
+            'start' => 5000,
+            'end' => 12500,
+            'fixed_tax' => 150,
+            'percentage_tax' => null,
+            'is_active' => true
+        ]);
+        SalaryTaxRange::create([
+            'start' => 12500,
+            'end' => 100000,
+            'fixed_tax' => null,
+            'percentage_tax' => 10,
+            'is_active' => true
+        ]);
+        SalaryTaxRange::create([
+            'start' => 100000,
+            'end' => 1000000,
+            'fixed_tax' => null,
+            'percentage_tax' => 20,
+            'is_active' => true
+        ]);
     }
     protected function deductionType()
     {
